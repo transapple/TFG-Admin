@@ -53,7 +53,8 @@
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#171B24;--card:#1F2430;--ink:#F1F3FA;--inkSoft:#9CA3BE;--line:#2D3140}}
 :root[data-theme="dark"]{--paper:#171B24;--card:#1F2430;--ink:#F1F3FA;--inkSoft:#9CA3BE;--line:#2D3140}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input, textarea, select, [contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 header{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:5}
 header h1{margin:0;font-size:19px}
 header p{margin:2px 0 0;font-size:12px;opacity:.85}
@@ -77,8 +78,8 @@ textarea{min-height:60px;resize:vertical}
 .blockrow{display:flex;flex-direction:column;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
 .blockrow .blockrow-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .blockrow select{flex:0 0 auto;width:auto;padding:6px 10px}
-.blockrow textarea{width:100%;min-height:120px;font-size:15px;line-height:1.5;padding:10px}
-.list-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--paper)}
+.blockrow textarea{width:100%;min-height:220px;font-size:15.5px;line-height:1.6;padding:12px;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.list-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--paper);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .list-item .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .tag{font-size:11px;background:var(--goldSoft);color:#7a5a06;padding:2px 8px;border-radius:10px;font-weight:700}
 .badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700}
@@ -89,7 +90,11 @@ textarea{min-height:60px;resize:vertical}
 .imgprev{max-width:100%;border-radius:8px;margin-top:6px}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .modalbg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
-.modal{background:var(--card);border-radius:14px;padding:16px;max-width:480px;width:100%;max-height:88vh;overflow:auto}
+.modal{background:var(--card);border-radius:14px;padding:16px 25px;max-width:480px;width:100%;max-height:88vh;overflow:hidden;position:relative}
+.modal-rail{position:absolute;top:0;bottom:0;width:25px;z-index:5;touch-action:none;cursor:ns-resize}
+.modal-rail-left{left:0}
+.modal-rail-right{right:0}
+.modal-rail::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3px;height:36px;border-radius:3px;background:var(--line)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.show{opacity:1}
 .empty{color:var(--inkSoft);font-size:13px;padding:14px;text-align:center}
@@ -297,6 +302,53 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 function uid(p){ return p+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1600); }
+
+// ---------- LONG-PRESS ACTIONS (edit/delete popups) ----------
+// Attaches a long-press gesture to items inside a container (event delegation,
+// so it keeps working after the list's innerHTML is re-rendered). Taps on any
+// <button> inside an item (e.g. "View full") are left alone as normal clicks.
+function attachLongPress(containerEl, itemSelector, onLongPress){
+  if(!containerEl || containerEl._longPressAttached) return;
+  containerEl._longPressAttached = true;
+  const THRESHOLD = 550, MOVE_TOL = 10;
+  let timer=null, startX=0, startY=0, pointerId=null;
+  function clear(){ if(timer){ clearTimeout(timer); timer=null; } pointerId=null; }
+  containerEl.addEventListener("pointerdown", e=>{
+    if(e.target.closest("button")) return;
+    const item = e.target.closest(itemSelector); if(!item) return;
+    pointerId=e.pointerId; startX=e.clientX; startY=e.clientY;
+    timer=setTimeout(()=>{
+      if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+      const id=item.dataset.id; clear(); onLongPress(id, item);
+    }, THRESHOLD);
+  });
+  containerEl.addEventListener("pointermove", e=>{
+    if(!timer||pointerId!==e.pointerId) return;
+    if(Math.abs(e.clientX-startX)>MOVE_TOL || Math.abs(e.clientY-startY)>MOVE_TOL) clear();
+  });
+  containerEl.addEventListener("pointerup", clear);
+  containerEl.addEventListener("pointercancel", clear);
+  containerEl.addEventListener("contextmenu", e=>{ if(e.target.closest(itemSelector)) e.preventDefault(); });
+}
+// Small centered popup (reuses .modalbg/.modal, which is already center-aligned)
+// listing one or more actions, plus a Cancel button.
+function showActionPopup(opts){
+  const old = document.getElementById("actionPopupBg"); if(old) old.remove();
+  const bg = document.createElement("div"); bg.className="modalbg"; bg.id="actionPopupBg";
+  bg.innerHTML = `<div class="modal" style="max-width:300px;text-align:center">
+    <h2 style="margin-bottom:14px">${esc(opts.title||"")}</h2>
+    <div class="actions" style="flex-direction:column;gap:8px">
+      ${opts.actions.map((a,i)=>`<button class="btn ${a.className||"btn-ghost"}" data-i="${i}" style="width:100%">${esc(a.label)}</button>`).join("")}
+      <button class="btn btn-ghost" id="popupCancel" style="width:100%">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  opts.actions.forEach((a,i)=>{
+    bg.querySelector(`[data-i="${i}"]`).onclick = ()=>{ bg.remove(); a.onClick(); };
+  });
+  document.getElementById("popupCancel").onclick = ()=>bg.remove();
+  bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
+}
 // Uploads a data: URL to the shared "media" Storage bucket instead of writing base64
 // straight into a Postgres text column, and returns the public URL to store instead.
 async function uploadMedia(dataUrl, folder){
@@ -334,6 +386,12 @@ async function loadSongs(){
   LANGS.forEach(l=>{ songs[l.code]=[]; });
   (data||[]).forEach(row=>{ if(songs[row.lang_code]) songs[row.lang_code].push(songRowToObj(row)); });
 }
+// Next free song number in a language: one past whatever's already posted there,
+// so a fresh post just continues the count — but it stays a normal editable field.
+function nextSongNum(lang){
+  const list = songs[lang]||[];
+  return list.length ? Math.max(...list.map(s=>s.num))+1 : 1;
+}
 
 function buildLyrics(rows){
   let vNum=0, out=[];
@@ -351,6 +409,7 @@ function renderSongs(){
   <div class="card">
     <h2>Songs by language</h2>
     <div class="pills" id="langPills">${LANGS.map(l=>`<button class="pill ${l.code===songLang?"active":""}" data-l="${l.code}">${l.label}</button>`).join("")}</div>
+    <div class="muted" style="margin:2px 0 8px">Long-press a song to edit or delete it.</div>
     <div id="songList"></div>
   </div>`;
   document.getElementById("langPills").addEventListener("click", e=>{
@@ -358,6 +417,16 @@ function renderSongs(){
     songLang = b.dataset.l; renderSongs();
   });
   renderSongList();
+  attachLongPress(document.getElementById("songList"), ".list-item", (id)=>{
+    const s = songs[songLang].find(x=>x.id===id); if(!s) return;
+    showActionPopup({
+      title: "#"+s.num+" "+s.title,
+      actions: [
+        { label:"Edit", className:"btn-primary", onClick:()=>openSongModal(s) },
+        { label:"Delete", className:"btn-danger", onClick:()=>deleteSong(id) }
+      ]
+    });
+  });
   showFab(openSongModal);
 }
 function showFab(onTap){
@@ -392,33 +461,57 @@ function showFab(onTap){
   });
 }
 function removeFab(){ const f=document.getElementById("actionFab"); if(f) f.remove(); }
-function openSongModal(){
-  blocks = [{type:"verse",text:""}];
+function parseLyrics(lyrics){
+  if(!lyrics) return [{type:"verse",text:""}];
+  const parsed = lyrics.split("\n\n").map(chunk=>{
+    const lines = chunk.split("\n");
+    const head = lines[0]||"";
+    const type = /^chorus/i.test(head) ? "chorus" : "verse";
+    return { type, text: lines.slice(1).join("\n") };
+  }).filter(b=>b.text.trim());
+  return parsed.length ? parsed : [{type:"verse",text:""}];
+}
+function openSongModal(editSong){
+  const editing = !!editSong;
+  blocks = editing ? parseLyrics(editSong.lyrics) : [{type:"verse",text:""}];
+  let suggestedNum = editing ? null : nextSongNum(songLang);
   const bg = document.createElement("div"); bg.className="modalbg"; bg.id="songModalBg";
   bg.innerHTML = `<div class="modal">
-    <h2>Post a song</h2>
+    <h2>${editing?"Edit song":"Post a song"}</h2>
     <label>Language</label>
-    <select id="sLang">${LANGS.map(l=>`<option value="${l.code}" ${l.code===songLang?"selected":""}>${l.label}</option>`).join("")}</select>
+    <select id="sLang" ${editing?"disabled":""}>${LANGS.map(l=>`<option value="${l.code}" ${l.code===(editing?editSong.langCode:songLang)?"selected":""}>${l.label}</option>`).join("")}</select>
     <div class="row">
-      <div><label>Song number</label><input id="sNum" type="number" min="1" placeholder="e.g. 7"></div>
-      <div><label>Key</label><select id="sKey">${KEYS.map(k=>`<option>${k}</option>`).join("")}</select></div>
+      <div><label>Song number</label><input id="sNum" type="number" min="1" placeholder="e.g. 7" value="${editing?editSong.num:suggestedNum}"></div>
+      <div><label>Key</label><select id="sKey">${KEYS.map(k=>`<option ${editing&&k===editSong.key?"selected":""}>${k}</option>`).join("")}</select></div>
     </div>
     <label>Title (optional)</label>
-    <input id="sTitle" placeholder="Song title">
+    <input id="sTitle" placeholder="Song title" value="${editing?esc(editSong.title):""}">
     <label>Verses &amp; chorus</label>
     <div id="sBlocks"></div>
     <div class="actions"><button class="btn btn-ghost btn-sm" id="addBlock">+ Add block</button></div>
     <div class="actions" style="margin-top:10px">
-      <button class="btn btn-primary" id="postSong">Post song</button>
+      <button class="btn btn-primary" id="postSong">${editing?"Save changes":"Post song"}</button>
       <button class="btn btn-ghost" id="cancelSong">Cancel</button>
     </div>
   </div>`;
   document.body.appendChild(bg);
   renderBlocks();
   document.getElementById("addBlock").onclick = ()=>{ blocks.push({type:"verse",text:""}); renderBlocks(); };
-  document.getElementById("postSong").onclick = postSong;
+  document.getElementById("postSong").onclick = ()=> editing ? updateSong(editSong.id, editSong.langCode) : postSong();
   document.getElementById("cancelSong").onclick = ()=>bg.remove();
   bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
+  if(!editing){
+    document.getElementById("sLang").addEventListener("change", e=>{
+      const numInput = document.getElementById("sNum");
+      const cur = parseInt(numInput.value,10);
+      // Only follow the language switch if the number is still untouched —
+      // once the admin edits it by hand, it's theirs to keep.
+      if(!numInput.value || cur===suggestedNum){
+        suggestedNum = nextSongNum(e.target.value);
+        numInput.value = suggestedNum;
+      }
+    });
+  }
 }
 function renderBlocks(){
   const c = document.getElementById("sBlocks");
@@ -454,13 +547,26 @@ async function postSong(){
   toast("Song posted");
   renderSongs();
 }
+async function updateSong(id, lang){
+  const num = parseInt(document.getElementById("sNum").value,10);
+  const key = document.getElementById("sKey").value;
+  const title = document.getElementById("sTitle").value.trim() || ("Song "+(num||""));
+  const lyrics = buildLyrics(blocks);
+  if(!num || !lyrics){ toast("Add a song number and at least one verse/chorus"); return; }
+  const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
+  const { data, error } = await sb.from("songs").update({ num, title, key, lyrics, snippet }).eq("id", id).select().single();
+  if(error){ toast("Could not update song: "+error.message); return; }
+  songs[lang] = songs[lang].map(s=>s.id===id ? songRowToObj(data) : s);
+  const bg = document.getElementById("songModalBg"); if(bg) bg.remove();
+  toast("Song updated");
+  renderSongList();
+}
 function renderSongList(){
   const list = songs[songLang].slice().sort((a,b)=>a.num-b.num);
   document.getElementById("songList").innerHTML = list.length ? list.map(s=>`
-    <div class="list-item">
+    <div class="list-item" data-id="${s.id}">
       <div class="top"><strong>#${s.num} ${esc(s.title)}</strong><span class="tag">${s.key}</span></div>
       <div class="muted">${esc(s.snippet)}</div>
-      <div class="actions"><button class="btn btn-danger btn-sm" onclick="deleteSong('${s.id}')">Delete</button></div>
     </div>`).join("") : `<div class="empty">No songs yet in this language.</div>`;
 }
 window.deleteSong=async(id)=>{
@@ -482,8 +588,15 @@ async function loadUpdates(){
 function renderUpdates(){
   const el = document.getElementById("main");
   el.innerHTML = `
-  <div class="card"><h2>Posted updates</h2><div id="updateList"></div></div>`;
+  <div class="card"><h2>Posted updates</h2><div class="muted" style="margin:2px 0 8px">Long-press an update to delete it.</div><div id="updateList"></div></div>`;
   renderUpdateList();
+  attachLongPress(document.getElementById("updateList"), ".list-item", (id)=>{
+    const u = updates.find(x=>x.id===id); if(!u) return;
+    showActionPopup({
+      title: "Update #"+u.num,
+      actions: [ { label:"Delete", className:"btn-danger", onClick:()=>deleteUpdate(id) } ]
+    });
+  });
   showFab(openUpdateModal);
 }
 function openUpdateModal(){
@@ -531,13 +644,10 @@ async function postUpdate(){
 function fmtTs(ts){ const d=new Date(ts); return d.toLocaleDateString()+" • "+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}); }
 function renderUpdateList(){
   document.getElementById("updateList").innerHTML = updates.length ? updates.map(u=>`
-    <div class="list-item">
+    <div class="list-item" data-id="${u.id}">
       <div class="top"><strong>Update #${u.num}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
       <div class="muted">${esc(u.text.slice(0,80))}${u.text.length>80?"…":""}</div>
-      <div class="actions">
-        <button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteUpdate('${u.id}')">Delete</button>
-      </div>
+      <div class="actions"><button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button></div>
     </div>`).join("") : `<div class="empty">No updates posted yet.</div>`;
 }
 window.deleteUpdate=async(id)=>{
@@ -906,6 +1016,75 @@ function renderHistoryList(history){
     </div>`).join("") + `</div>`;
 }
 
+// ---------- MODAL EDGE-SCROLL ----------
+// The modal itself no longer scrolls from dragging directly over its fields
+// (see .modal{overflow:hidden} above) — that was interrupting typing in the
+// verse/chorus boxes. Instead each modal gets two thin drag rails along its
+// left/right edges (outside where any input ever sits) that scroll the form;
+// each textarea keeps scrolling its own content independently as before.
+function setupModalRails(modalEl){
+  if(!modalEl || modalEl._railsSetup) return;
+  modalEl._railsSetup = true;
+  ["modal-rail-left","modal-rail-right"].forEach(cls=>{
+    const rail = document.createElement("div"); rail.className = "modal-rail "+cls;
+    modalEl.appendChild(rail);
+    let dragging=false, pointerId=null, startY=0, startScroll=0;
+    rail.addEventListener("pointerdown", e=>{
+      dragging=true; pointerId=e.pointerId; startY=e.clientY; startScroll=modalEl.scrollTop;
+      try{ rail.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    rail.addEventListener("pointermove", e=>{
+      if(!dragging || pointerId!==e.pointerId) return;
+      modalEl.scrollTop = startScroll - (e.clientY - startY);
+    });
+    const endDrag = ()=>{ dragging=false; };
+    rail.addEventListener("pointerup", endDrag);
+    rail.addEventListener("pointercancel", endDrag);
+  });
+}
+
+// ---------- DEVICE BACK BUTTON ----------
+// Every modal/popup in this app (song editor, update composer, view-update,
+// the long-press action popup, inbound report/complaint popup) is a plain
+// <div class="modalbg"> appended to <body> and removed with .remove() — so a
+// single MutationObserver here gives all of them back-button support without
+// touching each opener individually. Back also steps through visited tabs
+// before finally leaving the app, instead of exiting immediately.
+let backNavigating = false; // true while we're reacting to a popstate (avoids re-pushing/re-popping)
+try{ history.replaceState({ adminTab:"songs" }, "", location.href); }catch(e){}
+new MutationObserver(muts=>{
+  muts.forEach(m=>{
+    m.addedNodes.forEach(n=>{
+      if(n.nodeType===1 && n.classList && n.classList.contains("modalbg")){
+        const modalEl = n.querySelector(".modal");
+        if(modalEl) setupModalRails(modalEl);
+        if(!backNavigating){
+          try{ history.pushState({ adminModal:true }, "", location.href); }catch(e){}
+        }
+      }
+    });
+    m.removedNodes.forEach(n=>{
+      if(n.nodeType===1 && n.classList && n.classList.contains("modalbg") && !backNavigating && history.state && history.state.adminModal){
+        try{ history.back(); }catch(e){}
+      }
+    });
+  });
+}).observe(document.body, { childList:true });
+window.addEventListener("popstate", e=>{
+  backNavigating = true;
+  const openModal = document.querySelector(".modalbg");
+  if(openModal){
+    openModal.remove();
+  } else {
+    const target = (e.state && e.state.adminTab) || "songs";
+    if(target !== currentTab){
+      const btn = document.querySelector(`#tabs button[data-t="${target}"]`);
+      if(btn) btn.click();
+    }
+  }
+  setTimeout(()=>{ backNavigating=false; }, 0);
+});
+
 // ---------- TAB SWITCH ----------
 let currentTab = "songs";
 const renderers = { songs:renderSongs, updates:renderUpdates, believers:renderBelievers, reports:renderReports, trends:renderTrends };
@@ -915,6 +1094,7 @@ document.getElementById("tabs").addEventListener("click", e=>{
   b.classList.add("active");
   const prevTab = currentTab;
   currentTab = b.dataset.t;
+  if(!backNavigating){ try{ history.pushState({ adminTab:currentTab }, "", location.href); }catch(e){} }
   if(b.dataset.t!=="songs" && b.dataset.t!=="updates") removeFab();
   if(prevTab==="trends" && b.dataset.t!=="trends") stopTrendsRefresh();
   renderers[b.dataset.t]();
