@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TFG Admin</title>
+<script>
+(function(){
+  try{
+    var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    var skip = false;
+    try { skip = sessionStorage.getItem("pgContinue") === "1"; } catch (e) {}
+    if (!standalone && !skip) document.documentElement.classList.add("pg-on");
+  }catch(e){}
+})();
+</script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1E3FAE">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TFG Admin">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  #pgGate{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;overflow:auto;
+    background:linear-gradient(160deg,#1E3FAE 0%,#16307F 100%);
+    padding:32px 24px calc(32px + env(safe-area-inset-bottom,0px));
+    align-items:center; justify-content:center; text-align:center;}
+  html.pg-on #pgGate{display:flex;}
+  html.pg-on,html.pg-on body{overflow:hidden;}
+  #pgGate .pg-box{width:100%;max-width:340px;margin:auto;display:flex;flex-direction:column;align-items:center;color:#fff;}
+  #pgGate .pg-logo{width:140px;height:140px;border-radius:50%;display:block;background:transparent;
+    box-shadow:0 12px 30px rgba(0,0,0,.35);object-fit:contain;}
+  #pgGate .pg-name{margin:26px 0 6px;font-size:24px;font-weight:800;letter-spacing:.2px;}
+  #pgGate .pg-tagline{margin:0 0 44px;font-size:14px;color:rgba(255,255,255,.75);}
+  #pgGate .pg-install{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:320px;height:56px;
+    border:0;border-radius:14px;background:#E8AC2E;color:#3a2a00;font-size:16px;font-weight:800;cursor:pointer;
+    box-shadow:0 8px 20px rgba(232,172,46,.35);}
+  #pgGate .pg-install:active{transform:scale(.98);}
+  #pgGate .pg-install:disabled{opacity:.75;cursor:default;transform:none;}
+  #pgGate .pg-continue{margin-top:16px;padding:10px 14px;background:none;border:none;color:rgba(255,255,255,.85);
+    font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+  #pgGate .pg-install:focus-visible,#pgGate .pg-continue:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+  #pgGate .pg-msg{margin:14px 0 0;font-size:13px;line-height:1.5;color:rgba(255,255,255,.92);max-width:86vw;}
+  @media (max-height:520px){#pgGate .pg-name{margin-bottom:24px;}#pgGate .pg-logo{width:96px;height:96px;}}
+.install-btn{background:rgba(255,255,255,.18);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:16px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.install-btn[hidden]{display:none}
+.install-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:20px;font-size:13px;z-index:70;display:flex;gap:10px;align-items:center;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.install-toast button{background:var(--gold);color:#3a2a00;border:none;border-radius:14px;padding:5px 12px;font-weight:700;font-size:12px;cursor:pointer}
+:root{--blue:#1E3FAE;--blue2:#16307F;--gold:#E8AC2E;--goldSoft:#FCEACB;--paper:#F3F4F9;--card:#FCFCFE;--ink:#1A1D2E;--inkSoft:#6B7089;--line:#E9E9F0;--red:#D62828;--green:#1B5E3A;
+--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#171B24;--card:#1F2430;--ink:#F1F3FA;--inkSoft:#9CA3BE;--line:#2D3140}}
+:root[data-theme="dark"]{--paper:#171B24;--card:#1F2430;--ink:#F1F3FA;--inkSoft:#9CA3BE;--line:#2D3140}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+header{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:19px}
+header p{margin:2px 0 0;font-size:12px;opacity:.85}
+nav{display:flex;overflow-x:auto;gap:6px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:4}
+nav button{flex:0 0 auto;padding:8px 14px;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);font-size:13px;font-weight:600}
+nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+main{padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:15px}
+label{display:block;font-size:12px;color:var(--inkSoft);margin:8px 0 4px;font-weight:600}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:14px;font-family:inherit}
+textarea{min-height:60px;resize:vertical}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.btn{display:inline-block;padding:9px 14px;border-radius:9px;border:none;font-weight:700;font-size:13px;cursor:pointer}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-warn{background:var(--gold);color:#3a2a00}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn-sm{padding:6px 10px;font-size:12px}
+.blockrow{display:flex;flex-direction:column;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+.blockrow .blockrow-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.blockrow select{flex:0 0 auto;width:auto;padding:6px 10px}
+.blockrow textarea{width:100%;min-height:120px;font-size:15px;line-height:1.5;padding:10px}
+.list-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--paper)}
+.list-item .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-size:11px;background:var(--goldSoft);color:#7a5a06;padding:2px 8px;border-radius:10px;font-weight:700}
+.badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700}
+.badge.active{background:#dff3e3;color:var(--green)}
+.badge.suspended{background:#fdeecb;color:#8a5c00}
+.badge.banned{background:#fbdada;color:var(--red)}
+.muted{color:var(--inkSoft);font-size:12px}
+.imgprev{max-width:100%;border-radius:8px;margin-top:6px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal{background:var(--card);border-radius:14px;padding:16px;max-width:480px;width:100%;max-height:88vh;overflow:auto}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.show{opacity:1}
+.empty{color:var(--inkSoft);font-size:13px;padding:14px;text-align:center}
+.pills{display:flex;flex-wrap:nowrap;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.pill{flex:0 0 auto;white-space:nowrap;padding:6px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;font-weight:700}
+.pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.fab{position:fixed;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-size:28px;line-height:56px;text-align:center;border:none;box-shadow:0 6px 16px rgba(0,0,0,.3);z-index:40;touch-action:none;user-select:none;cursor:grab}
+.fab:active{cursor:grabbing}
+.bell-wrap{position:absolute;top:18px;right:16px}
+.bell-btn{background:rgba(255,255,255,.18);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:17px;position:relative}
+.bell-dot{position:absolute;top:2px;right:3px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:9px;min-width:16px;height:16px;line-height:16px;padding:0 3px}
+.tstat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tstat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.tstat-num{font-size:24px;font-weight:800;color:var(--blue)}
+.tstat-label{font-size:11px;color:var(--inkSoft);margin-top:2px}
+.trend-bars{display:flex;flex-direction:column;gap:10px}
+.trend-bar-row{display:flex;align-items:center;gap:8px}
+.trend-bar-label{flex:0 0 118px;font-size:12px;font-weight:600;color:var(--ink)}
+.trend-bar-track{flex:1;height:10px;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.trend-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:6px}
+.trend-bar-val{flex:0 0 52px;font-size:11px;color:var(--inkSoft);text-align:right}
+.traffic-chart{display:flex;align-items:flex-end;gap:5px;height:140px;padding-top:8px}
+.traffic-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.traffic-col-bar{width:70%;min-height:3px;background:var(--blue);border-radius:4px 4px 0 0}
+.traffic-col-val{font-size:10px;font-weight:700;color:var(--ink);margin-top:3px}
+.traffic-col-label{font-size:9px;color:var(--inkSoft);margin-top:1px;white-space:nowrap;transform:scale(.92)}
+.hist-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto}
+.hist-row{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.hist-day{font-size:13px;font-weight:600}
+.hist-nums{display:flex;gap:10px;font-size:12px;color:var(--inkSoft)}
+.hist-nums span:first-child{color:var(--blue);font-weight:700}
+</style>
+</head>
+<body>
+<div id="pgGate" role="dialog" aria-modal="true" aria-label="TFG Admin">
+  <div class="pg-box">
+    <img class="pg-logo" src="icon-512.png" alt="TFG Admin logo" width="140" height="140">
+    <div class="pg-name">TFG Admin</div>
+    <div class="pg-tagline">Admin panel for Only Believe Gospel Hymns</div>
+    <button type="button" id="pgInstall" class="pg-install">Install</button>
+    <a href="#" id="pgContinue" class="pg-continue">Continue in browser</a>
+    <p id="pgMsg" class="pg-msg" role="status" aria-live="polite" hidden></p>
+  </div>
+</div>
+<script>
+(function(){
+  var root = document.documentElement;
+  var btn = document.getElementById("pgInstall");
+  var cont = document.getElementById("pgContinue");
+  var msg = document.getElementById("pgMsg");
+  var deferred = null;
+  var busy = false;
+
+  function isStandalone(){
+    try{
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+    }catch(e){ return false; }
+  }
+
+  function showMsg(text){
+    msg.textContent = text;
+    msg.hidden = false;
+  }
+
+  function setBusy(on, label){
+    busy = on;
+    btn.disabled = on;
+    btn.textContent = on ? (label || "Working\u2026") : "Install";
+  }
+
+  async function doInstall(){
+    if (busy) return;
+    var p = deferred;
+    if (!p) {
+      var ua = navigator.userAgent;
+      var isIOS = /iphone|ipad|ipod/i.test(ua);
+      var isAndroid = /android/i.test(ua);
+      var isChrome = /chrome|crios|edg/i.test(ua) && !/firefox|fxios/i.test(ua);
+      if (isIOS) {
+        showMsg('iPhone/iPad: tap the Share icon in Safari\u2019s toolbar, then "Add to Home Screen". Apple does not allow this to be triggered automatically \u2014 it\u2019s a one-time manual step.');
+      } else if (isAndroid && isChrome) {
+        showMsg('Already installed, or your browser hasn\u2019t offered the install prompt yet. Try: Chrome menu (\u22EE) \u2192 "Install app" / "Add to Home screen".');
+      } else {
+        showMsg('Open your browser menu and choose "Add to Home Screen" or "Install app".');
+      }
+      return;
+    }
+    deferred = null; // a prompt can only be used once
+    try {
+      setBusy(true, "Installing\u2026");
+      p.prompt();
+      var choice = await p.userChoice;
+      if (choice && choice.outcome === "accepted") {
+        showMsg("Installing\u2026 TFG Admin will appear on your home screen in a few moments.");
+      } else {
+        setBusy(false);
+        showMsg("Install cancelled. You can install any time from your browser menu (\u22EE) \u2192 \u201CInstall app\u201D.");
+      }
+    } catch (err) {
+      setBusy(false);
+      showMsg('Couldn\u2019t start the install. Open your browser menu (\u22EE) and tap "Install app" or "Add to Home Screen".');
+    }
+  }
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferred = e;
+  });
+  window.addEventListener("appinstalled", function(){
+    deferred = null;
+    setBusy(true, "Installed \u2713");
+    showMsg("TFG Admin is installed. Open it from your home screen.");
+    setTimeout(function(){ root.classList.remove("pg-on"); }, 900);
+  });
+
+  btn.addEventListener("click", doInstall);
+  cont.addEventListener("click", function(e){
+    e.preventDefault();
+    try { sessionStorage.setItem("pgContinue", "1"); } catch (err) {}
+    root.classList.remove("pg-on");
+  });
+
+  if (isStandalone()) root.classList.remove("pg-on");
+})();
+</script>
+
+<header style="position:sticky;">
+  <h1>TFG Admin</h1><p>Manage Only Believe Gospel Hymns</p>
+  <div class="bell-wrap" style="display:flex;gap:8px;align-items:center">
+    <button class="install-btn" id="installBtn" hidden title="Install app">⬇</button>
+    <button class="bell-btn" id="bellBtn">🔔<span class="bell-dot" id="bellDot" style="display:none">0</span></button>
+  </div>
+</header>
+<nav id="tabs">
+  <button data-t="songs" class="active">Songs</button>
+  <button data-t="updates">Updates</button>
+  <button data-t="believers">Believers</button>
+  <button data-t="reports">Reports &amp; Notify</button>
+  <button data-t="trends">Trends</button>
+</nav>
+<main id="main"></main>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ---------- PWA INSTALL ----------
+(function(){
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+
+  function showToast(msg, actionLabel, actionFn){
+    const t = document.createElement('div');
+    t.className = 'install-toast';
+    t.innerHTML = '<span></span>';
+    t.querySelector('span').textContent = msg;
+    if(actionLabel){
+      const b = document.createElement('button');
+      b.textContent = actionLabel;
+      b.onclick = () => { actionFn && actionFn(); t.remove(); };
+      t.appendChild(b);
+    }
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 6000);
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if(installBtn) installBtn.hidden = false;
+  });
+
+  if(installBtn){
+    installBtn.addEventListener('click', async () => {
+      if(!deferredPrompt){
+        showToast('To install: open your browser menu and choose "Add to Home Screen".');
+        return;
+      }
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.hidden = true;
+      if(choice && choice.outcome === 'accepted'){
+        showToast('Installed! Look for TFG Admin on your home screen.');
+      }
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if(installBtn) installBtn.hidden = true;
+    deferredPrompt = null;
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+})();
+
+// ---------- SUPABASE ----------
+const SB_URL = "https://xdlbeepqqbstchjcepgw.supabase.co";
+const SB_KEY = "sb_publishable_VcV-PBmKDgfcxOUCockmJw_DyuuxRRq";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+function uid(p){ return p+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1600); }
+// Uploads a data: URL to the shared "media" Storage bucket instead of writing base64
+// straight into a Postgres text column, and returns the public URL to store instead.
+async function uploadMedia(dataUrl, folder){
+  if(!dataUrl || !dataUrl.startsWith("data:")) return dataUrl;
+  try{
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const ext = (blob.type.split("/")[1]||"jpg").split("+")[0];
+    const path = `${folder||"misc"}/admin_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+    const { error } = await sb.storage.from("media").upload(path, blob, { contentType:blob.type, upsert:true });
+    if(error){ console.error("uploadMedia", error); return dataUrl; }
+    const { data } = sb.storage.from("media").getPublicUrl(path);
+    return data?.publicUrl || dataUrl;
+  }catch(err){ console.error("uploadMedia", err); return dataUrl; }
+}
+
+const LANGS = [
+  {code:"alur",label:"Alur"},{code:"acholi",label:"Acholi"},{code:"english",label:"English"},
+  {code:"french",label:"French"},{code:"swahili",label:"Swahili"},{code:"luganda",label:"Luganda"}
+];
+const KEYS = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
+
+// ---------- SONGS ----------
+let songs = {};
+LANGS.forEach(l=>{ songs[l.code]=[]; });
+let songLang = LANGS[0].code;
+let blocks = [ {type:"verse", text:""} ]; // builder rows for the form in progress
+
+function songRowToObj(row){
+  return { id:row.id, num:row.num, title:row.title, key:row.key, lyrics:row.lyrics, langCode:row.lang_code, snippet:row.snippet };
+}
+async function loadSongs(){
+  const { data, error } = await sb.from("songs").select("*").order("num", { ascending:true });
+  if(error){ toast("Could not load songs: "+error.message); return; }
+  LANGS.forEach(l=>{ songs[l.code]=[]; });
+  (data||[]).forEach(row=>{ if(songs[row.lang_code]) songs[row.lang_code].push(songRowToObj(row)); });
+}
+
+function buildLyrics(rows){
+  let vNum=0, out=[];
+  rows.forEach(r=>{
+    if(!r.text.trim()) return;
+    if(r.type==="chorus") out.push("Chorus\n"+r.text.trim());
+    else { vNum++; out.push("Verse "+vNum+"\n"+r.text.trim()); }
+  });
+  return out.join("\n\n");
+}
+
+function renderSongs(){
+  const el = document.getElementById("main");
+  el.innerHTML = `
+  <div class="card">
+    <h2>Songs by language</h2>
+    <div class="pills" id="langPills">${LANGS.map(l=>`<button class="pill ${l.code===songLang?"active":""}" data-l="${l.code}">${l.label}</button>`).join("")}</div>
+    <div id="songList"></div>
+  </div>`;
+  document.getElementById("langPills").addEventListener("click", e=>{
+    const b = e.target.closest(".pill"); if(!b) return;
+    songLang = b.dataset.l; renderSongs();
+  });
+  renderSongList();
+  showFab(openSongModal);
+}
+function showFab(onTap){
+  removeFab();
+  const fab = document.createElement("button");
+  fab.className = "fab"; fab.id = "actionFab"; fab.textContent = "+";
+  fab.style.right = "22px"; fab.style.bottom = (24+parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')||0))+"px";
+  document.body.appendChild(fab);
+  let dragging=false, moved=false, startX,startY, origX,origY;
+  fab.addEventListener("pointerdown", e=>{
+    dragging=true; moved=false;
+    const r=fab.getBoundingClientRect();
+    startX=e.clientX; startY=e.clientY; origX=r.left; origY=r.top;
+    try{ fab.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  fab.addEventListener("pointermove", e=>{
+    if(!dragging) return;
+    const dx=e.clientX-startX, dy=e.clientY-startY;
+    if(Math.abs(dx)>6||Math.abs(dy)>6) moved=true;
+    if(moved){
+      fab.style.left=Math.max(6,Math.min(window.innerWidth-62,origX+dx))+"px";
+      fab.style.top=Math.max(6,Math.min(window.innerHeight-62,origY+dy))+"px";
+      fab.style.right="auto"; fab.style.bottom="auto";
+    }
+  });
+  const endDrag = ()=>{ dragging=false; };
+  fab.addEventListener("pointerup", endDrag);
+  fab.addEventListener("pointercancel", endDrag);
+  fab.addEventListener("click", e=>{
+    if(moved){ e.preventDefault(); e.stopPropagation(); return; }
+    onTap();
+  });
+}
+function removeFab(){ const f=document.getElementById("actionFab"); if(f) f.remove(); }
+function openSongModal(){
+  blocks = [{type:"verse",text:""}];
+  const bg = document.createElement("div"); bg.className="modalbg"; bg.id="songModalBg";
+  bg.innerHTML = `<div class="modal">
+    <h2>Post a song</h2>
+    <label>Language</label>
+    <select id="sLang">${LANGS.map(l=>`<option value="${l.code}" ${l.code===songLang?"selected":""}>${l.label}</option>`).join("")}</select>
+    <div class="row">
+      <div><label>Song number</label><input id="sNum" type="number" min="1" placeholder="e.g. 7"></div>
+      <div><label>Key</label><select id="sKey">${KEYS.map(k=>`<option>${k}</option>`).join("")}</select></div>
+    </div>
+    <label>Title (optional)</label>
+    <input id="sTitle" placeholder="Song title">
+    <label>Verses &amp; chorus</label>
+    <div id="sBlocks"></div>
+    <div class="actions"><button class="btn btn-ghost btn-sm" id="addBlock">+ Add block</button></div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn btn-primary" id="postSong">Post song</button>
+      <button class="btn btn-ghost" id="cancelSong">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  renderBlocks();
+  document.getElementById("addBlock").onclick = ()=>{ blocks.push({type:"verse",text:""}); renderBlocks(); };
+  document.getElementById("postSong").onclick = postSong;
+  document.getElementById("cancelSong").onclick = ()=>bg.remove();
+  bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
+}
+function renderBlocks(){
+  const c = document.getElementById("sBlocks");
+  c.innerHTML = blocks.map((b,i)=>`
+    <div class="blockrow">
+      <div class="blockrow-top">
+        <select onchange="setBlockType(${i},this.value)">
+          <option value="verse" ${b.type==="verse"?"selected":""}>Verse</option>
+          <option value="chorus" ${b.type==="chorus"?"selected":""}>Chorus</option>
+        </select>
+        <button class="btn btn-danger btn-sm" onclick="removeBlock(${i})">Remove</button>
+      </div>
+      <textarea placeholder="Type the lyrics for this block…" oninput="setBlockText(${i},this.value)">${esc(b.text)}</textarea>
+    </div>`).join("");
+}
+window.setBlockType=(i,v)=>{ blocks[i].type=v; };
+window.setBlockText=(i,v)=>{ blocks[i].text=v; };
+window.removeBlock=(i)=>{ blocks.splice(i,1); if(!blocks.length) blocks=[{type:"verse",text:""}]; renderBlocks(); };
+
+async function postSong(){
+  const lang = document.getElementById("sLang").value;
+  const num = parseInt(document.getElementById("sNum").value,10);
+  const key = document.getElementById("sKey").value;
+  const title = document.getElementById("sTitle").value.trim() || ("Song "+(num||""));
+  const lyrics = buildLyrics(blocks);
+  if(!num || !lyrics){ toast("Add a song number and at least one verse/chorus"); return; }
+  const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
+  const { data, error } = await sb.from("songs").insert({ lang_code:lang, num, title, key, lyrics, snippet }).select().single();
+  if(error){ toast("Could not post song: "+error.message); return; }
+  songs[lang].push(songRowToObj(data));
+  songLang = lang;
+  const bg = document.getElementById("songModalBg"); if(bg) bg.remove();
+  toast("Song posted");
+  renderSongs();
+}
+function renderSongList(){
+  const list = songs[songLang].slice().sort((a,b)=>a.num-b.num);
+  document.getElementById("songList").innerHTML = list.length ? list.map(s=>`
+    <div class="list-item">
+      <div class="top"><strong>#${s.num} ${esc(s.title)}</strong><span class="tag">${s.key}</span></div>
+      <div class="muted">${esc(s.snippet)}</div>
+      <div class="actions"><button class="btn btn-danger btn-sm" onclick="deleteSong('${s.id}')">Delete</button></div>
+    </div>`).join("") : `<div class="empty">No songs yet in this language.</div>`;
+}
+window.deleteSong=async(id)=>{
+  const { error } = await sb.from("songs").delete().eq("id", id);
+  if(error){ toast("Could not delete song: "+error.message); return; }
+  songs[songLang]=songs[songLang].filter(s=>s.id!==id);
+  toast("Song deleted"); renderSongList();
+};
+
+// ---------- UPDATES ----------
+let updates = [];
+let pendingImg = "";
+function updateRowToObj(row){ return { id:row.id, num:row.num, text:row.text, image:row.image_url, ts:new Date(row.created_at).getTime() }; }
+async function loadUpdates(){
+  const { data, error } = await sb.from("updates").select("*").order("created_at", { ascending:false });
+  if(error){ toast("Could not load updates: "+error.message); return; }
+  updates = (data||[]).map(updateRowToObj);
+}
+function renderUpdates(){
+  const el = document.getElementById("main");
+  el.innerHTML = `
+  <div class="card"><h2>Posted updates</h2><div id="updateList"></div></div>`;
+  renderUpdateList();
+  showFab(openUpdateModal);
+}
+function openUpdateModal(){
+  pendingImg = "";
+  const bg = document.createElement("div"); bg.className="modalbg"; bg.id="updateModalBg";
+  bg.innerHTML = `<div class="modal">
+    <h2>Post an update</h2>
+    <label>Update number</label>
+    <input id="uNum" type="number" min="1" placeholder="e.g. 5">
+    <label>Picture</label>
+    <input id="uImg" type="file" accept="image/*">
+    <div id="uImgPrev"></div>
+    <label>Text</label>
+    <textarea id="uText" placeholder="Update message"></textarea>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn btn-primary" id="postUpdate">Post update</button>
+      <button class="btn btn-ghost" id="cancelUpdate">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  document.getElementById("uImg").onchange = e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ pendingImg=r.result; document.getElementById("uImgPrev").innerHTML=`<img src="${pendingImg}" class="imgprev">`; };
+    r.readAsDataURL(f);
+  };
+  document.getElementById("postUpdate").onclick = postUpdate;
+  document.getElementById("cancelUpdate").onclick = ()=>bg.remove();
+  bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
+}
+async function postUpdate(){
+  const num = parseInt(document.getElementById("uNum").value,10);
+  const text = document.getElementById("uText").value.trim();
+  if(!num || !text){ toast("Add an update number and text"); return; }
+  const postBtn = document.getElementById("postUpdate"); postBtn.disabled=true; postBtn.textContent="Posting…";
+  const imageUrl = pendingImg ? await uploadMedia(pendingImg, "updates") : "";
+  const { data, error } = await sb.from("updates").insert({ num, text, image_url: imageUrl||null }).select().single();
+  if(error){ toast("Could not post update: "+error.message); postBtn.disabled=false; postBtn.textContent="Post update"; return; }
+  updates.unshift(updateRowToObj(data));
+  pendingImg="";
+  const bg = document.getElementById("updateModalBg"); if(bg) bg.remove();
+  toast("Update posted — live in the app now");
+  renderUpdates();
+}
+function fmtTs(ts){ const d=new Date(ts); return d.toLocaleDateString()+" • "+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}); }
+function renderUpdateList(){
+  document.getElementById("updateList").innerHTML = updates.length ? updates.map(u=>`
+    <div class="list-item">
+      <div class="top"><strong>Update #${u.num}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
+      <div class="muted">${esc(u.text.slice(0,80))}${u.text.length>80?"…":""}</div>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUpdate('${u.id}')">Delete</button>
+      </div>
+    </div>`).join("") : `<div class="empty">No updates posted yet.</div>`;
+}
+window.deleteUpdate=async(id)=>{
+  const { error } = await sb.from("updates").delete().eq("id", id);
+  if(error){ toast("Could not delete update: "+error.message); return; }
+  updates=updates.filter(u=>u.id!==id); toast("Update deleted"); renderUpdateList();
+};
+window.viewUpdate=(id)=>{
+  const u = updates.find(x=>x.id===id); if(!u) return;
+  const bg = document.createElement("div"); bg.className="modalbg";
+  bg.innerHTML = `<div class="modal">
+    <h2>Update #${u.num}</h2>
+    ${u.image?`<img src="${u.image}" class="imgprev">`:""}
+    <p style="margin-top:10px">${esc(u.text)}</p>
+    <p class="muted">${fmtTs(u.ts)}</p>
+    <div class="actions"><button class="btn btn-ghost btn-sm" id="closeM">Close</button></div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector("#closeM").onclick=()=>bg.remove();
+  bg.onclick=(e)=>{ if(e.target===bg) bg.remove(); };
+};
+
+// ---------- BELIEVERS ----------
+let believers = [];
+let restricted = [];
+let belSub = "active";
+function believerRowToObj(row){ return { id:row.id, name:row.name, phone:row.phone, pastor:row.pastor, device:row.device, status:row.status, regTs:new Date(row.reg_ts).getTime() }; }
+function restrictedRowToObj(row){ return { id:row.id, name:row.name, phone:row.phone, pastor:row.pastor, device:row.device, reason:row.reason, ts:new Date(row.ts).getTime() }; }
+async function loadBelievers(){
+  const { data, error } = await sb.from("believers").select("*").order("reg_ts", { ascending:false });
+  if(error){ toast("Could not load believers: "+error.message); return; }
+  believers = (data||[]).map(believerRowToObj);
+}
+async function loadRestricted(){
+  const { data, error } = await sb.from("restricted").select("*").order("ts", { ascending:false });
+  if(error){ toast("Could not load restricted list: "+error.message); return; }
+  restricted = (data||[]).map(restrictedRowToObj);
+}
+
+function renderBelievers(){
+  const el = document.getElementById("main");
+  el.innerHTML = `
+  <div class="card">
+    <div class="pills">
+      <button class="pill ${belSub==="active"?"active":""}" data-s="active">Active</button>
+      <button class="pill ${belSub==="restricted"?"active":""}" data-s="restricted">Restricted</button>
+    </div>
+    <div id="belBody"></div>
+  </div>`;
+  el.querySelectorAll(".pills button").forEach(b=>b.onclick=()=>{ belSub=b.dataset.s; renderBelievers(); });
+  document.getElementById("belBody").innerHTML = belSub==="active"
+    ? `<h2>Active believers</h2><div id="belList"></div>`
+    : `<h2>Restricted (suspended, banned, deleted)</h2><p class="muted">Anyone here is blocked from registering again with the same phone, name, device, or pastor.</p><div id="restrList"></div>`;
+  if(belSub==="active") renderBelList(); else renderRestrList();
+}
+function renderBelList(){
+  const list = believers.filter(b=>b.status==="active");
+  document.getElementById("belList").innerHTML = list.length ? list.map(b=>`
+    <div class="list-item">
+      <div class="top"><strong>${esc(b.name)}</strong><span class="badge ${b.status}">${b.status}</span></div>
+      <div class="muted">${esc(b.phone)} · ${esc(b.pastor)} · device ${esc(b.device)}</div>
+      <div class="actions">
+        <button class="btn btn-warn btn-sm" onclick="setStatus('${b.id}','suspended')">Suspend</button>
+        <button class="btn btn-danger btn-sm" onclick="setStatus('${b.id}','banned')">Ban</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBeliever('${b.id}')">Delete</button>
+      </div>
+    </div>`).join("") : `<div class="empty">No active believers.</div>`;
+}
+async function addRestriction(b, reason){
+  const { data, error } = await sb.from("restricted").insert({ name:b.name, phone:b.phone, pastor:b.pastor, device:b.device, reason }).select().single();
+  if(error){ toast("Could not add restriction: "+error.message); return; }
+  restricted.unshift(restrictedRowToObj(data));
+}
+window.setStatus=async(id,status)=>{
+  const b = believers.find(x=>x.id===id); if(!b) return;
+  const { error } = await sb.from("believers").update({ status }).eq("id", id);
+  if(error){ toast("Could not update status: "+error.message); return; }
+  b.status = status;
+  if(status==="suspended"||status==="banned") await addRestriction(b, status);
+  toast("Status updated"); renderBelievers();
+};
+window.deleteBeliever=async(id)=>{
+  const b = believers.find(x=>x.id===id); if(!b) return;
+  await addRestriction(b, "deleted");
+  const { error } = await sb.from("believers").delete().eq("id", id);
+  if(error){ toast("Could not delete believer: "+error.message); return; }
+  believers = believers.filter(x=>x.id!==id);
+  toast("Believer deleted and blocked from re-registering"); renderBelievers();
+};
+function renderRestrList(){
+  document.getElementById("restrList").innerHTML = restricted.length ? restricted.map(r=>`
+    <div class="list-item">
+      <div class="top"><strong>${esc(r.name)}</strong><span class="badge banned">${r.reason}</span></div>
+      <div class="muted">${esc(r.phone)} · ${esc(r.pastor)} · device ${esc(r.device)}</div>
+      <div class="actions"><button class="btn btn-ghost btn-sm" onclick="unrestrict('${r.id}')">Restore &amp; remove restriction</button></div>
+    </div>`).join("") : `<div class="empty">No one is restricted right now.</div>`;
+}
+window.unrestrict=async(id)=>{
+  const r = restricted.find(x=>x.id===id); if(!r) return;
+  const b = believers.find(x=>x.phone===r.phone || x.device===r.device);
+  if(b){
+    const { error } = await sb.from("believers").update({ status:"active" }).eq("id", b.id);
+    if(error){ toast("Could not restore believer: "+error.message); return; }
+    b.status="active";
+  } else if(r.reason==="deleted"){
+    const { data, error } = await sb.from("believers").insert({ name:r.name, phone:r.phone, pastor:r.pastor, device:r.device, status:"active" }).select().single();
+    if(error){ toast("Could not restore believer: "+error.message); return; }
+    believers.push(believerRowToObj(data));
+  }
+  const { error:delErr } = await sb.from("restricted").delete().eq("id", id);
+  if(delErr){ toast("Could not clear restriction: "+delErr.message); return; }
+  restricted = restricted.filter(x=>x.id!==id);
+  toast("Restriction removed"); renderBelievers();
+};
+// The main app (a separate file) queries the `restricted` table directly with
+// this same match logic before letting anyone register or re-register.
+window.isRestricted=(phone,name,device,pastor)=> restricted.some(r=>
+  (phone && r.phone===phone) || (name && r.name===name) || (device && r.device===device) || (pastor && r.pastor===pastor));
+
+// ---------- REPORTS & NOTIFY ----------
+let reports = [];
+let outbox = [];
+let reportSub = "reports";
+function reportRowToObj(row){ return { id:row.id, kind:row.kind, postText:row.post_text, reportedBy:row.reported_by, from:row.from_user, reason:row.reason, status:row.status, ts:new Date(row.ts).getTime() }; }
+function notifRowToObj(row){ return { id:row.id, type:row.type, text:row.text, ts:new Date(row.ts).getTime() }; }
+async function loadReports(){
+  const { data, error } = await sb.from("reports").select("*").order("ts", { ascending:false });
+  if(error){ toast("Could not load reports: "+error.message); return; }
+  reports = (data||[]).map(reportRowToObj);
+}
+async function loadOutbox(){
+  const { data, error } = await sb.from("notifications").select("*").order("ts", { ascending:false });
+  if(error){ toast("Could not load notifications: "+error.message); return; }
+  outbox = (data||[]).map(notifRowToObj);
+}
+function renderReports(){
+  const el = document.getElementById("main");
+  el.innerHTML = `
+  <div class="card">
+    <div class="pills">
+      <button class="pill ${reportSub==="reports"?"active":""}" data-s="reports">Reports</button>
+      <button class="pill ${reportSub==="notify"?"active":""}" data-s="notify">Notify</button>
+    </div>
+    <div id="repBody"></div>
+  </div>`;
+  el.querySelectorAll(".pills button").forEach(b=>b.onclick=()=>{ reportSub=b.dataset.s; renderReports(); });
+  if(reportSub==="reports"){
+    document.getElementById("repBody").innerHTML = `<h2>Reported posts</h2><div id="repList"></div>`;
+    renderRepList();
+  } else {
+    document.getElementById("repBody").innerHTML = `
+      <h2>Send a notification</h2>
+      <label>Message</label>
+      <textarea id="nText" placeholder="e.g. New hymns added in Luganda this week!"></textarea>
+      <div class="actions" style="margin-top:8px"><button class="btn btn-primary" id="sendNotif">Send to app</button></div>
+      <p class="muted" style="margin-top:6px">Sends live — it appears as a pop-up in the app the moment you send it (the app must be online to receive it).</p>
+      <h2 style="margin-top:16px">Sent notifications</h2><div id="outList"></div>`;
+    document.getElementById("sendNotif").onclick=async()=>{
+      const text = document.getElementById("nText").value.trim();
+      if(!text){ toast("Write a message first"); return; }
+      const { data, error } = await sb.from("notifications").insert({ type:"system", text }).select().single();
+      if(error){ toast("Could not send notification: "+error.message); return; }
+      outbox.unshift(notifRowToObj(data));
+      toast("Notification sent — live in the app now"); renderReports();
+    };
+    renderOutList();
+  }
+}
+function renderRepList(){
+  document.getElementById("repList").innerHTML = reports.length ? reports.map(r=>`
+    <div class="list-item">
+      <div class="top"><strong>${r.kind==="complaint" ? "Complaint from "+esc(r.from||"app user") : esc(r.reportedBy)+" reported a post"}</strong><span class="tag">${esc(r.reason||(r.kind==="complaint"?"Complaint":""))}</span></div>
+      <div class="muted">"${esc(r.postText||r.text||"")}"</div>
+      <div class="muted">${fmtTs(r.ts)} · ${r.status}</div>
+      <div class="actions">
+        ${r.status==="open"?`<button class="btn btn-warn btn-sm" onclick="resolveReport('${r.id}')">Mark reviewed</button>`:""}
+        <button class="btn btn-danger btn-sm" onclick="deleteReport('${r.id}')">Delete</button>
+      </div>
+    </div>`).join("") : `<div class="empty">Nothing reported right now.</div>`;
+}
+window.resolveReport=async(id)=>{
+  const { error } = await sb.from("reports").update({ status:"reviewed" }).eq("id", id);
+  if(error){ toast("Could not update report: "+error.message); return; }
+  const r=reports.find(x=>x.id===id); if(r) r.status="reviewed"; renderRepList(); renderBell();
+};
+window.deleteReport=async(id)=>{
+  const { error } = await sb.from("reports").delete().eq("id", id);
+  if(error){ toast("Could not delete report: "+error.message); return; }
+  reports=reports.filter(r=>r.id!==id); renderRepList(); renderBell();
+};
+function renderOutList(){
+  document.getElementById("outList").innerHTML = outbox.length ? outbox.map(n=>`
+    <div class="list-item">
+      <div class="top"><span class="muted">${fmtTs(n.ts)}</span><button class="btn btn-danger btn-sm" onclick="deleteOutboxNotif('${n.id}')">Delete</button></div>
+      <div>${esc(n.text)}</div>
+    </div>`).join("")
+    : `<div class="empty">Nothing sent yet.</div>`;
+}
+window.deleteOutboxNotif=async(id)=>{
+  const { error } = await sb.from("notifications").delete().eq("id", id);
+  if(error){ toast("Could not delete notification: "+error.message); return; }
+  outbox=outbox.filter(n=>n.id!==id); toast("Notification deleted"); renderOutList();
+};
+
+// ---------- TRENDS ----------
+// Reads the `usage_events` rows the main Only Believe Gospel Hymns app writes:
+// kind "open" (an app launch/return — one per session, used for daily-used and
+// history counts), kind "heartbeat" (still in foreground, tagged with the
+// feature/screen in view, sent every 25s — used for "currently active", total
+// time, and time-per-feature), kind "install" (added to home screen, logged
+// once per device). History is kept for good — nothing here is ever auto-deleted.
+const HEARTBEAT_SECONDS = 25; // must match the main app's heartbeat interval
+const ACTIVE_WINDOW_MS = 90*1000; // a device counts as "using it right now" if it pinged within this window
+const HISTORY_DAYS = 30; // default rolling window shown in the History list
+let trendsTimer = null;
+let trendsLoading = false;
+
+function startOfDay(t){ const d = new Date(t); d.setHours(0,0,0,0); return d; }
+function dayKey(t){ return startOfDay(t).toISOString().slice(0,10); }
+function fmtDuration(totalSeconds){
+  const h = Math.floor(totalSeconds/3600), m = Math.round((totalSeconds%3600)/60);
+  return h>0 ? `${h}h ${m}m` : `${m}m`;
+}
+function fmtFeatureName(f){
+  const names = { home:"Home", hymns:"Hymns", updates:"Updates", more:"More",
+    believers_connect:"Believers Connect", testimony_wall:"Testimony Wall", chat:"Chat" };
+  return names[f] || (f ? f.charAt(0).toUpperCase()+f.slice(1) : "Unknown");
+}
+function fmtDayLabel(key){
+  const today = dayKey(Date.now());
+  const yesterday = dayKey(Date.now()-24*3600*1000);
+  if(key===today) return "Today";
+  if(key===yesterday) return "Yesterday";
+  const d = new Date(key+"T00:00:00");
+  return d.toLocaleDateString([], { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+}
+// Count of distinct devices per kind, for one or more days, in one query.
+async function countByDay(kinds, fromIso, toIso){
+  let q = sb.from("usage_events").select("device_id,kind,ts").in("kind", kinds).gte("ts", fromIso);
+  if(toIso) q = q.lt("ts", toIso);
+  const { data, error } = await q;
+  if(error) return { error };
+  const byDay = {}; // "YYYY-MM-DD" -> { [kind]: Set(device_id) }
+  (data||[]).forEach(r=>{
+    const key = dayKey(r.ts);
+    if(!byDay[key]) byDay[key] = {};
+    if(!byDay[key][r.kind]) byDay[key][r.kind] = new Set();
+    byDay[key][r.kind].add(r.device_id);
+  });
+  return { byDay };
+}
+async function loadTrendsData(){
+  const now = Date.now();
+  const todayStartIso = startOfDay(now).toISOString();
+  const activeCutoffIso = new Date(now - ACTIVE_WINDOW_MS).toISOString();
+  const historySinceIso = startOfDay(now - (HISTORY_DAYS-1)*24*3600*1000).toISOString();
+
+  const [todayRes, activeRes, installRes, historyRes] = await Promise.all([
+    sb.from("usage_events").select("device_id,kind,feature,ts").gte("ts", todayStartIso),
+    sb.from("usage_events").select("device_id").in("kind",["open","heartbeat"]).gte("ts", activeCutoffIso),
+    sb.from("usage_events").select("device_id").eq("kind","install"),
+    countByDay(["open","install"], historySinceIso)
+  ]);
+  const firstErr = todayRes.error || activeRes.error || installRes.error || historyRes.error;
+  if(firstErr){ toast("Could not load trends: "+firstErr.message); return null; }
+
+  const todayRows = todayRes.data||[];
+  const activeToday = new Set(todayRows.filter(r=>r.kind==="open").map(r=>r.device_id)).size;
+  const currentlyActive = new Set((activeRes.data||[]).map(r=>r.device_id)).size;
+  const totalInstalls = new Set((installRes.data||[]).map(r=>r.device_id)).size;
+
+  const heartbeatsToday = todayRows.filter(r=>r.kind==="heartbeat");
+  const totalSecondsToday = heartbeatsToday.length * HEARTBEAT_SECONDS;
+
+  const featureSeconds = {};
+  heartbeatsToday.forEach(r=>{
+    const f = r.feature || "home";
+    featureSeconds[f] = (featureSeconds[f]||0) + HEARTBEAT_SECONDS;
+  });
+  const featureList = Object.entries(featureSeconds).sort((a,b)=>b[1]-a[1]);
+
+  const history = [];
+  for(let i=0;i<HISTORY_DAYS;i++){
+    const key = dayKey(now - i*24*3600*1000);
+    const day = historyRes.byDay[key] || {};
+    history.push({ key, used:(day.open?day.open.size:0), installed:(day.install?day.install.size:0) });
+  }
+
+  return { activeToday, currentlyActive, totalInstalls, totalSecondsToday, featureList, history };
+}
+// Looks up one specific date (any date at all — history is never deleted).
+async function lookupUsageForDate(dateStr){
+  const from = new Date(dateStr+"T00:00:00");
+  const to = new Date(from.getTime()+24*3600*1000);
+  const { data, error } = await sb.from("usage_events").select("device_id,kind")
+    .in("kind",["open","install"]).gte("ts", from.toISOString()).lt("ts", to.toISOString());
+  if(error){ toast("Could not look up that date: "+error.message); return null; }
+  const used = new Set((data||[]).filter(r=>r.kind==="open").map(r=>r.device_id)).size;
+  const installed = new Set((data||[]).filter(r=>r.kind==="install").map(r=>r.device_id)).size;
+  return { used, installed };
+}
+function renderTrends(){
+  const el = document.getElementById("main");
+  const todayStr = dayKey(Date.now());
+  el.innerHTML = `
+  <div class="card" id="trendsStats"><h2>Right now</h2><div class="empty">Loading…</div></div>
+  <div class="card" id="trendsFeatures"><h2>Where time goes today</h2><div class="empty">Loading…</div></div>
+  <div class="card" id="trendsHistory">
+    <h2>History</h2>
+    <div class="row" style="align-items:flex-end;margin-bottom:10px">
+      <div><label>Look up a date</label><input type="date" id="histDate" max="${todayStr}"></div>
+      <div style="flex:0 0 auto"><button class="btn btn-primary btn-sm" id="histSearchBtn">Search</button></div>
+    </div>
+    <div id="histSearchResult"></div>
+    <div id="histList"><div class="empty">Loading…</div></div>
+  </div>`;
+  document.getElementById("histSearchBtn").onclick = async ()=>{
+    const v = document.getElementById("histDate").value;
+    if(!v){ toast("Pick a date first"); return; }
+    const r = await lookupUsageForDate(v);
+    if(!r) return;
+    document.getElementById("histSearchResult").innerHTML =
+      `<div class="list-item"><strong>${esc(fmtDayLabel(v))}</strong><div class="muted" style="margin-top:4px">${r.used} used it that day · ${r.installed} installed that day</div></div>`;
+  };
+  refreshTrends();
+  if(trendsTimer) clearInterval(trendsTimer);
+  trendsTimer = setInterval(refreshTrends, 20000);
+}
+function stopTrendsRefresh(){ if(trendsTimer){ clearInterval(trendsTimer); trendsTimer=null; } }
+async function refreshTrends(){
+  if(trendsLoading) return; trendsLoading = true;
+  const stats = await loadTrendsData();
+  trendsLoading = false;
+  if(!stats || currentTab!=="trends") return;
+
+  document.getElementById("trendsStats").innerHTML = `
+    <h2>Right now</h2>
+    <div class="tstat-grid">
+      <div class="tstat"><div class="tstat-num">${stats.currentlyActive}</div><div class="tstat-label">using it right now</div></div>
+      <div class="tstat"><div class="tstat-num">${stats.activeToday}</div><div class="tstat-label">used it today</div></div>
+      <div class="tstat"><div class="tstat-num">${fmtDuration(stats.totalSecondsToday)}</div><div class="tstat-label">total time today</div></div>
+      <div class="tstat"><div class="tstat-num">${stats.totalInstalls}</div><div class="tstat-label">have installed (all-time)</div></div>
+    </div>
+    <p class="muted" style="margin-top:10px">Refreshes automatically every 20 seconds while this tab is open.</p>`;
+
+  document.getElementById("trendsFeatures").innerHTML = `
+    <h2>Where time goes today</h2>
+    ${stats.featureList.length ? renderFeatureBars(stats.featureList) : '<div class="empty">No activity yet today.</div>'}`;
+
+  document.getElementById("histList").innerHTML = renderHistoryList(stats.history);
+}
+function renderFeatureBars(list){
+  const max = Math.max(...list.map(([,s])=>s), 1);
+  return `<div class="trend-bars">` + list.map(([feature,secs])=>`
+    <div class="trend-bar-row">
+      <div class="trend-bar-label">${esc(fmtFeatureName(feature))}</div>
+      <div class="trend-bar-track"><div class="trend-bar-fill" style="width:${Math.max(4,(secs/max*100))}%"></div></div>
+      <div class="trend-bar-val">${fmtDuration(secs)}</div>
+    </div>`).join("") + `</div>`;
+}
+function renderHistoryList(history){
+  return `<div class="hist-list">` + history.map(d=>`
+    <div class="hist-row">
+      <div class="hist-day">${esc(fmtDayLabel(d.key))}</div>
+      <div class="hist-nums"><span title="Used it that day">${d.used} used</span><span title="Installed that day">${d.installed} installed</span></div>
+    </div>`).join("") + `</div>`;
+}
+
+// ---------- TAB SWITCH ----------
+let currentTab = "songs";
+const renderers = { songs:renderSongs, updates:renderUpdates, believers:renderBelievers, reports:renderReports, trends:renderTrends };
+document.getElementById("tabs").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  const prevTab = currentTab;
+  currentTab = b.dataset.t;
+  if(b.dataset.t!=="songs" && b.dataset.t!=="updates") removeFab();
+  if(prevTab==="trends" && b.dataset.t!=="trends") stopTrendsRefresh();
+  renderers[b.dataset.t]();
+});
+
+// ---------- BELL: unread badge + pop-up for incoming reports/complaints ----------
+function renderBell(){
+  const openCount = reports.filter(r=>r.status==="open").length;
+  const dot = document.getElementById("bellDot");
+  if(openCount>0){ dot.style.display="inline-block"; dot.textContent = openCount>9?"9+":openCount; }
+  else dot.style.display="none";
+}
+document.getElementById("bellBtn").onclick = ()=>{
+  document.querySelector('#tabs button[data-t="reports"]').click();
+  reportSub = "reports";
+  renderReports();
+};
+function showInboundPopup(n){
+  const bg = document.createElement("div"); bg.className="modalbg";
+  bg.innerHTML = `<div class="modal">
+    <h2>${n.kind==="complaint" ? "New complaint" : "New report"}</h2>
+    <p>${esc(n.text || n.postText || "")}</p>
+    <p class="muted">${fmtTs(n.ts)}</p>
+    <div class="actions">
+      <button class="btn btn-primary btn-sm" id="popView">View</button>
+      <button class="btn btn-ghost btn-sm" id="popClose">Dismiss</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.querySelector("#popClose").onclick=()=>bg.remove();
+  bg.querySelector("#popView").onclick=()=>{ bg.remove(); document.getElementById("bellBtn").click(); };
+  bg.onclick=e=>{ if(e.target===bg) bg.remove(); };
+}
+let seenInboxIds = new Set();
+function handleFreshReportRow(row){
+  const r = reportRowToObj(row);
+  if(seenInboxIds.has(r.id)) return;
+  seenInboxIds.add(r.id);
+  reports = reports.filter(x=>x.id!==r.id);
+  reports.unshift(r);
+  if(r.status==="open") showInboundPopup(r);
+  renderBell();
+  if(currentTab==="reports") renderReports();
+}
+// Live push instead of polling: new reports (from a "Report" tap or the complaints
+// flow in the main app) arrive over Supabase Realtime the moment they're inserted.
+sb.channel("admin_reports")
+  .on("postgres_changes", { event:"INSERT", schema:"public", table:"reports" }, payload=>handleFreshReportRow(payload.new))
+  .subscribe();
+
+// ---------- STARTUP: pull everything from Supabase, then draw the first tab ----------
+(async function init(){
+  await Promise.all([loadSongs(), loadUpdates(), loadBelievers(), loadRestricted(), loadReports(), loadOutbox()]);
+  seenInboxIds = new Set(reports.map(r=>r.id));
+  renderers[currentTab]();
+  renderBell();
+})();
+</script>
+</body>
+</html>
