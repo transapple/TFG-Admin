@@ -90,7 +90,11 @@ textarea{min-height:60px;resize:vertical}
 .imgprev{max-width:100%;border-radius:8px;margin-top:6px}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .modalbg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
-.modal{background:var(--card);border-radius:14px;padding:16px 25px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;position:relative}
+.modal{max-width:480px;width:100%;max-height:88vh;position:relative}
+.modal-scroll{background:var(--card);border-radius:14px;padding:16px 34px 16px 3px;margin:0;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+.modal-scrollbar{position:absolute;top:6px;bottom:6px;right:4px;width:16px;z-index:6;touch-action:none;display:none;}
+.modal-scrollbar-thumb{position:absolute;top:0;left:0;width:100%;min-height:28px;border-radius:8px;background:var(--inkSoft);opacity:.5}
+.modal-scrollbar-thumb:active{opacity:.85}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.show{opacity:1}
 .empty{color:var(--inkSoft);font-size:13px;padding:14px;text-align:center}
@@ -589,7 +593,7 @@ function renderUpdates(){
   attachLongPress(document.getElementById("updateList"), ".list-item", (id)=>{
     const u = updates.find(x=>x.id===id); if(!u) return;
     showActionPopup({
-      title: u.title || ("Update #"+u.num),
+      title: u.title || "Untitled update",
       actions: [
         { label:"Edit", className:"btn-primary", onClick:()=>openUpdateModal(u) },
         { label:"Delete", className:"btn-danger", onClick:()=>deleteUpdate(id) }
@@ -604,8 +608,6 @@ function openUpdateModal(editUpdate){
   const bg = document.createElement("div"); bg.className="modalbg"; bg.id="updateModalBg";
   bg.innerHTML = `<div class="modal">
     <h2>${editing?"Edit update":"Post an update"}</h2>
-    <label>Update number</label>
-    <input id="uNum" type="number" min="1" placeholder="e.g. 5" value="${editing?editUpdate.num:""}">
     <label>Title</label>
     <input id="uTitle" placeholder="Update title" value="${editing?esc(editUpdate.title||""):""}">
     <label>Picture</label>
@@ -625,15 +627,21 @@ function openUpdateModal(editUpdate){
     r.onload=()=>{ pendingImg=r.result; document.getElementById("uImgPrev").innerHTML=`<img src="${pendingImg}" class="imgprev">`; };
     r.readAsDataURL(f);
   };
-  document.getElementById("postUpdate").onclick = ()=> editing ? saveUpdate(editUpdate.id) : postUpdate();
+  document.getElementById("postUpdate").onclick = ()=> editing ? saveUpdate(editUpdate.id, editUpdate.num) : postUpdate();
   document.getElementById("cancelUpdate").onclick = ()=>bg.remove();
   bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
 }
+// Updates are identified by their title now, not a number the admin has to
+// pick — a number is still kept behind the scenes (next free one) purely
+// because the database column expects it.
+function nextUpdateNum(){
+  return (updates.length ? Math.max(...updates.map(u=>u.num||0)) : 0) + 1;
+}
 async function postUpdate(){
-  const num = parseInt(document.getElementById("uNum").value,10);
   const title = document.getElementById("uTitle").value.trim();
   const text = document.getElementById("uText").value.trim();
-  if(!num || !title || !text){ toast("Add an update number, title and text"); return; }
+  if(!title || !text){ toast("Add a title and text"); return; }
+  const num = nextUpdateNum();
   const postBtn = document.getElementById("postUpdate"); postBtn.disabled=true; postBtn.textContent="Posting…";
   const imageUrl = pendingImg ? await uploadMedia(pendingImg, "updates") : "";
   const { data, error } = await sb.from("updates").insert({ num, title, text, image_url: imageUrl||null }).select().single();
@@ -644,11 +652,10 @@ async function postUpdate(){
   toast("Update posted — live in the app now");
   renderUpdates();
 }
-async function saveUpdate(id){
-  const num = parseInt(document.getElementById("uNum").value,10);
+async function saveUpdate(id, num){
   const title = document.getElementById("uTitle").value.trim();
   const text = document.getElementById("uText").value.trim();
-  if(!num || !title || !text){ toast("Add an update number, title and text"); return; }
+  if(!title || !text){ toast("Add a title and text"); return; }
   const saveBtn = document.getElementById("postUpdate"); saveBtn.disabled=true; saveBtn.textContent="Saving…";
   // pendingImg is either an existing (already-uploaded) URL left untouched,
   // a fresh base64 data URL from a newly picked file, or empty if removed.
@@ -665,7 +672,7 @@ function fmtTs(ts){ const d=new Date(ts); return d.toLocaleDateString()+" • "+
 function renderUpdateList(){
   document.getElementById("updateList").innerHTML = updates.length ? updates.map(u=>`
     <div class="list-item" data-id="${u.id}">
-      <div class="top"><strong>${esc(u.title||("Update #"+u.num))}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
+      <div class="top"><strong>${esc(u.title||"Untitled update")}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
       <div class="muted">${esc(u.text.slice(0,80))}${u.text.length>80?"…":""}</div>
       <div class="actions"><button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button></div>
     </div>`).join("") : `<div class="empty">No updates posted yet.</div>`;
@@ -679,7 +686,7 @@ window.viewUpdate=(id)=>{
   const u = updates.find(x=>x.id===id); if(!u) return;
   const bg = document.createElement("div"); bg.className="modalbg";
   bg.innerHTML = `<div class="modal">
-    <h2>${esc(u.title||("Update #"+u.num))}</h2>
+    <h2>${esc(u.title||"Untitled update")}</h2>
     ${u.image?`<img src="${u.image}" class="imgprev">`:""}
     <p style="margin-top:10px">${esc(u.text)}</p>
     <p class="muted">${fmtTs(u.ts)}</p>
@@ -1044,6 +1051,92 @@ function renderHistoryList(history){
     </div>`).join("") + `</div>`;
 }
 
+// ---------- MODAL SCROLL CONTROLLER ----------
+// A visible drag handle on the modal's right edge that scrolls the form
+// directly by setting scrollTop from pointer position — this works even in
+// places where touch/swipe scrolling on the modal itself is unreliable.
+// The actual scrollable area is an inner wrapper (.modal-scroll) that we
+// move the modal's real content into; the track+thumb stay OUTSIDE that
+// wrapper, as plain siblings of it, so they stay fixed at the modal's right
+// edge instead of scrolling away with the content underneath them.
+function setupModalScrollbar(modalEl){
+  if(!modalEl || modalEl._scrollbarSetup) return;
+  modalEl._scrollbarSetup = true;
+
+  const inner = document.createElement("div"); inner.className = "modal-scroll";
+  while(modalEl.firstChild) inner.appendChild(modalEl.firstChild);
+  modalEl.appendChild(inner);
+
+  const track = document.createElement("div"); track.className = "modal-scrollbar";
+  const thumb = document.createElement("div"); thumb.className = "modal-scrollbar-thumb";
+  track.appendChild(thumb);
+  modalEl.appendChild(track);
+
+  function thumbHeight(){
+    const trackH = track.clientHeight, contentH = inner.scrollHeight, viewH = inner.clientHeight;
+    if(contentH<=0) return trackH;
+    return Math.min(trackH, Math.max(28, trackH*(viewH/contentH)));
+  }
+  function refresh(){
+    const trackH = track.clientHeight, contentH = inner.scrollHeight, viewH = inner.clientHeight;
+    if(contentH <= viewH + 1){ track.style.display = "none"; return; }
+    track.style.display = "block";
+    const th = thumbHeight();
+    const maxTop = trackH - th;
+    const ratio = maxTop>0 ? (inner.scrollTop/(contentH-viewH)) : 0;
+    thumb.style.height = th+"px";
+    thumb.style.transform = "translateY("+(ratio*maxTop)+"px)";
+  }
+  function currentThumbTop(){
+    const m = /translateY\(([-\d.]+)px\)/.exec(thumb.style.transform);
+    return m ? parseFloat(m[1]) : 0;
+  }
+  function scrollToThumbTop(top){
+    const trackH = track.clientHeight, contentH = inner.scrollHeight, viewH = inner.clientHeight;
+    const th = thumbHeight();
+    const maxTop = trackH - th;
+    const clamped = Math.max(0, Math.min(maxTop, top));
+    inner.scrollTop = maxTop>0 ? (clamped/maxTop)*(contentH-viewH) : 0;
+    refresh();
+  }
+
+  let dragging=false, pointerId=null, dragStartY=0, dragStartTop=0;
+  function beginDrag(e, jumpToPointer){
+    dragging=true; pointerId=e.pointerId;
+    if(jumpToPointer){
+      // Tapping straight on the track (not the thumb) snaps the handle to
+      // the fingertip immediately, so it's under your finger from the very
+      // first touch instead of you having to go hunt for it.
+      const rect = track.getBoundingClientRect();
+      scrollToThumbTop((e.clientY-rect.top) - thumbHeight()/2);
+    }
+    dragStartY=e.clientY; dragStartTop=currentThumbTop();
+    e.preventDefault(); e.stopPropagation();
+  }
+  const onMove = e=>{ if(!dragging || pointerId!==e.pointerId) return; scrollToThumbTop(dragStartTop+(e.clientY-dragStartY)); };
+  const onEnd = ()=>{ dragging=false; pointerId=null; };
+
+  thumb.addEventListener("pointerdown", e=>{ beginDrag(e,false); try{ thumb.setPointerCapture(e.pointerId); }catch(err){} });
+  thumb.addEventListener("pointermove", onMove);
+  thumb.addEventListener("pointerup", onEnd);
+  thumb.addEventListener("pointercancel", onEnd);
+
+  track.addEventListener("pointerdown", e=>{
+    if(e.target===thumb) return;
+    beginDrag(e,true);
+    try{ track.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  track.addEventListener("pointermove", onMove);
+  track.addEventListener("pointerup", onEnd);
+  track.addEventListener("pointercancel", onEnd);
+
+  inner.addEventListener("scroll", refresh);
+  window.addEventListener("resize", refresh);
+  try{ new ResizeObserver(refresh).observe(inner); }catch(e){}
+  try{ new MutationObserver(refresh).observe(inner, { childList:true, subtree:true, characterData:true }); }catch(e){}
+  refresh();
+}
+
 // ---------- DEVICE BACK BUTTON ----------
 // Every modal/popup in this app (song editor, update composer, view-update,
 // the long-press action popup, inbound report/complaint popup) is a plain
@@ -1051,23 +1144,37 @@ function renderHistoryList(history){
 // single MutationObserver here gives all of them back-button support without
 // touching each opener individually. Back also steps through visited tabs
 // before finally leaving the app, instead of exiting immediately.
+//
+// Some actions (e.g. tapping "Edit" in a long-press popup) remove one modal
+// and immediately open another in the very same synchronous step — both
+// changes land in the SAME batch of mutation records here. We tally the
+// net change (added minus removed) for that whole batch rather than acting
+// on each record alone: a straight swap (net 0) leaves the history depth
+// untouched, which is what avoids a delayed history.back() racing with the
+// newly-opened modal and closing it again right after it appears.
 let backNavigating = false; // true while we're reacting to a popstate (avoids re-pushing/re-popping)
 try{ history.replaceState({ adminTab:"songs" }, "", location.href); }catch(e){}
 new MutationObserver(muts=>{
+  let added = 0, removed = 0;
   muts.forEach(m=>{
     m.addedNodes.forEach(n=>{
       if(n.nodeType===1 && n.classList && n.classList.contains("modalbg")){
-        if(!backNavigating){
-          try{ history.pushState({ adminModal:true }, "", location.href); }catch(e){}
-        }
+        const modalEl = n.querySelector(".modal");
+        if(modalEl) setupModalScrollbar(modalEl);
+        added++;
       }
     });
     m.removedNodes.forEach(n=>{
-      if(n.nodeType===1 && n.classList && n.classList.contains("modalbg") && !backNavigating && history.state && history.state.adminModal){
-        try{ history.back(); }catch(e){}
-      }
+      if(n.nodeType===1 && n.classList && n.classList.contains("modalbg")) removed++;
     });
   });
+  if(backNavigating) return;
+  const net = added - removed;
+  if(net > 0){
+    for(let i=0;i<net;i++){ try{ history.pushState({ adminModal:true }, "", location.href); }catch(e){} }
+  } else if(net < 0 && history.state && history.state.adminModal){
+    try{ history.back(); }catch(e){}
+  }
 }).observe(document.body, { childList:true });
 window.addEventListener("popstate", e=>{
   backNavigating = true;
