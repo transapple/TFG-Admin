@@ -90,11 +90,7 @@ textarea{min-height:60px;resize:vertical}
 .imgprev{max-width:100%;border-radius:8px;margin-top:6px}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .modalbg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
-.modal{background:var(--card);border-radius:14px;padding:16px 25px;max-width:480px;width:100%;max-height:88vh;overflow:hidden;position:relative}
-.modal-rail{position:absolute;top:0;bottom:0;width:25px;z-index:5;touch-action:none;cursor:ns-resize}
-.modal-rail-left{left:0}
-.modal-rail-right{right:0}
-.modal-rail::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3px;height:36px;border-radius:3px;background:var(--line)}
+.modal{background:var(--card);border-radius:14px;padding:16px 25px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;position:relative}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.show{opacity:1}
 .empty{color:var(--inkSoft);font-size:13px;padding:14px;text-align:center}
@@ -484,7 +480,7 @@ function openSongModal(editSong){
       <div><label>Song number</label><input id="sNum" type="number" min="1" placeholder="e.g. 7" value="${editing?editSong.num:suggestedNum}"></div>
       <div><label>Key</label><select id="sKey">${KEYS.map(k=>`<option ${editing&&k===editSong.key?"selected":""}>${k}</option>`).join("")}</select></div>
     </div>
-    <label>Title (optional)</label>
+    <label>Title</label>
     <input id="sTitle" placeholder="Song title" value="${editing?esc(editSong.title):""}">
     <label>Verses &amp; chorus</label>
     <div id="sBlocks"></div>
@@ -535,9 +531,9 @@ async function postSong(){
   const lang = document.getElementById("sLang").value;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
-  const title = document.getElementById("sTitle").value.trim() || ("Song "+(num||""));
+  const title = document.getElementById("sTitle").value.trim();
   const lyrics = buildLyrics(blocks);
-  if(!num || !lyrics){ toast("Add a song number and at least one verse/chorus"); return; }
+  if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
   const { data, error } = await sb.from("songs").insert({ lang_code:lang, num, title, key, lyrics, snippet }).select().single();
   if(error){ toast("Could not post song: "+error.message); return; }
@@ -550,9 +546,9 @@ async function postSong(){
 async function updateSong(id, lang){
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
-  const title = document.getElementById("sTitle").value.trim() || ("Song "+(num||""));
+  const title = document.getElementById("sTitle").value.trim();
   const lyrics = buildLyrics(blocks);
-  if(!num || !lyrics){ toast("Add a song number and at least one verse/chorus"); return; }
+  if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
   const { data, error } = await sb.from("songs").update({ num, title, key, lyrics, snippet }).eq("id", id).select().single();
   if(error){ toast("Could not update song: "+error.message); return; }
@@ -579,7 +575,7 @@ window.deleteSong=async(id)=>{
 // ---------- UPDATES ----------
 let updates = [];
 let pendingImg = "";
-function updateRowToObj(row){ return { id:row.id, num:row.num, text:row.text, image:row.image_url, ts:new Date(row.created_at).getTime() }; }
+function updateRowToObj(row){ return { id:row.id, num:row.num, title:row.title, text:row.text, image:row.image_url, ts:new Date(row.created_at).getTime() }; }
 async function loadUpdates(){
   const { data, error } = await sb.from("updates").select("*").order("created_at", { ascending:false });
   if(error){ toast("Could not load updates: "+error.message); return; }
@@ -588,31 +584,37 @@ async function loadUpdates(){
 function renderUpdates(){
   const el = document.getElementById("main");
   el.innerHTML = `
-  <div class="card"><h2>Posted updates</h2><div class="muted" style="margin:2px 0 8px">Long-press an update to delete it.</div><div id="updateList"></div></div>`;
+  <div class="card"><h2>Posted updates</h2><div class="muted" style="margin:2px 0 8px">Long-press an update to edit or delete it.</div><div id="updateList"></div></div>`;
   renderUpdateList();
   attachLongPress(document.getElementById("updateList"), ".list-item", (id)=>{
     const u = updates.find(x=>x.id===id); if(!u) return;
     showActionPopup({
-      title: "Update #"+u.num,
-      actions: [ { label:"Delete", className:"btn-danger", onClick:()=>deleteUpdate(id) } ]
+      title: u.title || ("Update #"+u.num),
+      actions: [
+        { label:"Edit", className:"btn-primary", onClick:()=>openUpdateModal(u) },
+        { label:"Delete", className:"btn-danger", onClick:()=>deleteUpdate(id) }
+      ]
     });
   });
   showFab(openUpdateModal);
 }
-function openUpdateModal(){
-  pendingImg = "";
+function openUpdateModal(editUpdate){
+  const editing = !!editUpdate;
+  pendingImg = editing ? (editUpdate.image || "") : "";
   const bg = document.createElement("div"); bg.className="modalbg"; bg.id="updateModalBg";
   bg.innerHTML = `<div class="modal">
-    <h2>Post an update</h2>
+    <h2>${editing?"Edit update":"Post an update"}</h2>
     <label>Update number</label>
-    <input id="uNum" type="number" min="1" placeholder="e.g. 5">
+    <input id="uNum" type="number" min="1" placeholder="e.g. 5" value="${editing?editUpdate.num:""}">
+    <label>Title</label>
+    <input id="uTitle" placeholder="Update title" value="${editing?esc(editUpdate.title||""):""}">
     <label>Picture</label>
     <input id="uImg" type="file" accept="image/*">
-    <div id="uImgPrev"></div>
+    <div id="uImgPrev">${editing && editUpdate.image ? `<img src="${editUpdate.image}" class="imgprev">` : ""}</div>
     <label>Text</label>
-    <textarea id="uText" placeholder="Update message"></textarea>
+    <textarea id="uText" placeholder="Update message">${editing?esc(editUpdate.text):""}</textarea>
     <div class="actions" style="margin-top:10px">
-      <button class="btn btn-primary" id="postUpdate">Post update</button>
+      <button class="btn btn-primary" id="postUpdate">${editing?"Save changes":"Post update"}</button>
       <button class="btn btn-ghost" id="cancelUpdate">Cancel</button>
     </div>
   </div>`;
@@ -623,17 +625,18 @@ function openUpdateModal(){
     r.onload=()=>{ pendingImg=r.result; document.getElementById("uImgPrev").innerHTML=`<img src="${pendingImg}" class="imgprev">`; };
     r.readAsDataURL(f);
   };
-  document.getElementById("postUpdate").onclick = postUpdate;
+  document.getElementById("postUpdate").onclick = ()=> editing ? saveUpdate(editUpdate.id) : postUpdate();
   document.getElementById("cancelUpdate").onclick = ()=>bg.remove();
   bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
 }
 async function postUpdate(){
   const num = parseInt(document.getElementById("uNum").value,10);
+  const title = document.getElementById("uTitle").value.trim();
   const text = document.getElementById("uText").value.trim();
-  if(!num || !text){ toast("Add an update number and text"); return; }
+  if(!num || !title || !text){ toast("Add an update number, title and text"); return; }
   const postBtn = document.getElementById("postUpdate"); postBtn.disabled=true; postBtn.textContent="Posting…";
   const imageUrl = pendingImg ? await uploadMedia(pendingImg, "updates") : "";
-  const { data, error } = await sb.from("updates").insert({ num, text, image_url: imageUrl||null }).select().single();
+  const { data, error } = await sb.from("updates").insert({ num, title, text, image_url: imageUrl||null }).select().single();
   if(error){ toast("Could not post update: "+error.message); postBtn.disabled=false; postBtn.textContent="Post update"; return; }
   updates.unshift(updateRowToObj(data));
   pendingImg="";
@@ -641,11 +644,28 @@ async function postUpdate(){
   toast("Update posted — live in the app now");
   renderUpdates();
 }
+async function saveUpdate(id){
+  const num = parseInt(document.getElementById("uNum").value,10);
+  const title = document.getElementById("uTitle").value.trim();
+  const text = document.getElementById("uText").value.trim();
+  if(!num || !title || !text){ toast("Add an update number, title and text"); return; }
+  const saveBtn = document.getElementById("postUpdate"); saveBtn.disabled=true; saveBtn.textContent="Saving…";
+  // pendingImg is either an existing (already-uploaded) URL left untouched,
+  // a fresh base64 data URL from a newly picked file, or empty if removed.
+  const imageUrl = pendingImg ? (pendingImg.startsWith("data:") ? await uploadMedia(pendingImg, "updates") : pendingImg) : "";
+  const { data, error } = await sb.from("updates").update({ num, title, text, image_url: imageUrl||null }).eq("id", id).select().single();
+  if(error){ toast("Could not save update: "+error.message); saveBtn.disabled=false; saveBtn.textContent="Save changes"; return; }
+  updates = updates.map(u=>u.id===id ? updateRowToObj(data) : u);
+  pendingImg="";
+  const bg = document.getElementById("updateModalBg"); if(bg) bg.remove();
+  toast("Update saved");
+  renderUpdates();
+}
 function fmtTs(ts){ const d=new Date(ts); return d.toLocaleDateString()+" • "+d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}); }
 function renderUpdateList(){
   document.getElementById("updateList").innerHTML = updates.length ? updates.map(u=>`
     <div class="list-item" data-id="${u.id}">
-      <div class="top"><strong>Update #${u.num}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
+      <div class="top"><strong>${esc(u.title||("Update #"+u.num))}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
       <div class="muted">${esc(u.text.slice(0,80))}${u.text.length>80?"…":""}</div>
       <div class="actions"><button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button></div>
     </div>`).join("") : `<div class="empty">No updates posted yet.</div>`;
@@ -659,7 +679,7 @@ window.viewUpdate=(id)=>{
   const u = updates.find(x=>x.id===id); if(!u) return;
   const bg = document.createElement("div"); bg.className="modalbg";
   bg.innerHTML = `<div class="modal">
-    <h2>Update #${u.num}</h2>
+    <h2>${esc(u.title||("Update #"+u.num))}</h2>
     ${u.image?`<img src="${u.image}" class="imgprev">`:""}
     <p style="margin-top:10px">${esc(u.text)}</p>
     <p class="muted">${fmtTs(u.ts)}</p>
@@ -1024,33 +1044,6 @@ function renderHistoryList(history){
     </div>`).join("") + `</div>`;
 }
 
-// ---------- MODAL EDGE-SCROLL ----------
-// The modal itself no longer scrolls from dragging directly over its fields
-// (see .modal{overflow:hidden} above) — that was interrupting typing in the
-// verse/chorus boxes. Instead each modal gets two thin drag rails along its
-// left/right edges (outside where any input ever sits) that scroll the form;
-// each textarea keeps scrolling its own content independently as before.
-function setupModalRails(modalEl){
-  if(!modalEl || modalEl._railsSetup) return;
-  modalEl._railsSetup = true;
-  ["modal-rail-left","modal-rail-right"].forEach(cls=>{
-    const rail = document.createElement("div"); rail.className = "modal-rail "+cls;
-    modalEl.appendChild(rail);
-    let dragging=false, pointerId=null, startY=0, startScroll=0;
-    rail.addEventListener("pointerdown", e=>{
-      dragging=true; pointerId=e.pointerId; startY=e.clientY; startScroll=modalEl.scrollTop;
-      try{ rail.setPointerCapture(e.pointerId); }catch(err){}
-    });
-    rail.addEventListener("pointermove", e=>{
-      if(!dragging || pointerId!==e.pointerId) return;
-      modalEl.scrollTop = startScroll - (e.clientY - startY);
-    });
-    const endDrag = ()=>{ dragging=false; };
-    rail.addEventListener("pointerup", endDrag);
-    rail.addEventListener("pointercancel", endDrag);
-  });
-}
-
 // ---------- DEVICE BACK BUTTON ----------
 // Every modal/popup in this app (song editor, update composer, view-update,
 // the long-press action popup, inbound report/complaint popup) is a plain
@@ -1064,8 +1057,6 @@ new MutationObserver(muts=>{
   muts.forEach(m=>{
     m.addedNodes.forEach(n=>{
       if(n.nodeType===1 && n.classList && n.classList.contains("modalbg")){
-        const modalEl = n.querySelector(".modal");
-        if(modalEl) setupModalRails(modalEl);
         if(!backNavigating){
           try{ history.pushState({ adminModal:true }, "", location.href); }catch(e){}
         }
