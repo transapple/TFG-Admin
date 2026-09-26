@@ -699,21 +699,29 @@ function renderBelievers(){
   </div>`;
   el.querySelectorAll(".pills button").forEach(b=>b.onclick=()=>{ belSub=b.dataset.s; renderBelievers(); });
   document.getElementById("belBody").innerHTML = belSub==="active"
-    ? `<h2>Active believers</h2><div id="belList"></div>`
+    ? `<h2>Active believers</h2><div class="muted" style="margin:2px 0 8px">Long-press a believer to suspend, ban, or delete.</div><div id="belList"></div>`
     : `<h2>Restricted (suspended, banned, deleted)</h2><p class="muted">Anyone here is blocked from registering again with the same phone, name, device, or pastor.</p><div id="restrList"></div>`;
-  if(belSub==="active") renderBelList(); else renderRestrList();
+  if(belSub==="active"){
+    renderBelList();
+    attachLongPress(document.getElementById("belList"), ".list-item", (id)=>{
+      const b = believers.find(x=>x.id===id); if(!b) return;
+      showActionPopup({
+        title: b.name,
+        actions: [
+          { label:"Suspend", className:"btn-warn", onClick:()=>setStatus(id,"suspended") },
+          { label:"Ban", className:"btn-danger", onClick:()=>setStatus(id,"banned") },
+          { label:"Delete", className:"btn-danger", onClick:()=>deleteBeliever(id) }
+        ]
+      });
+    });
+  } else renderRestrList();
 }
 function renderBelList(){
   const list = believers.filter(b=>b.status==="active");
   document.getElementById("belList").innerHTML = list.length ? list.map(b=>`
-    <div class="list-item">
+    <div class="list-item" data-id="${b.id}">
       <div class="top"><strong>${esc(b.name)}</strong><span class="badge ${b.status}">${b.status}</span></div>
       <div class="muted">${esc(b.phone)} · ${esc(b.pastor)} · device ${esc(b.device)}</div>
-      <div class="actions">
-        <button class="btn btn-warn btn-sm" onclick="setStatus('${b.id}','suspended')">Suspend</button>
-        <button class="btn btn-danger btn-sm" onclick="setStatus('${b.id}','banned')">Ban</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteBeliever('${b.id}')">Delete</button>
-      </div>
     </div>`).join("") : `<div class="empty">No active believers.</div>`;
 }
 async function addRestriction(b, reason){
