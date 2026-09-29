@@ -463,9 +463,18 @@ function buildLyrics(rows){
 
 function renderSongs(){
   const el = document.getElementById("main");
+  const oldPills = document.getElementById("langPills");
+  const savedScroll = oldPills ? oldPills.scrollLeft : null;
   el.innerHTML = `
   <div class="card">
     <h2>Songs by language</h2>
+    ${(getDrafts().length && songLang!==DRAFTS_TAB) ? `<div style="border:1px solid var(--gold);background:#fff8e1;border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="font-weight:700;margin-bottom:6px">📝 ${getDrafts().length} draft${getDrafts().length===1?"":"s"} waiting to upload</div>
+      <div class="actions" style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" id="bannerUploadAll" ${navigator.onLine?"":"disabled"}>⬆ Upload all</button>
+        <button class="btn btn-ghost btn-sm" id="bannerViewDrafts">View drafts</button>
+      </div>
+    </div>` : ""}
     <div class="pills" id="langPills">${LANGS.map(l=>`<button class="pill ${l.code===songLang?"active":""}" data-l="${l.code}">${l.label}</button>`).join("")}<button class="pill ${songLang===DRAFTS_TAB?"active":""}" data-l="${DRAFTS_TAB}">📝 Drafts (${getDrafts().length})</button></div>
     ${navigator.onLine?"":`<div class="muted" style="margin:0 0 8px;color:var(--red);font-weight:700">⚠ Offline — new songs are saved to Drafts</div>`}
     <div class="muted" style="margin:2px 0 8px">Long-press a song to edit or delete it.</div>
@@ -475,6 +484,19 @@ function renderSongs(){
     const b = e.target.closest(".pill"); if(!b) return;
     songLang = b.dataset.l; renderSongs();
   });
+  // Keep the pill row exactly where it was (no jumping back to the start), and only
+  // nudge it if the active pill would otherwise be hidden off-screen.
+  const pillRow = document.getElementById("langPills"), activePill = pillRow && pillRow.querySelector(".pill.active");
+  if(pillRow){
+    if(savedScroll!==null) pillRow.scrollLeft = savedScroll;
+    if(activePill){
+      const left = activePill.offsetLeft, right = left + activePill.offsetWidth;
+      if(left < pillRow.scrollLeft) pillRow.scrollLeft = left - 8;
+      else if(right > pillRow.scrollLeft + pillRow.clientWidth) pillRow.scrollLeft = right - pillRow.clientWidth + 8;
+    }
+  }
+  const bu=document.getElementById("bannerUploadAll"); if(bu) bu.onclick=()=>uploadAllDrafts();
+  const bv=document.getElementById("bannerViewDrafts"); if(bv) bv.onclick=()=>{ songLang=DRAFTS_TAB; renderSongs(); };
   renderSongList();
   attachLongPress(document.getElementById("songList"), ".list-item", (id)=>{
     if(songLang===DRAFTS_TAB){
