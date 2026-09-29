@@ -578,9 +578,10 @@ function autoParseSong(raw){
   const lines = text.split("\n");
   const numRe  = /^\s*(?:verse\s*)?(\d{1,2})\s*[.):\-]?\s*$/i;            // "1" "1." "1)" "Verse 1"
   const numTxt = /^\s*(\d{1,2})\s*[.)]\s+(\S.*)$/;                        // "1. First line..."
-  const choRe  = /^\s*[\[(*_\s]*(?:repeat\s+)?(chorus|refrain|cho)\b\.?\s*[\])*_]*\s*(?:x\s*\d+|\d+\s*x)?\s*(:|-|–)?\s*(.*)$/i;
+  // Chorus words (any capitalization): English/Acholi/Luganda "Chorus", Alur "Koro", French "Chœur"/"Choeur" (+ existing "Refrain"/"Cho")
+  const choRe  = /^\s*[\[(*_\s]*(?:repeat\s+)?(chorus|chœur|choeur|koro|refrain|cho)\b\.?\s*[\])*_]*\s*(?:x\s*\d+|\d+\s*x)?\s*(:|-|–)?\s*(.*)$/i;
   const clean = a => a.map(l=>l.trim()).filter(Boolean).join("\n");   // blank lines inside a block removed: blocks are joined by blank lines when saved
-  const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+  const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"·").replace(/·/g," ").trim();
   // header test for a line: returns {rest} if it is a chorus header/marker
   const choHead = line => {
     const m = line.match(choRe); if(!m) return null;
@@ -588,54 +589,63 @@ function autoParseSong(raw){
     return (!rest || m[2]) ? { rest } : null;   // "Chorus of angels sing" is NOT a header; "Chorus: ..." / "Chorus" alone is
   };
   const hasNumbers = lines.some(l=>numRe.test(l) || numTxt.test(l));
-  const secs = []; let preface = "";
 
-  if(!hasNumbers){
-    // Verse-only songs (or unnumbered songs with a Chorus): paragraphs = verses, "Chorus" paragraph = chorus
-    text.split(/\n\s*\n/).forEach(par=>{
-      const pl = par.split("\n").filter(l=>l.trim()); if(!pl.length) return;
-      const h = choHead(pl[0]);
-      if(h){ secs.push({type:"chorus", num:null, lines:[h.rest].concat(pl.slice(1))}); }
-      else secs.push({type:"verse", num:null, lines:pl});
-    });
-  } else {
-    let cur = null; const pre = [];
-    const start = (type,num)=>{ cur = { type, num, lines:[] }; secs.push(cur); };
-    lines.forEach(line=>{
+  // ---- 1. Split into sections ----
+  // one line break = same section · two or more line breaks = new section (verse or chorus)
+  // a number or a Chorus word on its own line always starts a section too, but is never required.
+  const paras = text.split(/\n\s*\n/).map(p=>p.split("\n").filter(l=>l.trim()));
+  const secs = []; const pre = []; let cur = null;
+  const start = (type,num,labeled)=>{ cur = { type, num, labeled, lines:[] }; secs.push(cur); return cur; };
+  paras.forEach(pl=>{
+    if(!pl.length) return;
+    if(cur && cur.lines.length) cur = null;   // blank-line boundary. (A lone "1" or "Chorus" with no words yet waits for the next block.)
+    pl.forEach(line=>{
       let m;
-      if((m = line.match(numRe))){ start("verse", parseInt(m[1],10)); return; }
+      if((m = line.match(numRe))){ start("verse", parseInt(m[1],10), true); return; }
       const h = choHead(line);
-      if(h){ start("chorus", null); if(h.rest) cur.lines.push(h.rest); return; }
-      if((m = line.match(numTxt))){ start("verse", parseInt(m[1],10)); cur.lines.push(m[2].trim()); return; }
-      if(!cur){ pre.push(line); return; }
+      if(h){ start("chorus", null, true); if(h.rest) cur.lines.push(h.rest); return; }
+      if((m = line.match(numTxt))){ start("verse", parseInt(m[1],10), true).lines.push(m[2].trim()); return; }
+      if(!cur){
+        if(hasNumbers && !secs.length){ pre.push(line); return; }   // text above the first numbered verse (e.g. a title): goes to review, not auto-added
+        start("verse", null, false);                                // no label needed: the blank-line block is a section on its own
+      }
       cur.lines.push(line);
     });
-    preface = clean(pre);   // anything above the first verse/chorus: NOT auto-added, goes to review
+  });
+  const items = secs.map(sc=>({ type:sc.type, num:sc.num, labeled:sc.labeled, text:clean(sc.lines) }));
+
+  // ---- 2. No "Chorus"/"Koro"/"Chœur" word anywhere: a block that repeats word-for-word is the chorus ----
+  if(!items.some(s=>s.type==="chorus")){
+    const cnt = {}; let bestKey = "", bestN = 1;
+    items.forEach(s=>{ if(s.labeled || !s.text) return; const k = norm(s.text); if(k) cnt[k] = (cnt[k]||0)+1; });
+    items.forEach(s=>{ if(s.labeled || !s.text) return; const k = norm(s.text); if(cnt[k]>bestN){ bestN = cnt[k]; bestKey = k; } });
+    if(bestKey){
+      items.forEach(s=>{ if(!s.labeled && s.text && norm(s.text)===bestKey) s.type = "chorus"; });
+      notes.push("No chorus label found — a block that repeats word-for-word was treated as the chorus. Please check.");
+    }
   }
 
-  const verses = []; let chorus = ""; let choCount = 0, dupCount = 0, diffCount = 0;
-  secs.forEach(sc=>{
-    const t = clean(sc.lines);
-    if(sc.type==="chorus"){
+  // ---- 3. Build blocks in song order; the chorus is stored once, where it first occurs ----
+  const blocks = []; let chorus = "", choCount = 0, dupCount = 0, diffCount = 0, vNum = 0, mismatch = false;
+  items.forEach(s=>{
+    if(s.type==="chorus"){
       choCount++;
-      if(!t) return;                                  // just a "repeat chorus" marker
-      if(!chorus) chorus = t;
-      else if(norm(t)===norm(chorus)) dupCount++;
+      if(!s.text) return;                                   // just a "repeat chorus" marker
+      if(!chorus){ chorus = s.text; blocks.push({type:"chorus", text:chorus}); }
+      else if(norm(s.text)===norm(chorus)) dupCount++;
       else diffCount++;
-    } else if(t){ verses.push({num:sc.num, text:t}); }
+      return;
+    }
+    if(!s.text) return;
+    if(!s.labeled && chorus && norm(s.text)===norm(chorus)){ dupCount++; return; }   // unlabeled repeat of the chorus
+    blocks.push({type:"verse", text:s.text}); vNum++;
+    if(s.num && s.num!==vNum) mismatch = true;
   });
   if(dupCount) notes.push("Chorus appeared more than once — kept a single copy.");
   if(diffCount) notes.push("Found "+diffCount+" chorus block(s) with different wording — kept the first only. Check the chorus.");
   if(choCount && !chorus) notes.push("'Chorus' was marked but no chorus words were found — add them in the Chorus block.");
-  const nums = verses.map(v=>v.num).filter(n=>n>0);
-  if(nums.some((n,i)=>n!==i+1)) notes.push("Verse numbers in your text weren't 1,2,3… in order — they were renumbered by position.");
-  const blocks = [];
-  verses.forEach((v,i)=>{
-    blocks.push({type:"verse", text:v.text});
-    if(i===0 && chorus) blocks.push({type:"chorus", text:chorus});    // Verse 1 -> Chorus -> Verse 2 -> ...
-  });
-  if(!verses.length && chorus) blocks.push({type:"chorus", text:chorus});
-  return { blocks, notes, preface };
+  if(mismatch) notes.push("Verse numbers in your text weren't 1,2,3… in order — they were renumbered by position.");
+  return { blocks, notes, preface: clean(pre) };
 }
 let autoNotes = [];
 let pendingPre = "";   // text found above the first verse — must be approved/discarded by the admin
@@ -681,7 +691,7 @@ function openSongModal(editSong){
     <input id="sTitle" placeholder="Song title" value="${editing?esc(editSong.title):""}">
     <div class="autobox">
       <label style="margin-top:0">Paste the complete song (auto-organize)</label>
-      <textarea id="sPaste" placeholder="Paste all the lyrics here — numbers (1, 2. 3)) and “Chorus” are detected automatically"></textarea>
+      <textarea id="sPaste" placeholder="Paste all the lyrics here — numbers (1, 2. 3)) and “Chorus / Koro / Chœur” are detected automatically; blank lines split sections"></textarea>
       <div class="actions" style="margin-top:8px"><button class="btn btn-primary btn-sm" type="button" onclick="runAutoOrganize()">✨ Auto-organize</button></div>
     </div>
     <label>Review: verses &amp; chorus</label>
