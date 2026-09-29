@@ -78,6 +78,14 @@ textarea{min-height:60px;resize:vertical}
 .blockrow{display:flex;flex-direction:column;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
 .blockrow .blockrow-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .blockrow select{flex:0 0 auto;width:auto;padding:6px 10px}
+.autobox{background:#f3f8ff;border:1px dashed var(--blue);border-radius:10px;padding:10px;margin:6px 0 10px}
+.autobox textarea{min-height:130px;font-size:14px}
+.flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:6px 0 8px;font-size:12px}
+.flow .chip{padding:3px 8px;border-radius:12px;background:var(--paper);border:1px solid var(--line);font-weight:700}
+.flow .chip.ch{background:var(--gold);color:#3a2a00;border-color:var(--gold)}
+.autonote{font-size:12px;color:#8a5a00;background:#fff8e1;border:1px solid var(--gold);border-radius:8px;padding:6px 8px;margin:4px 0}
+.blockrow .blabel{font-weight:800;font-size:13px;flex:1}
+.blockrow .btn-move{padding:6px 9px}
 .blockrow textarea{width:100%;min-height:220px;font-size:15.5px;line-height:1.6;padding:12px;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .list-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--paper);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .list-item .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -560,9 +568,104 @@ function parseLyrics(lyrics){
   }).filter(b=>b.text.trim());
   return parsed.length ? parsed : [{type:"verse",text:""}];
 }
+
+// ---------- AUTO-ORGANIZE (paste a whole song -> Verse 1, Chorus, Verse 2, ...) ----------
+// Output is the same {type,text} block list the manual builder uses, so
+// buildLyrics()/save/publish are completely unchanged.
+function autoParseSong(raw){
+  const notes = [];
+  const text = String(raw||"").replace(/\r\n?/g,"\n").replace(/\u00a0/g," ");
+  const lines = text.split("\n");
+  const numRe  = /^\s*(?:verse\s*)?(\d{1,2})\s*[.):\-]?\s*$/i;            // "1" "1." "1)" "Verse 1"
+  const numTxt = /^\s*(\d{1,2})\s*[.)]\s+(\S.*)$/;                        // "1. First line..."
+  const choRe  = /^\s*[\[(*_\s]*(?:repeat\s+)?(chorus|refrain|cho)\b\.?\s*[\])*_]*\s*(?:x\s*\d+|\d+\s*x)?\s*(:|-|–)?\s*(.*)$/i;
+  const clean = a => a.map(l=>l.trim()).filter(Boolean).join("\n");   // blank lines inside a block removed: blocks are joined by blank lines when saved
+  const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+  // header test for a line: returns {rest} if it is a chorus header/marker
+  const choHead = line => {
+    const m = line.match(choRe); if(!m) return null;
+    const rest = (m[3]||"").trim();
+    return (!rest || m[2]) ? { rest } : null;   // "Chorus of angels sing" is NOT a header; "Chorus: ..." / "Chorus" alone is
+  };
+  const hasNumbers = lines.some(l=>numRe.test(l) || numTxt.test(l));
+  const secs = []; let preface = "";
+
+  if(!hasNumbers){
+    // Verse-only songs (or unnumbered songs with a Chorus): paragraphs = verses, "Chorus" paragraph = chorus
+    text.split(/\n\s*\n/).forEach(par=>{
+      const pl = par.split("\n").filter(l=>l.trim()); if(!pl.length) return;
+      const h = choHead(pl[0]);
+      if(h){ secs.push({type:"chorus", num:null, lines:[h.rest].concat(pl.slice(1))}); }
+      else secs.push({type:"verse", num:null, lines:pl});
+    });
+  } else {
+    let cur = null; const pre = [];
+    const start = (type,num)=>{ cur = { type, num, lines:[] }; secs.push(cur); };
+    lines.forEach(line=>{
+      let m;
+      if((m = line.match(numRe))){ start("verse", parseInt(m[1],10)); return; }
+      const h = choHead(line);
+      if(h){ start("chorus", null); if(h.rest) cur.lines.push(h.rest); return; }
+      if((m = line.match(numTxt))){ start("verse", parseInt(m[1],10)); cur.lines.push(m[2].trim()); return; }
+      if(!cur){ pre.push(line); return; }
+      cur.lines.push(line);
+    });
+    preface = clean(pre);   // anything above the first verse/chorus: NOT auto-added, goes to review
+  }
+
+  const verses = []; let chorus = ""; let choCount = 0, dupCount = 0, diffCount = 0;
+  secs.forEach(sc=>{
+    const t = clean(sc.lines);
+    if(sc.type==="chorus"){
+      choCount++;
+      if(!t) return;                                  // just a "repeat chorus" marker
+      if(!chorus) chorus = t;
+      else if(norm(t)===norm(chorus)) dupCount++;
+      else diffCount++;
+    } else if(t){ verses.push({num:sc.num, text:t}); }
+  });
+  if(dupCount) notes.push("Chorus appeared more than once — kept a single copy.");
+  if(diffCount) notes.push("Found "+diffCount+" chorus block(s) with different wording — kept the first only. Check the chorus.");
+  if(choCount && !chorus) notes.push("'Chorus' was marked but no chorus words were found — add them in the Chorus block.");
+  const nums = verses.map(v=>v.num).filter(n=>n>0);
+  if(nums.some((n,i)=>n!==i+1)) notes.push("Verse numbers in your text weren't 1,2,3… in order — they were renumbered by position.");
+  const blocks = [];
+  verses.forEach((v,i)=>{
+    blocks.push({type:"verse", text:v.text});
+    if(i===0 && chorus) blocks.push({type:"chorus", text:chorus});    // Verse 1 -> Chorus -> Verse 2 -> ...
+  });
+  if(!verses.length && chorus) blocks.push({type:"chorus", text:chorus});
+  return { blocks, notes, preface };
+}
+let autoNotes = [];
+let pendingPre = "";   // text found above the first verse — must be approved/discarded by the admin
+window.resolvePre=(mode)=>{
+  if(mode==="verse" && pendingPre){ blocks.unshift({type:"verse", text:pendingPre}); }
+  pendingPre=""; renderBlocks();
+};
+window.runAutoOrganize = ()=>{
+  const ta = document.getElementById("sPaste"); if(!ta) return;
+  const raw = ta.value; if(!raw.trim()){ toast("Paste the full song first"); return; }
+  const hasWork = blocks.some(b=>b.text.trim());
+  if(hasWork && !confirm("Replace the current verses/chorus below with the auto-organized version?")) return;
+  const r = autoParseSong(raw);
+  if(!r.blocks.length){ toast("Could not find any lyrics"); return; }
+  blocks = r.blocks; autoNotes = r.notes; pendingPre = r.preface || "";
+  ta.value = ""; renderBlocks();
+  toast("Organized — review below, fix anything, then save");
+  const rv = document.getElementById("sBlocks"); if(rv) rv.scrollIntoView({behavior:"smooth", block:"start"});
+};
+// Stops a save if pasted text is sitting un-organized in the paste box
+function pasteGuard(){
+  const ta = document.getElementById("sPaste");
+  if(ta && ta.value.trim()){ toast("Tap “Auto-organize” first so you can review the sections"); return true; }
+  if(pendingPre){ toast("Please approve or discard the text found before Verse 1"); return true; }
+  return false;
+}
 function openSongModal(editSong){
   const editing = !!editSong;
   blocks = editing ? parseLyrics(editSong.lyrics) : [{type:"verse",text:""}];
+  autoNotes = []; pendingPre = "";
   const modalLang = (songs[songLang]) ? songLang : LANGS[0].code;
   let suggestedNum = editing ? null : nextSongNum(modalLang);
   const bg = document.createElement("div"); bg.className="modalbg"; bg.id="songModalBg";
@@ -576,7 +679,13 @@ function openSongModal(editSong){
     </div>
     <label>Title</label>
     <input id="sTitle" placeholder="Song title" value="${editing?esc(editSong.title):""}">
-    <label>Verses &amp; chorus</label>
+    <div class="autobox">
+      <label style="margin-top:0">Paste the complete song (auto-organize)</label>
+      <textarea id="sPaste" placeholder="Paste all the lyrics here — numbers (1, 2. 3)) and “Chorus” are detected automatically"></textarea>
+      <div class="actions" style="margin-top:8px"><button class="btn btn-primary btn-sm" type="button" onclick="runAutoOrganize()">✨ Auto-organize</button></div>
+    </div>
+    <label>Review: verses &amp; chorus</label>
+    <div id="sFlow"></div>
     <div id="sBlocks"></div>
     <div class="actions"><button class="btn btn-ghost btn-sm" id="addBlock">+ Add block</button></div>
     <div class="actions" style="margin-top:10px">
@@ -603,25 +712,46 @@ function openSongModal(editSong){
     });
   }
 }
+function blockLabels(){
+  let v=0; return blocks.map(b=> b.type==="chorus" ? "Chorus" : "Verse "+(++v));
+}
 function renderBlocks(){
   const c = document.getElementById("sBlocks");
+  const labels = blockLabels();
+  const flow = document.getElementById("sFlow");
+  if(flow){
+    const shown = blocks.map((b,i)=>b.text.trim()?`<span class="chip ${b.type==="chorus"?"ch":""}">${labels[i]}</span>`:"").filter(Boolean);
+    const preCard = pendingPre ? `<div class="autonote" style="background:#fff;border-color:var(--red)">
+        <b>Review needed:</b> this text was found before Verse 1 and was NOT added. What should I do with it?
+        <pre style="white-space:pre-wrap;font-family:inherit;margin:6px 0;padding:8px;background:var(--paper);border-radius:8px;font-size:13px;color:var(--ink)">${esc(pendingPre)}</pre>
+        <div class="actions"><button class="btn btn-primary btn-sm" type="button" onclick="resolvePre('verse')">Add as first verse</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="resolvePre('discard')">Discard it</button></div></div>` : "";
+    flow.innerHTML = preCard + ((shown.length>1 || autoNotes.length)
+      ? `<div class="flow">${shown.join("<span>→</span>")}</div>` + autoNotes.map(n=>`<div class="autonote">⚠ ${esc(n)}</div>`).join("")
+      : "");
+  }
   c.innerHTML = blocks.map((b,i)=>`
     <div class="blockrow">
       <div class="blockrow-top">
+        <span class="blabel">${labels[i]}</span>
         <select onchange="setBlockType(${i},this.value)">
           <option value="verse" ${b.type==="verse"?"selected":""}>Verse</option>
           <option value="chorus" ${b.type==="chorus"?"selected":""}>Chorus</option>
         </select>
+        <button class="btn btn-ghost btn-sm btn-move" type="button" onclick="moveBlock(${i},-1)" ${i===0?"disabled":""}>↑</button>
+        <button class="btn btn-ghost btn-sm btn-move" type="button" onclick="moveBlock(${i},1)" ${i===blocks.length-1?"disabled":""}>↓</button>
         <button class="btn btn-danger btn-sm" onclick="removeBlock(${i})">Remove</button>
       </div>
       <textarea placeholder="Type the lyrics for this block…" oninput="setBlockText(${i},this.value)">${esc(b.text)}</textarea>
     </div>`).join("");
 }
-window.setBlockType=(i,v)=>{ blocks[i].type=v; };
+window.moveBlock=(i,d)=>{ const j=i+d; if(j<0||j>=blocks.length) return; [blocks[i],blocks[j]]=[blocks[j],blocks[i]]; renderBlocks(); };
+window.setBlockType=(i,v)=>{ blocks[i].type=v; renderBlocks(); };
 window.setBlockText=(i,v)=>{ blocks[i].text=v; };
 window.removeBlock=(i)=>{ blocks.splice(i,1); if(!blocks.length) blocks=[{type:"verse",text:""}]; renderBlocks(); };
 
 async function postSong(){
+  if(pasteGuard()) return;
   const lang = document.getElementById("sLang").value;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
@@ -658,6 +788,7 @@ async function postSong(){
   renderSongs();
 }
 async function updateSong(id, lang){
+  if(pasteGuard()) return;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
   const title = document.getElementById("sTitle").value.trim();
@@ -734,6 +865,7 @@ async function uploadAllDrafts(auto){
   if(currentTab==="songs") renderSongs();
 }
 function updateDraft(id){
+  if(pasteGuard()) return;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
   const title = document.getElementById("sTitle").value.trim();
