@@ -297,7 +297,19 @@ textarea{min-height:60px;resize:vertical}
 // ---------- SUPABASE ----------
 const SB_URL = "https://xdlbeepqqbstchjcepgw.supabase.co";
 const SB_KEY = "sb_publishable_VcV-PBmKDgfcxOUCockmJw_DyuuxRRq";
-const sb = supabase.createClient(SB_URL, SB_KEY);
+function makeDeadChain(){
+  const p = new Proxy(function(){}, {
+    get(_,k){ if(k==="then") return (res)=>res({data:null,error:{message:"Failed to fetch (offline)"}}); return ()=>p; },
+    apply(){ return p; }
+  });
+  return p;
+}
+// If the Supabase library could not be loaded (e.g. opened offline), fall back to a stub
+// so the rest of the app still runs and songs can be saved to drafts.
+const sb = (typeof supabase!=="undefined" && supabase.createClient)
+  ? supabase.createClient(SB_URL, SB_KEY)
+  : { from:()=>makeDeadChain(), channel:()=>makeDeadChain(),
+      storage:{ from:()=>({ upload:async()=>({error:{message:"Failed to fetch"}}), getPublicUrl:()=>({data:null}) }) } };
 
 function uid(p){ return p+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -380,17 +392,63 @@ let blocks = [ {type:"verse", text:""} ]; // builder rows for the form in progre
 function songRowToObj(row){
   return { id:row.id, num:row.num, title:row.title, key:row.key, lyrics:row.lyrics, langCode:row.lang_code, snippet:row.snippet };
 }
+const SONGS_CACHE_KEY = "tfg_songs_cache_v1";
+const DRAFTS_KEY = "tfg_song_drafts_v1";
+const DRAFTS_TAB = "__drafts";
 async function loadSongs(){
   const { data, error } = await sb.from("songs").select("*").order("num", { ascending:true });
-  if(error){ toast("Could not load songs: "+error.message); return; }
+  if(error){
+    // Offline / failed: fall back to the last copy we saw so the list and numbering still work.
+    try{
+      const cached = JSON.parse(localStorage.getItem(SONGS_CACHE_KEY)||"null");
+      if(cached){
+        LANGS.forEach(l=>{ songs[l.code]=[]; });
+        cached.forEach(row=>{ if(songs[row.lang_code]) songs[row.lang_code].push(songRowToObj(row)); });
+        toast("Offline: showing saved songs");
+        return;
+      }
+    }catch(e){}
+    toast("Could not load songs: "+error.message); return;
+  }
   LANGS.forEach(l=>{ songs[l.code]=[]; });
   (data||[]).forEach(row=>{ if(songs[row.lang_code]) songs[row.lang_code].push(songRowToObj(row)); });
+  try{ localStorage.setItem(SONGS_CACHE_KEY, JSON.stringify(data||[])); }catch(e){}
 }
+function cacheSongsLocally(){
+  try{
+    const rows=[]; LANGS.forEach(l=>(songs[l.code]||[]).forEach(x=>rows.push({ id:x.id, num:x.num, title:x.title, key:x.key, lyrics:x.lyrics, lang_code:x.langCode, snippet:x.snippet })));
+    localStorage.setItem(SONGS_CACHE_KEY, JSON.stringify(rows));
+  }catch(e){}
+}
+// ---------- DRAFTS (songs saved on this device while offline) ----------
+function getDrafts(){
+  try{ const d = JSON.parse(localStorage.getItem(DRAFTS_KEY)||"[]"); return Array.isArray(d)?d:[]; }catch(e){ return []; }
+}
+function saveDrafts(list){
+  try{ localStorage.setItem(DRAFTS_KEY, JSON.stringify(list)); return true; }
+  catch(e){ toast("Could not save draft on this device (storage full?)"); return false; }
+}
+function isNetworkError(err){
+  const m = String((err && (err.message||err))||"");
+  return /failed to fetch|networkerror|network request failed|load failed|offline|fetch/i.test(m);
+}
+function draftToObj(d){ return { id:d.id, num:d.num, title:d.title, key:d.key, lyrics:d.lyrics, langCode:d.lang, snippet:d.snippet, isDraft:true }; }
+window.addEventListener("offline", ()=>{ toast("You're offline — new songs will go to Drafts"); if(currentTab==="songs") renderSongs(); });
+window.addEventListener("online", ()=>{ if(currentTab==="songs") renderSongs(); setTimeout(()=>autoSyncDrafts(), 800); });
+// Auto-sync: whenever the app is online and drafts are waiting, upload them without any tap.
+// Triggers: connection comes back, app opened/returned to, and a retry every 15s
+// (the browser's "online" flag can be wrong, so the retry catches weak/late connections).
+function autoSyncDrafts(){
+  if(uploadingDrafts || !navigator.onLine || !getDrafts().length) return;
+  uploadAllDrafts(true);
+}
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) autoSyncDrafts(); });
+setInterval(autoSyncDrafts, 15000);
 // Next free song number in a language: one past whatever's already posted there,
 // so a fresh post just continues the count — but it stays a normal editable field.
 function nextSongNum(lang){
-  const list = songs[lang]||[];
-  return list.length ? Math.max(...list.map(s=>s.num))+1 : 1;
+  const list = (songs[lang]||[]).map(s=>s.num).concat(getDrafts().filter(d=>d.lang===lang).map(d=>d.num));
+  return list.length ? Math.max(...list)+1 : 1;
 }
 
 function buildLyrics(rows){
@@ -408,7 +466,8 @@ function renderSongs(){
   el.innerHTML = `
   <div class="card">
     <h2>Songs by language</h2>
-    <div class="pills" id="langPills">${LANGS.map(l=>`<button class="pill ${l.code===songLang?"active":""}" data-l="${l.code}">${l.label}</button>`).join("")}</div>
+    <div class="pills" id="langPills">${LANGS.map(l=>`<button class="pill ${l.code===songLang?"active":""}" data-l="${l.code}">${l.label}</button>`).join("")}<button class="pill ${songLang===DRAFTS_TAB?"active":""}" data-l="${DRAFTS_TAB}">📝 Drafts (${getDrafts().length})</button></div>
+    ${navigator.onLine?"":`<div class="muted" style="margin:0 0 8px;color:var(--red);font-weight:700">⚠ Offline — new songs are saved to Drafts</div>`}
     <div class="muted" style="margin:2px 0 8px">Long-press a song to edit or delete it.</div>
     <div id="songList"></div>
   </div>`;
@@ -418,7 +477,15 @@ function renderSongs(){
   });
   renderSongList();
   attachLongPress(document.getElementById("songList"), ".list-item", (id)=>{
-    const s = songs[songLang].find(x=>x.id===id); if(!s) return;
+    if(songLang===DRAFTS_TAB){
+      const d = getDrafts().find(x=>x.id===id); if(!d) return;
+      showActionPopup({ title:`#${d.num} ${d.title}`, actions:[
+        { label:"Edit draft", className:"btn-primary", onClick:()=>openSongModal(draftToObj(d)) },
+        { label:"Delete draft", className:"btn-danger", onClick:()=>deleteDraft(id) }
+      ]});
+      return;
+    }
+    const s = (songs[songLang]||[]).find(x=>x.id===id); if(!s) return;
     showActionPopup({
       title: "#"+s.num+" "+s.title,
       actions: [
@@ -474,12 +541,13 @@ function parseLyrics(lyrics){
 function openSongModal(editSong){
   const editing = !!editSong;
   blocks = editing ? parseLyrics(editSong.lyrics) : [{type:"verse",text:""}];
-  let suggestedNum = editing ? null : nextSongNum(songLang);
+  const modalLang = (songs[songLang]) ? songLang : LANGS[0].code;
+  let suggestedNum = editing ? null : nextSongNum(modalLang);
   const bg = document.createElement("div"); bg.className="modalbg"; bg.id="songModalBg";
   bg.innerHTML = `<div class="modal">
-    <h2>${editing?"Edit song":"Post a song"}</h2>
+    <h2>${editing?(editSong.isDraft?"Edit draft":"Edit song"):"Post a song"}</h2>
     <label>Language</label>
-    <select id="sLang" ${editing?"disabled":""}>${LANGS.map(l=>`<option value="${l.code}" ${l.code===(editing?editSong.langCode:songLang)?"selected":""}>${l.label}</option>`).join("")}</select>
+    <select id="sLang" ${editing?"disabled":""}>${LANGS.map(l=>`<option value="${l.code}" ${l.code===(editing?editSong.langCode:modalLang)?"selected":""}>${l.label}</option>`).join("")}</select>
     <div class="row">
       <div><label>Song number</label><input id="sNum" type="number" min="1" placeholder="e.g. 7" value="${editing?editSong.num:suggestedNum}"></div>
       <div><label>Key</label><select id="sKey">${KEYS.map(k=>`<option ${editing&&k===editSong.key?"selected":""}>${k}</option>`).join("")}</select></div>
@@ -490,14 +558,14 @@ function openSongModal(editSong){
     <div id="sBlocks"></div>
     <div class="actions"><button class="btn btn-ghost btn-sm" id="addBlock">+ Add block</button></div>
     <div class="actions" style="margin-top:10px">
-      <button class="btn btn-primary" id="postSong">${editing?"Save changes":"Post song"}</button>
+      <button class="btn btn-primary" id="postSong">${editing?"Save changes":(navigator.onLine?"Post song":"Save to drafts")}</button>
       <button class="btn btn-ghost" id="cancelSong">Cancel</button>
     </div>
   </div>`;
   document.body.appendChild(bg);
   renderBlocks();
   document.getElementById("addBlock").onclick = ()=>{ blocks.push({type:"verse",text:""}); renderBlocks(); };
-  document.getElementById("postSong").onclick = ()=> editing ? updateSong(editSong.id, editSong.langCode) : postSong();
+  document.getElementById("postSong").onclick = ()=> editing ? (editSong.isDraft ? updateDraft(editSong.id) : updateSong(editSong.id, editSong.langCode)) : postSong();
   document.getElementById("cancelSong").onclick = ()=>bg.remove();
   bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
   if(!editing){
@@ -539,9 +607,29 @@ async function postSong(){
   const lyrics = buildLyrics(blocks);
   if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
-  const { data, error } = await sb.from("songs").insert({ lang_code:lang, num, title, key, lyrics, snippet }).select().single();
-  if(error){ toast("Could not post song: "+error.message); return; }
+  const saveAsDraft = ()=>{
+    const list = getDrafts();
+    list.push({ id:uid("draft"), lang, num, title, key, lyrics, snippet, createdAt:Date.now() });
+    if(!saveDrafts(list)) return;
+    songLang = DRAFTS_TAB;
+    const bg2 = document.getElementById("songModalBg"); if(bg2) bg2.remove();
+    toast("Saved to Drafts (upload when online)");
+    renderSongs();
+  };
+  // Offline: never try Supabase, go straight to the draft.
+  if(!navigator.onLine){ saveAsDraft(); return; }
+  const btn = document.getElementById("postSong"); if(btn){ if(btn.disabled) return; btn.disabled = true; }
+  let data, error;
+  try{ ({ data, error } = await sb.from("songs").insert({ lang_code:lang, num, title, key, lyrics, snippet }).select().single()); }
+  catch(e){ error = e; }
+  if(error){
+    // Connection dropped / no real internet even though the browser said online -> keep it as a draft.
+    if(isNetworkError(error)){ saveAsDraft(); return; }
+    if(btn) btn.disabled = false;
+    toast("Could not post song: "+error.message); return;
+  }
   songs[lang].push(songRowToObj(data));
+  cacheSongsLocally();
   songLang = lang;
   const bg = document.getElementById("songModalBg"); if(bg) bg.remove();
   toast("Song posted");
@@ -557,12 +645,95 @@ async function updateSong(id, lang){
   const { data, error } = await sb.from("songs").update({ num, title, key, lyrics, snippet }).eq("id", id).select().single();
   if(error){ toast("Could not update song: "+error.message); return; }
   songs[lang] = songs[lang].map(s=>s.id===id ? songRowToObj(data) : s);
+  cacheSongsLocally();
   const bg = document.getElementById("songModalBg"); if(bg) bg.remove();
   toast("Song updated");
   renderSongList();
 }
+function renderDraftList(){
+  const drafts = getDrafts().sort((a,b)=>a.lang===b.lang ? a.num-b.num : a.lang.localeCompare(b.lang));
+  const label = c=>(LANGS.find(l=>l.code===c)||{label:c}).label;
+  const box = document.getElementById("songList");
+  if(!drafts.length){ box.innerHTML = `<div class="empty">No drafts. Songs you add while offline are saved here.</div>`; return; }
+  box.innerHTML = `
+    <button class="btn btn-primary" id="uploadAllBtn" style="width:100%;margin-bottom:10px">⬆ Upload all (${drafts.length})</button>
+    <div class="muted" style="margin-bottom:8px">${navigator.onLine?"You're online — tap Upload all to send these to the server.":"You're offline — connect to the internet to upload."}</div>
+    ${drafts.map(d=>`
+    <div class="list-item" data-id="${d.id}">
+      <div class="top"><strong>#${d.num} ${esc(d.title)}</strong><span class="tag">${esc(d.key)}</span></div>
+      <div class="muted">${esc(label(d.lang))} · ${esc(d.snippet)}</div>
+      ${d.lastError?`<div class="muted" style="color:var(--red)">Failed last time: ${esc(d.lastError)}</div>`:""}
+    </div>`).join("")}`;
+  document.getElementById("uploadAllBtn").onclick = uploadAllDrafts;
+}
+let uploadingDrafts = false;
+async function uploadAllDrafts(auto){
+  auto = (auto===true);
+  if(uploadingDrafts) return;
+  if(!navigator.onLine){ if(!auto) toast("You're offline. Connect to the internet first."); return; }
+  const queue = getDrafts();
+  if(!queue.length) return;
+  uploadingDrafts = true;
+  const btn = document.getElementById("uploadAllBtn"); if(btn){ btn.disabled = true; btn.textContent = "Uploading…"; }
+  let ok = 0, failed = 0, stopped = false;
+  for(const d of queue){
+    if(!navigator.onLine){ stopped = true; break; }
+    try{
+      // Avoid duplicates if an earlier attempt reached the server but the reply was lost.
+      const dup = await sb.from("songs").select("id").eq("lang_code", d.lang).eq("num", d.num).eq("title", d.title).limit(1);
+      if(dup.error) throw dup.error;
+      let row = dup.data && dup.data[0] ? null : undefined;
+      if(row === undefined){
+        const { data, error } = await sb.from("songs").insert({ lang_code:d.lang, num:d.num, title:d.title, key:d.key, lyrics:d.lyrics, snippet:d.snippet }).select().single();
+        if(error) throw error;
+        if(songs[d.lang]) songs[d.lang].push(songRowToObj(data));
+      }
+      // Remove only this draft, only after the server confirmed it.
+      saveDrafts(getDrafts().filter(x=>x.id!==d.id));
+      ok++;
+      if(currentTab==="songs") renderSongs();   // synced draft disappears right away
+    }catch(err){
+      if(isNetworkError(err)){ stopped = true; break; }
+      failed++;
+      saveDrafts(getDrafts().map(x=>x.id===d.id ? Object.assign({}, x, { lastError:String(err.message||err) }) : x));
+    }
+  }
+  uploadingDrafts = false;
+  cacheSongsLocally();
+  const left = getDrafts().length;
+  if(auto){
+    // Automatic runs stay quiet unless something actually synced.
+    if(ok) toast(`${ok} draft${ok===1?"":"s"} synced automatically` + (left?` · ${left} still waiting`:""));
+  } else {
+    if(stopped) toast(`Connection lost. ${ok} uploaded, ${left} still in Drafts`);
+    else if(failed) toast(`${ok} uploaded, ${failed} failed (kept in Drafts)`);
+    else toast(`${ok} song${ok===1?"":"s"} uploaded`);
+  }
+  if(currentTab==="songs") renderSongs();
+}
+function updateDraft(id){
+  const num = parseInt(document.getElementById("sNum").value,10);
+  const key = document.getElementById("sKey").value;
+  const title = document.getElementById("sTitle").value.trim();
+  const lyrics = buildLyrics(blocks);
+  if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
+  const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
+  if(!getDrafts().some(d=>d.id===id)){
+    const bg0 = document.getElementById("songModalBg"); if(bg0) bg0.remove();
+    toast("This draft was already uploaded"); renderSongs(); return;
+  }
+  const list = getDrafts().map(d=>d.id===id ? Object.assign({}, d, { num, title, key, lyrics, snippet, lastError:undefined }) : d);
+  if(!saveDrafts(list)) return;
+  const bg = document.getElementById("songModalBg"); if(bg) bg.remove();
+  toast("Draft updated"); renderSongs();
+}
+function deleteDraft(id){
+  saveDrafts(getDrafts().filter(d=>d.id!==id));
+  toast("Draft deleted"); renderSongs();
+}
 function renderSongList(){
-  const list = songs[songLang].slice().sort((a,b)=>a.num-b.num);
+  if(songLang===DRAFTS_TAB){ renderDraftList(); return; }
+  const list = (songs[songLang]||[]).slice().sort((a,b)=>a.num-b.num);
   document.getElementById("songList").innerHTML = list.length ? list.map(s=>`
     <div class="list-item" data-id="${s.id}">
       <div class="top"><strong>#${s.num} ${esc(s.title)}</strong><span class="tag">${s.key}</span></div>
@@ -573,6 +744,7 @@ window.deleteSong=async(id)=>{
   const { error } = await sb.from("songs").delete().eq("id", id);
   if(error){ toast("Could not delete song: "+error.message); return; }
   songs[songLang]=songs[songLang].filter(s=>s.id!==id);
+  cacheSongsLocally();
   toast("Song deleted"); renderSongList();
 };
 
@@ -1257,6 +1429,7 @@ sb.channel("admin_reports")
   seenInboxIds = new Set(reports.map(r=>r.id));
   renderers[currentTab]();
   renderBell();
+  autoSyncDrafts();
 })();
 </script>
 </body>
