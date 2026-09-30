@@ -109,6 +109,14 @@ textarea{min-height:60px;resize:vertical}
 .pills{display:flex;flex-wrap:nowrap;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 .pill{flex:0 0 auto;white-space:nowrap;padding:6px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;font-weight:700}
 .pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab-dot{display:inline-block;margin-left:5px;min-width:16px;padding:0 4px;height:16px;line-height:16px;border-radius:8px;background:#e0245e;color:#fff;font-size:10px;font-weight:800;text-align:center;vertical-align:middle}
+.act-item{padding:7px 0;border-bottom:1px solid rgba(128,128,128,.22);font-size:13px}
+.act-item:last-child{border-bottom:0}
+.upd-stats{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 2px;font-size:12.5px;font-weight:700;color:var(--muted,#64708f)}
+.uc-item{padding:10px 0;border-bottom:1px solid rgba(128,128,128,.25)}
+.uc-item:last-child{border-bottom:0}
+.uc-item textarea{width:100%;min-height:54px;margin-top:8px;box-sizing:border-box}
+.uc-reply{margin:6px 0 0 10px;padding:6px 10px;border-left:3px solid #1E3FAE;font-size:13px}
 .fab{position:fixed;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-size:28px;line-height:56px;text-align:center;border:none;box-shadow:0 6px 16px rgba(0,0,0,.3);z-index:40;touch-action:none;user-select:none;cursor:grab}
 .fab:active{cursor:grabbing}
 .bell-wrap{position:absolute;top:18px;right:16px}
@@ -926,16 +934,79 @@ window.deleteSong=async(id)=>{
 let updates = [];
 let pendingImg = "";
 function updateRowToObj(row){ return { id:row.id, num:row.num, title:row.title, text:row.text, image:row.image_url, ts:new Date(row.created_at).getTime() }; }
+let updStats = {};   // update id -> { likes, comments, views }
+async function loadUpdateStats(){
+  const { data, error } = await sb.from("update_stats").select("*");
+  if(error){ return; }   // engagement tables not created yet — list still works without counts
+  updStats = {};
+  (data||[]).forEach(r=>{ updStats[r.update_id] = { likes:r.likes||0, comments:r.comments||0, views:r.views||0 }; });
+}
+// ---- Activity feed: every like / comment / view on an update ----
+let updActivity = [];
+const ACT_SEEN_KEY = "tfg_upd_activity_seen";
+function actLastSeen(){ try{ return Number(localStorage.getItem(ACT_SEEN_KEY))||0; }catch(e){ return 0; } }
+function actUnseenCount(){ const t = actLastSeen(); return updActivity.filter(a=>a.ts>t).length; }
+function markActivitySeen(){ try{ localStorage.setItem(ACT_SEEN_KEY, String(Date.now())); }catch(e){} renderActivityDot(); }
+function renderActivityDot(){
+  const btn = document.querySelector('#tabs button[data-t="updates"]'); if(!btn) return;
+  let dot = btn.querySelector(".tab-dot");
+  const n = actUnseenCount();
+  if(n>0){
+    if(!dot){ dot = document.createElement("span"); dot.className="tab-dot"; btn.appendChild(dot); }
+    dot.textContent = n>9 ? "9+" : String(n);
+  } else if(dot){ dot.remove(); }
+}
+function actTitle(id){ const u = updates.find(x=>x.id===id); return u ? (u.title||"Untitled update") : "an update"; }
+function actText(a){
+  const t = `"${actTitle(a.updateId)}"`;
+  return a.kind==="like" ? `♥ A believer liked ${t}`
+       : a.kind==="view" ? `👁 A believer viewed ${t}`
+       : `💬 ${a.name||"A believer"} commented on ${t}: ${a.text.length>60?a.text.slice(0,60)+"…":a.text}`;
+}
+function makeActivity(kind, row){
+  return { id: kind+":"+(row.id || (row.update_id+"|"+row.device_id)), kind, updateId:row.update_id, name:row.name, text:row.text||"", ts:new Date(row.created_at).getTime() };
+}
+async function loadUpdateActivity(){
+  const [l,v,c] = await Promise.all([
+    sb.from("update_likes").select("*").order("created_at",{ascending:false}).limit(25),
+    sb.from("update_views").select("*").order("created_at",{ascending:false}).limit(25),
+    sb.from("update_comments").select("*").order("created_at",{ascending:false}).limit(25)
+  ]);
+  if(l.error||v.error||c.error) return;   // engagement tables missing — skip quietly
+  updActivity = [].concat((l.data||[]).map(r=>makeActivity("like",r)), (v.data||[]).map(r=>makeActivity("view",r)), (c.data||[]).map(r=>makeActivity("comment",r)))
+    .sort((a,b)=>b.ts-a.ts).slice(0,60);
+  renderActivityDot();
+}
+function renderActivityList(){
+  const el = document.getElementById("actList"); if(!el) return;
+  el.innerHTML = updActivity.length ? updActivity.slice(0,15).map(a=>`<div class="act-item"><div>${esc(actText(a))}</div><div class="muted">${fmtTs(a.ts)}</div></div>`).join("") : `<div class="empty">No activity yet.</div>`;
+}
+// Live: the moment anyone likes, views or comments, the admin is told.
+function onUpdateActivity(kind, row){
+  const a = makeActivity(kind, row);
+  if(updActivity.some(x=>x.id===a.id)) return;
+  updActivity.unshift(a); updActivity = updActivity.slice(0,60);
+  const st = updStats[a.updateId] = updStats[a.updateId] || { likes:0, comments:0, views:0 };
+  if(kind==="like") st.likes++; else if(kind==="view") st.views++; else st.comments++;
+  if(currentTab==="updates"){ markActivitySeen(); renderUpdateList(); renderActivityList(); }
+  else renderActivityDot();
+  toast(actText(a));
+}
 async function loadUpdates(){
   const { data, error } = await sb.from("updates").select("*").order("created_at", { ascending:false });
   if(error){ toast("Could not load updates: "+error.message); return; }
   updates = (data||[]).map(updateRowToObj);
+  await loadUpdateStats();
+  await loadUpdateActivity();
 }
 function renderUpdates(){
   const el = document.getElementById("main");
   el.innerHTML = `
+  <div class="card"><h2>Recent activity</h2><div id="actList"></div></div>
   <div class="card"><h2>Posted updates</h2><div class="muted" style="margin:2px 0 8px">Long-press an update to edit or delete it.</div><div id="updateList"></div></div>`;
   renderUpdateList();
+  renderActivityList();
+  markActivitySeen();
   attachLongPress(document.getElementById("updateList"), ".list-item", (id)=>{
     const u = updates.find(x=>x.id===id); if(!u) return;
     showActionPopup({
@@ -1020,9 +1091,48 @@ function renderUpdateList(){
     <div class="list-item" data-id="${u.id}">
       <div class="top"><strong>${esc(u.title||"Untitled update")}</strong><span class="muted">${fmtTs(u.ts)}</span></div>
       <div class="muted">${esc(u.text.slice(0,80))}${u.text.length>80?"…":""}</div>
-      <div class="actions"><button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button></div>
+      <div class="upd-stats"><span>♥ ${(updStats[u.id]||{}).likes||0} likes</span><span>💬 ${(updStats[u.id]||{}).comments||0} comments</span><span>👁 ${(updStats[u.id]||{}).views||0} views</span></div>
+      <div class="actions"><button class="btn btn-ghost btn-sm" onclick="viewUpdate('${u.id}')">View full</button><button class="btn btn-primary btn-sm" onclick="openUpdateComments('${u.id}')">Comments &amp; replies</button></div>
     </div>`).join("") : `<div class="empty">No updates posted yet.</div>`;
 }
+window.openUpdateComments=async(id)=>{
+  const u = updates.find(x=>x.id===id); if(!u) return;
+  const bg = document.createElement("div"); bg.className="modalbg";
+  bg.innerHTML = `<div class="modal"><h2>Comments</h2><div class="muted" style="margin-bottom:8px">${esc(u.title||"Untitled update")}</div><div id="ucList"><div class="muted">Loading…</div></div><div class="actions" style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="ucClose">Close</button></div></div>`;
+  document.body.appendChild(bg);
+  const close = ()=>{ bg.remove(); loadUpdateStats().then(renderUpdateList); };
+  bg.querySelector("#ucClose").onclick = close;
+  bg.onclick = e=>{ if(e.target===bg) close(); };
+  const listEl = bg.querySelector("#ucList");
+  const { data, error } = await sb.from("update_comments").select("*").eq("update_id", id).order("created_at", { ascending:true });
+  if(error){ listEl.innerHTML = `<div class="empty">Could not load comments: ${esc(error.message)}</div>`; return; }
+  const rows = data||[];
+  if(!rows.length){ listEl.innerHTML = `<div class="empty">No comments on this update yet.</div>`; return; }
+  listEl.innerHTML = rows.map(c=>`
+    <div class="uc-item" data-cid="${c.id}">
+      <div class="top"><strong>${esc(c.name||"Believer")}</strong><span class="muted">${fmtTs(new Date(c.created_at).getTime())}</span></div>
+      <div>${esc(c.text)}</div>
+      ${c.admin_reply ? `<div class="uc-reply"><strong>Your reply</strong><div>${esc(c.admin_reply)}</div></div>` : ""}
+      <textarea placeholder="${c.admin_reply?"Edit your reply…":"Write a reply…"}">${c.admin_reply?esc(c.admin_reply):""}</textarea>
+      <div class="actions"><button class="btn btn-primary btn-sm" data-reply="${c.id}">${c.admin_reply?"Update reply":"Reply"}</button></div>
+    </div>`).join("");
+  listEl.querySelectorAll("[data-reply]").forEach(btn=>{
+    btn.onclick = async ()=>{
+      const item = btn.closest(".uc-item");
+      const text = item.querySelector("textarea").value.trim();
+      if(!text){ toast("Write a reply first"); return; }
+      btn.disabled = true;
+      const { error:e2 } = await sb.from("update_comments").update({ admin_reply:text, replied_at:new Date().toISOString() }).eq("id", btn.dataset.reply);
+      btn.disabled = false;
+      if(e2){ toast("Could not save reply: "+e2.message); return; }
+      toast("Reply saved — visible in the app");
+      let box = item.querySelector(".uc-reply");
+      if(!box){ box = document.createElement("div"); box.className="uc-reply"; item.insertBefore(box, item.querySelector("textarea")); }
+      box.innerHTML = `<strong>Your reply</strong><div>${esc(text)}</div>`;
+      btn.textContent = "Update reply";
+    };
+  });
+};
 window.deleteUpdate=async(id)=>{
   const { error } = await sb.from("updates").delete().eq("id", id);
   if(error){ toast("Could not delete update: "+error.message); return; }
@@ -1036,6 +1146,7 @@ window.viewUpdate=(id)=>{
     ${u.image?`<img src="${u.image}" class="imgprev">`:""}
     <p style="margin-top:10px">${esc(u.text)}</p>
     <p class="muted">${fmtTs(u.ts)}</p>
+    <div class="upd-stats"><span>♥ ${(updStats[u.id]||{}).likes||0} likes</span><span>💬 ${(updStats[u.id]||{}).comments||0} comments</span><span>👁 ${(updStats[u.id]||{}).views||0} views</span></div>
     <div class="actions"><button class="btn btn-ghost btn-sm" id="closeM">Close</button></div>
   </div>`;
   document.body.appendChild(bg);
@@ -1756,6 +1867,12 @@ function handleFreshReportRow(row){
 // flow in the main app) arrive over Supabase Realtime the moment they're inserted.
 sb.channel("admin_reports")
   .on("postgres_changes", { event:"INSERT", schema:"public", table:"reports" }, payload=>handleFreshReportRow(payload.new))
+  .subscribe();
+
+sb.channel("admin_update_activity")
+  .on("postgres_changes", { event:"INSERT", schema:"public", table:"update_likes" },    p=>onUpdateActivity("like", p.new))
+  .on("postgres_changes", { event:"INSERT", schema:"public", table:"update_views" },    p=>onUpdateActivity("view", p.new))
+  .on("postgres_changes", { event:"INSERT", schema:"public", table:"update_comments" }, p=>onUpdateActivity("comment", p.new))
   .subscribe();
 
 // ---------- STARTUP: pull everything from Supabase, then draw the first tab ----------
