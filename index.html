@@ -977,10 +977,6 @@ async function loadUpdateActivity(){
     .sort((a,b)=>b.ts-a.ts).slice(0,60);
   renderActivityDot();
 }
-function renderActivityList(){
-  const el = document.getElementById("actList"); if(!el) return;
-  el.innerHTML = updActivity.length ? updActivity.slice(0,15).map(a=>`<div class="act-item"><div>${esc(actText(a))}</div><div class="muted">${fmtTs(a.ts)}</div></div>`).join("") : `<div class="empty">No activity yet.</div>`;
-}
 // Live: the moment anyone likes, views or comments, the admin is told.
 function onUpdateActivity(kind, row){
   const a = makeActivity(kind, row);
@@ -988,7 +984,7 @@ function onUpdateActivity(kind, row){
   updActivity.unshift(a); updActivity = updActivity.slice(0,60);
   const st = updStats[a.updateId] = updStats[a.updateId] || { likes:0, comments:0, views:0 };
   if(kind==="like") st.likes++; else if(kind==="view") st.views++; else st.comments++;
-  if(currentTab==="updates"){ markActivitySeen(); renderUpdateList(); renderActivityList(); }
+  if(currentTab==="updates"){ markActivitySeen(); renderUpdateList(); }
   else renderActivityDot();
   toast(actText(a));
 }
@@ -1002,10 +998,8 @@ async function loadUpdates(){
 function renderUpdates(){
   const el = document.getElementById("main");
   el.innerHTML = `
-  <div class="card"><h2>Recent activity</h2><div id="actList"></div></div>
   <div class="card"><h2>Posted updates</h2><div class="muted" style="margin:2px 0 8px">Long-press an update to edit or delete it.</div><div id="updateList"></div></div>`;
   renderUpdateList();
-  renderActivityList();
   markActivitySeen();
   attachLongPress(document.getElementById("updateList"), ".list-item", (id)=>{
     const u = updates.find(x=>x.id===id); if(!u) return;
@@ -1098,12 +1092,28 @@ function renderUpdateList(){
 window.openUpdateComments=async(id)=>{
   const u = updates.find(x=>x.id===id); if(!u) return;
   const bg = document.createElement("div"); bg.className="modalbg";
-  bg.innerHTML = `<div class="modal"><h2>Comments</h2><div class="muted" style="margin-bottom:8px">${esc(u.title||"Untitled update")}</div><div id="ucList"><div class="muted">Loading…</div></div><div class="actions" style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="ucClose">Close</button></div></div>`;
+  bg.innerHTML = `<div class="modal"><h2>${esc(u.title||"Untitled update")}</h2><div id="ucStats" class="upd-stats"></div><div id="ucAct"></div><h3 style="margin:12px 0 4px;font-size:15px">Comments &amp; replies</h3><div id="ucList"><div class="muted">Loading…</div></div><div class="actions" style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="ucClose">Close</button></div></div>`;
   document.body.appendChild(bg);
   const close = ()=>{ bg.remove(); loadUpdateStats().then(renderUpdateList); };
   bg.querySelector("#ucClose").onclick = close;
   bg.onclick = e=>{ if(e.target===bg) close(); };
   const listEl = bg.querySelector("#ucList");
+  // Likes, views and comment totals + every like/view time for this update.
+  (async ()=>{
+    const [l, v] = await Promise.all([
+      sb.from("update_likes").select("created_at").eq("update_id", id).order("created_at",{ascending:false}),
+      sb.from("update_views").select("created_at").eq("update_id", id).order("created_at",{ascending:false})
+    ]);
+    const likes = l.data||[], views = v.data||[];
+    const cm = (updStats[id]||{}).comments||0;
+    const st = bg.querySelector("#ucStats");
+    if(st) st.innerHTML = `<span>♥ ${likes.length} likes</span><span>💬 ${cm} comments</span><span>👁 ${views.length} views</span>`;
+    const act = bg.querySelector("#ucAct");
+    if(act) act.innerHTML = (likes.length||views.length) ? `<div class="muted" style="margin:6px 0 2px">Recent likes &amp; views</div>` + [].concat(
+        likes.slice(0,10).map(r=>({t:new Date(r.created_at).getTime(),k:"♥ A believer liked this"})),
+        views.slice(0,10).map(r=>({t:new Date(r.created_at).getTime(),k:"👁 A believer viewed this"}))
+      ).sort((a,b)=>b.t-a.t).slice(0,10).map(x=>`<div class="act-item"><div>${x.k}</div><div class="muted">${fmtTs(x.t)}</div></div>`).join("") : "";
+  })();
   const { data, error } = await sb.from("update_comments").select("*").eq("update_id", id).order("created_at", { ascending:true });
   if(error){ listEl.innerHTML = `<div class="empty">Could not load comments: ${esc(error.message)}</div>`; return; }
   const rows = data||[];
