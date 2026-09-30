@@ -440,6 +440,11 @@ function isNetworkError(err){
   const m = String((err && (err.message||err))||"");
   return /failed to fetch|networkerror|network request failed|load failed|offline|fetch/i.test(m);
 }
+// Song titles: first letter of every word is a capital, all other letters small
+// (so pasted ALL-CAPS titles are fixed too).
+function titleCase(str){
+  return String(str||"").toLowerCase().replace(/(^|[\s\-\/("\u201C\u2018])(\p{L})/gu, (m, pre, ch)=>pre+ch.toUpperCase());
+}
 function draftToObj(d){ return { id:d.id, num:d.num, title:d.title, key:d.key, lyrics:d.lyrics, langCode:d.lang, snippet:d.snippet, isDraft:true }; }
 window.addEventListener("offline", ()=>{ toast("You're offline — new songs will go to Drafts"); if(currentTab==="songs") renderSongs(); });
 window.addEventListener("online", ()=>{ if(currentTab==="songs") renderSongs(); setTimeout(()=>autoSyncDrafts(), 800); });
@@ -708,6 +713,11 @@ function openSongModal(editSong){
   document.getElementById("addBlock").onclick = ()=>{ blocks.push({type:"verse",text:""}); renderBlocks(); };
   document.getElementById("postSong").onclick = ()=> editing ? (editSong.isDraft ? updateDraft(editSong.id) : updateSong(editSong.id, editSong.langCode)) : postSong();
   document.getElementById("cancelSong").onclick = ()=>bg.remove();
+  const sTitleEl = document.getElementById("sTitle");
+  sTitleEl.addEventListener("input", ()=>{
+    const v = sTitleEl.value, t = titleCase(v);
+    if(t !== v){ const pos = sTitleEl.selectionStart; sTitleEl.value = t; try{ sTitleEl.setSelectionRange(pos,pos); }catch(e){} }
+  });
   bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
   if(!editing){
     document.getElementById("sLang").addEventListener("change", e=>{
@@ -765,7 +775,7 @@ async function postSong(){
   const lang = document.getElementById("sLang").value;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
-  const title = document.getElementById("sTitle").value.trim();
+  const title = titleCase(document.getElementById("sTitle").value.trim());
   const lyrics = buildLyrics(blocks);
   if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
@@ -801,7 +811,7 @@ async function updateSong(id, lang){
   if(pasteGuard()) return;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
-  const title = document.getElementById("sTitle").value.trim();
+  const title = titleCase(document.getElementById("sTitle").value.trim());
   const lyrics = buildLyrics(blocks);
   if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
@@ -878,7 +888,7 @@ function updateDraft(id){
   if(pasteGuard()) return;
   const num = parseInt(document.getElementById("sNum").value,10);
   const key = document.getElementById("sKey").value;
-  const title = document.getElementById("sTitle").value.trim();
+  const title = titleCase(document.getElementById("sTitle").value.trim());
   const lyrics = buildLyrics(blocks);
   if(!num || !title || !lyrics){ toast("Add a song number, title, and at least one verse/chorus"); return; }
   const snippet = (lyrics.split("\n").find(l=>l && !/^verse|^chorus/i.test(l))||"").slice(0,60);
@@ -1093,6 +1103,15 @@ async function setBelieverVerified(profileId, verified){
   if(!data || !!data.verified !== !!verified) return { ok:false, message:"the database rejected the change" };
   return { ok:true, verified:!!data.verified, verified_at:data.verified_at||null };
 }
+async function setBelieverBadgeColor(profileId, color){
+  const { data, error } = await rpcSafe("admin_set_badge_color", { p_key:ADMIN_KEY, p_profile:profileId, p_color:color });
+  if(error){
+    if(isUnauthorized(error)) return { ok:false, keyProblem:true, message:"the admin key in this app is out of date" };
+    return { ok:false, message:error.message };
+  }
+  if(!data || (data.badge_color||"blue") !== color) return { ok:false, message:"the database rejected the change" };
+  return { ok:true, badge_color:data.badge_color };
+}
 
 function renderBelievers(){
   const el = document.getElementById("main");
@@ -1130,10 +1149,21 @@ function renderBelievers(){
     });
   } else renderRestrList();
 }
-// Same blue check the Believers Connect app draws next to verified accounts.
-function vbadgeSvg(size){
-  const s = size||16;
-  return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" role="img" aria-label="Verified account" focusable="false" style="vertical-align:-3px;margin-left:4px"><circle cx="12" cy="12" r="11" fill="#1E63E9"/><path d="M7 12.5l3.3 3.3L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Same zigzag check the Believers Connect app draws next to verified accounts.
+// Seven colours the admin can choose from (blue is the default).
+const BADGE_COLORS = [
+  { key:"blue",   label:"Blue",   hex:"#1E63E9" },
+  { key:"red",    label:"Red",    hex:"#E53935" },
+  { key:"green",  label:"Green",  hex:"#2E9E4F" },
+  { key:"yellow", label:"Yellow", hex:"#F5B301" },
+  { key:"orange", label:"Orange", hex:"#F57C00" },
+  { key:"purple", label:"Purple", hex:"#8E44AD" },
+  { key:"brown",  label:"Brown",  hex:"#8B5A2B" }
+];
+function badgeHex(key){ const c = BADGE_COLORS.find(x=>x.key===key); return c ? c.hex : BADGE_COLORS[0].hex; }
+function vbadgeSvg(size, colorKey){
+  const s = size||16, hex = badgeHex(colorKey), tick = colorKey==="yellow" ? "#4A3500" : "#fff";
+  return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" role="img" aria-label="Verified account" focusable="false" style="vertical-align:-3px;margin-left:4px"><polygon points="12.00,0.30 14.48,2.73 17.85,1.87 18.79,5.21 22.13,6.15 21.27,9.52 23.70,12.00 21.27,14.48 22.13,17.85 18.79,18.79 17.85,22.13 14.48,21.27 12.00,23.70 9.52,21.27 6.15,22.13 5.21,18.79 1.87,17.85 2.73,14.48 0.30,12.00 2.73,9.52 1.87,6.15 5.21,5.21 6.15,1.87 9.52,2.73" fill="${hex}" stroke="${hex}" stroke-width="1" stroke-linejoin="round"/><path d="M7 12.5l3.3 3.3L17 9" fill="none" stroke="${tick}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 function openBelieverDetail(id){
   const b = believers.find(x=>x.id===id); if(!b) return;
@@ -1162,9 +1192,11 @@ function openBelieverDetail(id){
     const p = adminOverview.get(String(b.id)) || null;
     let verifyHtml;
     if(p){
-      verifyHtml = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 8px"><strong style="font-size:15px">Verification</strong><span class="muted">${p.verified ? "Verified"+vbadgeSvg(14) : "Not verified"}</span></div>
+      verifyHtml = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 8px"><strong style="font-size:15px">Verification</strong><span class="muted">${p.verified ? "Verified"+vbadgeSvg(14,p.badge_color) : "Not verified"}</span></div>
         ${p.verified && p.verified_at ? row("Verified on", fmtTs(p.verified_at)) : ""}
-        <button class="btn ${p.verified?"btn-ghost":"btn-primary"}" id="belVerifyBtn" style="width:100%;margin-top:8px">${p.verified?"Remove verification mark":"Give verification mark"}</button>`;
+        <button class="btn ${p.verified?"btn-ghost":"btn-primary"}" id="belVerifyBtn" style="width:100%;margin-top:8px">${p.verified?"Remove verification mark":"Give verification mark"}</button>
+        ${p.verified ? `<div style="margin:16px 0 8px"><strong style="font-size:15px">Badge colour</strong></div>
+        <div id="belColors" style="display:flex;flex-wrap:wrap;gap:10px">${BADGE_COLORS.map(c=>{ const on=(p.badge_color||"blue")===c.key; return `<button type="button" class="belColorBtn" data-color="${c.key}" aria-label="${c.label}" title="${c.label}" style="display:flex;flex-direction:column;align-items:center;gap:4px;border:2px solid ${on?c.hex:"transparent"};background:${on?"rgba(128,128,128,.12)":"transparent"};border-radius:12px;padding:6px 6px 4px;min-width:52px;cursor:pointer;color:inherit;font:600 11px inherit">${vbadgeSvg(28,c.key).replace("margin-left:4px","margin-left:0")}<span>${c.label}</span></button>`; }).join("")}</div>` : ""}`;
     } else if(overviewLoaded){
       verifyHtml = `<div class="muted" style="margin-top:14px">This believer has no Believers Connect profile linked to their registration, so there is nothing to verify yet.</div>`;
     } else if(overviewLoading){
@@ -1177,7 +1209,7 @@ function openBelieverDetail(id){
         <button class="btn btn-primary" id="belRetryBtn" style="width:100%">Try again</button>`;
     }
     body.innerHTML = `
-      <h2 style="margin-bottom:10px">${esc(b.name)}${p&&p.verified?vbadgeSvg(18):""}</h2>
+      <h2 style="margin-bottom:10px">${esc(b.name)}${p&&p.verified?vbadgeSvg(18,p.badge_color):""}</h2>
       ${row("Username", p&&p.username ? "@"+p.username : "")}
       ${row("Phone", b.phone)}
       ${row("Pastor", b.pastor)}
@@ -1201,6 +1233,17 @@ function openBelieverDetail(id){
       if(document.getElementById("belList")) renderBelList();
       if(stillOpen()) showDetail();
     };
+    body.querySelectorAll(".belColorBtn").forEach(cb=>cb.onclick = async()=>{
+      const color = cb.dataset.color;
+      if((p.badge_color||"blue") === color) return;
+      busy(cb);
+      const r = await setBelieverBadgeColor(p.profile_id, color);
+      if(!r.ok){ toast(r.keyProblem ? "Admin key in this app is out of date" : "Could not change colour: "+r.message); if(stillOpen()) showDetail(); return; }
+      p.badge_color = r.badge_color;
+      toast("Badge colour changed");
+      if(document.getElementById("belList")) renderBelList();
+      if(stillOpen()) showDetail();
+    });
     const rb = body.querySelector("#belRetryBtn");
     if(rb) rb.onclick = ()=>{ busy(rb); load(); };
   }
@@ -1211,7 +1254,7 @@ function renderBelList(){
   const list = believers.filter(b=>b.status==="active");
   document.getElementById("belList").innerHTML = list.length ? list.map(b=>{ const p=adminOverview.get(String(b.id)); return `
     <div class="list-item" data-id="${b.id}" style="cursor:pointer">
-      <div class="top"><strong>${esc(b.name)}${p&&p.verified?vbadgeSvg(14):""}</strong><span class="badge ${b.status}">${b.status}</span></div>
+      <div class="top"><strong>${esc(b.name)}${p&&p.verified?vbadgeSvg(14,p.badge_color):""}</strong><span class="badge ${b.status}">${b.status}</span></div>
       <div class="muted">${esc(b.phone)} · ${esc(b.pastor)} · device ${esc(b.device)}</div>
     </div>`; }).join("") : `<div class="empty">No active believers.</div>`;
 }
