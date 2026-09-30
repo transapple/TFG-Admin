@@ -4,7 +4,7 @@
      (needed so songs can be saved to Drafts while offline). */
 
 const CACHE_PREFIX = "tfg-admin-";
-const CACHE = CACHE_PREFIX + "v2";
+const CACHE = CACHE_PREFIX + "v3";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 // The only cross-site file we keep: the Supabase library the app needs to start.
 const SUPABASE_LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
