@@ -297,7 +297,7 @@ textarea{min-height:60px;resize:vertical}
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
     });
   }
 })();
@@ -1050,6 +1050,50 @@ async function loadRestricted(){
   restricted = (data||[]).map(restrictedRowToObj);
 }
 
+// ---- Believers Connect profile details + verification mark ----
+// This app has no sign-in. It holds the admin key itself and sends it with each request; the
+// database only accepts these two functions (admin_believers_overview, admin_set_verified) with
+// that key, so nobody else can give a mark. Keep this file private: anyone who can open it has
+// full admin power. If you change the key in the database (admin_change_key), change it here too.
+const ADMIN_KEY = "AAZC-GR32-DWTY-2X8Z";
+let adminOverview = new Map();   // believer id -> overview row (only believers that have a linked profile)
+let overviewLoaded = false;
+let overviewAt = 0;
+let overviewLoading = null;      // the load currently in flight, shared by everyone who asks
+let overviewProblem = "";        // "key" = the database rejected ADMIN_KEY, otherwise an error message
+function isUnauthorized(error){ return !!error && (error.code==="28000" || /unauthorized/i.test(error.message||"")); }
+async function rpcSafe(fn, args){
+  try{ const res = await sb.rpc(fn, args); return res || { data:null, error:{ message:"No response" } }; }
+  catch(e){ return { data:null, error:{ message:"Offline — try again when connected" } }; }
+}
+function loadOverview(){
+  if(overviewLoading) return overviewLoading;
+  overviewLoading = (async()=>{
+    const { data, error } = await rpcSafe("admin_believers_overview", { p_key:ADMIN_KEY });
+    overviewLoading = null;
+    if(error){ overviewLoaded = false; overviewProblem = isUnauthorized(error) ? "key" : (error.message||"Could not load"); return false; }
+    adminOverview = new Map((data||[]).filter(r=>r && r.profile_id).map(r=>[String(r.believer_id), r]));
+    overviewLoaded = true; overviewAt = Date.now(); overviewProblem = "";
+    return true;
+  })();
+  return overviewLoading;
+}
+// Loads (or refreshes, at most once a minute) in the background so the blue checks show in the list.
+async function refreshOverviewQuiet(){
+  if(overviewLoaded && Date.now()-overviewAt < 60000) return;
+  await loadOverview();
+  if(currentTab==="believers" && belSub==="active" && document.getElementById("belList")) renderBelList();
+}
+async function setBelieverVerified(profileId, verified){
+  const { data, error } = await rpcSafe("admin_set_verified", { p_key:ADMIN_KEY, p_profile:profileId, p_verified:!!verified });
+  if(error){
+    if(isUnauthorized(error)) return { ok:false, keyProblem:true, message:"the admin key in this app is out of date" };
+    return { ok:false, message:error.message };
+  }
+  if(!data || !!data.verified !== !!verified) return { ok:false, message:"the database rejected the change" };
+  return { ok:true, verified:!!data.verified, verified_at:data.verified_at||null };
+}
+
 function renderBelievers(){
   const el = document.getElementById("main");
   el.innerHTML = `
@@ -1062,10 +1106,17 @@ function renderBelievers(){
   </div>`;
   el.querySelectorAll(".pills button").forEach(b=>b.onclick=()=>{ belSub=b.dataset.s; renderBelievers(); });
   document.getElementById("belBody").innerHTML = belSub==="active"
-    ? `<h2>Active believers</h2><div class="muted" style="margin:2px 0 8px">Long-press a believer to suspend, ban, or delete.</div><div id="belList"></div>`
+    ? `<h2>Active believers</h2><div class="muted" style="margin:2px 0 8px">Tap a believer to see their details and give or remove the verification mark. Long-press to suspend, ban, or delete.</div><div id="belList"></div>`
     : `<h2>Restricted (suspended, banned, deleted)</h2><p class="muted">Anyone here is blocked from registering again with the same phone, name, device, or pastor.</p><div id="restrList"></div>`;
   if(belSub==="active"){
     renderBelList();
+    refreshOverviewQuiet();   // adds blue checks once the saved admin key (if any) has loaded the profiles
+    // Tap = details + verification. (A long-press opens its own popup first, so taps are ignored while any popup is open.)
+    document.getElementById("belList").addEventListener("click", e=>{
+      if(document.querySelector(".modalbg")) return;
+      const item = e.target.closest(".list-item"); if(!item) return;
+      openBelieverDetail(item.dataset.id);
+    });
     attachLongPress(document.getElementById("belList"), ".list-item", (id)=>{
       const b = believers.find(x=>x.id===id); if(!b) return;
       showActionPopup({
@@ -1079,13 +1130,90 @@ function renderBelievers(){
     });
   } else renderRestrList();
 }
+// Same blue check the Believers Connect app draws next to verified accounts.
+function vbadgeSvg(size){
+  const s = size||16;
+  return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" role="img" aria-label="Verified account" focusable="false" style="vertical-align:-3px;margin-left:4px"><circle cx="12" cy="12" r="11" fill="#1E63E9"/><path d="M7 12.5l3.3 3.3L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function openBelieverDetail(id){
+  const b = believers.find(x=>x.id===id); if(!b) return;
+  const old = document.getElementById("belDetailBg"); if(old) old.remove();
+  // One sheet; it redraws its own body in place, so no modal is opened or closed mid-flow and the
+  // back-button handling is never disturbed.
+  const bg = document.createElement("div"); bg.className="modalbg"; bg.id="belDetailBg";
+  bg.innerHTML = `<div class="modal" style="max-width:340px"><div id="belSheetBody"></div></div>`;
+  document.body.appendChild(bg);
+  bg.onclick = e=>{ if(e.target===bg) bg.remove(); };
+  const body = bg.querySelector("#belSheetBody");
+  const row = (k,v)=> (v===null||v===undefined||v==="") ? "" : `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><div class="muted" style="min-width:84px">${k}</div><div style="flex:1;word-break:break-word">${esc(v)}</div></div>`;
+  const busy = btn=>{ btn.disabled=true; btn.style.opacity=".6"; };
+  const stillOpen = ()=>document.body.contains(bg);
+
+  function load(){
+    const pr = loadOverview();            // shows the "Loading" state below while it runs
+    showDetail();
+    pr.then(()=>{
+      if(document.getElementById("belList")) renderBelList();
+      if(stillOpen()) showDetail();
+    });
+  }
+
+  function showDetail(){
+    const p = adminOverview.get(String(b.id)) || null;
+    let verifyHtml;
+    if(p){
+      verifyHtml = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 8px"><strong style="font-size:15px">Verification</strong><span class="muted">${p.verified ? "Verified"+vbadgeSvg(14) : "Not verified"}</span></div>
+        ${p.verified && p.verified_at ? row("Verified on", fmtTs(p.verified_at)) : ""}
+        <button class="btn ${p.verified?"btn-ghost":"btn-primary"}" id="belVerifyBtn" style="width:100%;margin-top:8px">${p.verified?"Remove verification mark":"Give verification mark"}</button>`;
+    } else if(overviewLoaded){
+      verifyHtml = `<div class="muted" style="margin-top:14px">This believer has no Believers Connect profile linked to their registration, so there is nothing to verify yet.</div>`;
+    } else if(overviewLoading){
+      verifyHtml = `<div class="muted" style="margin-top:14px">Loading profile details…</div>`;
+    } else {
+      const why = overviewProblem==="key"
+        ? "The admin key saved in this app is out of date, so profile details can't load. Update ADMIN_KEY in the app file to match the database."
+        : "Could not load profile details: "+(overviewProblem||"unknown problem");
+      verifyHtml = `<div class="muted" style="margin:14px 0 8px">${esc(why)}</div>
+        <button class="btn btn-primary" id="belRetryBtn" style="width:100%">Try again</button>`;
+    }
+    body.innerHTML = `
+      <h2 style="margin-bottom:10px">${esc(b.name)}${p&&p.verified?vbadgeSvg(18):""}</h2>
+      ${row("Username", p&&p.username ? "@"+p.username : "")}
+      ${row("Phone", b.phone)}
+      ${row("Pastor", b.pastor)}
+      ${row("Church", p&&p.church)}
+      ${row("Bio", p&&p.bio)}
+      ${row("Activity", p ? `${p.posts} posts · ${p.comments} comments · ${p.post_likes} likes · ${p.followers} followers · ${p.following} following` : "")}
+      ${row("Device", b.device)}
+      ${row("Status", b.status)}
+      ${row("Registered", b.regTs ? fmtTs(b.regTs) : "")}
+      ${row("Last seen", p&&p.last_seen ? fmtTs(p.last_seen) : "")}
+      ${verifyHtml}
+      <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" id="belDetailClose" style="width:100%">Close</button></div>`;
+    body.querySelector("#belDetailClose").onclick = ()=>bg.remove();
+    const vb = body.querySelector("#belVerifyBtn");
+    if(vb) vb.onclick = async()=>{
+      busy(vb);
+      const r = await setBelieverVerified(p.profile_id, !p.verified);
+      if(!r.ok){ toast(r.keyProblem ? "Admin key in this app is out of date" : "Could not update verification: "+r.message); if(stillOpen()) showDetail(); return; }
+      p.verified = r.verified; p.verified_at = r.verified_at;   // p lives in adminOverview, so the list badge follows
+      toast(r.verified ? "Verification mark given" : "Verification mark removed");
+      if(document.getElementById("belList")) renderBelList();
+      if(stillOpen()) showDetail();
+    };
+    const rb = body.querySelector("#belRetryBtn");
+    if(rb) rb.onclick = ()=>{ busy(rb); load(); };
+  }
+
+  if(overviewLoaded) showDetail(); else load();
+}
 function renderBelList(){
   const list = believers.filter(b=>b.status==="active");
-  document.getElementById("belList").innerHTML = list.length ? list.map(b=>`
-    <div class="list-item" data-id="${b.id}">
-      <div class="top"><strong>${esc(b.name)}</strong><span class="badge ${b.status}">${b.status}</span></div>
+  document.getElementById("belList").innerHTML = list.length ? list.map(b=>{ const p=adminOverview.get(String(b.id)); return `
+    <div class="list-item" data-id="${b.id}" style="cursor:pointer">
+      <div class="top"><strong>${esc(b.name)}${p&&p.verified?vbadgeSvg(14):""}</strong><span class="badge ${b.status}">${b.status}</span></div>
       <div class="muted">${esc(b.phone)} · ${esc(b.pastor)} · device ${esc(b.device)}</div>
-    </div>`).join("") : `<div class="empty">No active believers.</div>`;
+    </div>`; }).join("") : `<div class="empty">No active believers.</div>`;
 }
 async function addRestriction(b, reason){
   const { data, error } = await sb.from("restricted").insert({ name:b.name, phone:b.phone, pastor:b.pastor, device:b.device, reason }).select().single();
