@@ -137,6 +137,18 @@ textarea{min-height:60px;resize:vertical}
 .traffic-col-bar{width:70%;min-height:3px;background:var(--blue);border-radius:4px 4px 0 0}
 .traffic-col-val{font-size:10px;font-weight:700;color:var(--ink);margin-top:3px}
 .traffic-col-label{font-size:9px;color:var(--inkSoft);margin-top:1px;white-space:nowrap;transform:scale(.92)}
+.st-block{margin-bottom:14px}
+.st-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.st-wrap{display:flex;align-items:flex-start;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.st-axis{flex:0 0 34px;background:var(--card);z-index:1}
+.st-scroll{flex:1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.st-hint{font-size:11px;color:var(--inkSoft);text-align:right;margin-top:3px;font-style:italic}
+.st-daytitle{font-size:16px;font-weight:800;margin-bottom:10px}
+.st-sub{font-size:12px;font-weight:700;color:var(--inkSoft);margin:14px 0 6px}
+.hr-chart{display:flex;align-items:flex-end;gap:2px;height:80px;padding:0 2px}
+.hr-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.hr-bar{width:100%;background:var(--blue);border-radius:3px 3px 0 0;min-height:2px}
+.hr-lbl{font-size:9px;color:var(--inkSoft);height:12px;line-height:12px}
 .hist-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto}
 .hist-row{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
 .hist-day{font-size:13px;font-weight:600}
@@ -1524,12 +1536,18 @@ window.deleteOutboxNotif=async(id)=>{
 // once per device). History is kept for good — nothing here is ever auto-deleted.
 const HEARTBEAT_SECONDS = 25; // must match the main app's heartbeat interval
 const ACTIVE_WINDOW_MS = 90*1000; // a device counts as "using it right now" if it pinged within this window
-const HISTORY_DAYS = 30; // default rolling window shown in the History list
+const HISTORY_DAYS = 30; // (kept for compatibility)
 let trendsTimer = null;
 let trendsLoading = false;
 
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 function startOfDay(t){ const d = new Date(t); d.setHours(0,0,0,0); return d; }
-function dayKey(t){ return startOfDay(t).toISOString().slice(0,10); }
+// Local calendar-day key "YYYY-MM-DD" (uses the admin's own timezone, not UTC,
+// so a day's numbers never slip into the neighbouring day).
+function dayKey(t){
+  const d = new Date(t);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
 function fmtDuration(totalSeconds){
   const h = Math.floor(totalSeconds/3600), m = Math.round((totalSeconds%3600)/60);
   return h>0 ? `${h}h ${m}m` : `${m}m`;
@@ -1547,94 +1565,328 @@ function fmtDayLabel(key){
   const d = new Date(key+"T00:00:00");
   return d.toLocaleDateString([], { weekday:"short", month:"short", day:"numeric", year:"numeric" });
 }
-// Count of distinct devices per kind, for one or more days, in one query.
-async function countByDay(kinds, fromIso, toIso){
-  let q = sb.from("usage_events").select("device_id,kind,ts").in("kind", kinds).gte("ts", fromIso);
-  if(toIso) q = q.lt("ts", toIso);
-  const { data, error } = await q;
-  if(error) return { error };
-  const byDay = {}; // "YYYY-MM-DD" -> { [kind]: Set(device_id) }
-  (data||[]).forEach(r=>{
-    const key = dayKey(r.ts);
-    if(!byDay[key]) byDay[key] = {};
-    if(!byDay[key][r.kind]) byDay[key][r.kind] = new Set();
-    byDay[key][r.kind].add(r.device_id);
-  });
-  return { byDay };
+// Supabase returns at most 1000 rows per request, so read in pages — otherwise
+// busy days/months would be silently cut short and the numbers would be wrong.
+async function fetchAllRows(makeQuery){
+  const PAGE = 1000; let all = [], from = 0;
+  for(;;){
+    const { data, error } = await makeQuery().range(from, from+PAGE-1);
+    if(error) return { error };
+    all = all.concat(data||[]);
+    if(!data || data.length < PAGE) break;
+    from += PAGE;
+    if(from > 200000) break; // safety stop
+  }
+  return { data: all };
+}
+// device_id -> local day key of that device's FIRST install (a device is only ever counted as installed once).
+async function loadFirstInstalls(){
+  const res = await fetchAllRows(()=> sb.from("usage_events").select("device_id,ts").eq("kind","install").order("ts",{ascending:true}));
+  if(res.error) return res;
+  const first = {};
+  res.data.forEach(r=>{ if(!first[r.device_id]) first[r.device_id] = dayKey(r.ts); });
+  return { first };
 }
 async function loadTrendsData(){
   const now = Date.now();
   const todayStartIso = startOfDay(now).toISOString();
   const activeCutoffIso = new Date(now - ACTIVE_WINDOW_MS).toISOString();
-  const historySinceIso = startOfDay(now - (HISTORY_DAYS-1)*24*3600*1000).toISOString();
 
-  const [todayRes, activeRes, installRes, historyRes] = await Promise.all([
-    sb.from("usage_events").select("device_id,kind,feature,ts").gte("ts", todayStartIso),
-    sb.from("usage_events").select("device_id").in("kind",["open","heartbeat"]).gte("ts", activeCutoffIso),
-    sb.from("usage_events").select("device_id").eq("kind","install"),
-    countByDay(["open","install"], historySinceIso)
+  const [todayRes, activeRes, instRes] = await Promise.all([
+    fetchAllRows(()=> sb.from("usage_events").select("device_id,kind,feature,ts").gte("ts", todayStartIso).order("ts",{ascending:true})),
+    sb.from("usage_events").select("device_id").in("kind",["open","heartbeat"]).gte("ts", activeCutoffIso).limit(1000),
+    loadFirstInstalls()
   ]);
-  const firstErr = todayRes.error || activeRes.error || installRes.error || historyRes.error;
+  const firstErr = todayRes.error || activeRes.error || instRes.error;
   if(firstErr){ toast("Could not load trends: "+firstErr.message); return null; }
+  statsFirstInstall = instRes.first;
 
   const todayRows = todayRes.data||[];
   const activeToday = new Set(todayRows.filter(r=>r.kind==="open").map(r=>r.device_id)).size;
   const currentlyActive = new Set((activeRes.data||[]).map(r=>r.device_id)).size;
-  const totalInstalls = new Set((installRes.data||[]).map(r=>r.device_id)).size;
+  const totalInstalls = Object.keys(instRes.first).length;
 
   const heartbeatsToday = todayRows.filter(r=>r.kind==="heartbeat");
   const totalSecondsToday = heartbeatsToday.length * HEARTBEAT_SECONDS;
-
   const featureSeconds = {};
   heartbeatsToday.forEach(r=>{
     const f = r.feature || "home";
     featureSeconds[f] = (featureSeconds[f]||0) + HEARTBEAT_SECONDS;
   });
   const featureList = Object.entries(featureSeconds).sort((a,b)=>b[1]-a[1]);
+  return { activeToday, currentlyActive, totalInstalls, totalSecondsToday, featureList };
+}
 
-  const history = [];
-  for(let i=0;i<HISTORY_DAYS;i++){
-    const key = dayKey(now - i*24*3600*1000);
-    const day = historyRes.byDay[key] || {};
-    history.push({ key, used:(day.open?day.open.size:0), installed:(day.install?day.install.size:0) });
+// ---------- STATISTICS (rolling timeline: last week → today, scroll back for older days) ----------
+let statsFirstInstall = {};
+let statsSel = dayKey(Date.now());   // selected day
+let tl = [];                         // loaded days, oldest → today: {key,day,mon,used,installed}
+let tlFloor = null;                  // day of the very first recorded event (no point scrolling further back)
+let tlLoading = false;
+const INITIAL_DAYS = 30, CHUNK_DAYS = 30, MIN_DAYS = 14;
+const MON_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function keyToDate(k){ return new Date(k+"T00:00:00"); }
+function addDays(k, n){ const d = keyToDate(k); return dayKey(new Date(d.getFullYear(), d.getMonth(), d.getDate()+n)); }
+function daysBetween(a, b){ return Math.round((keyToDate(b)-keyToDate(a))/86400000); }
+function fmtShort(k){ const d = keyToDate(k); return d.getDate()+" "+MON_SHORT[d.getMonth()]; }
+
+// Users + installs for every day from fromKey to toKey (inclusive).
+async function loadRangeStats(fromKey, toKey){
+  const from = keyToDate(fromKey), to = keyToDate(addDays(toKey, 1));
+  const [openRes, instRes] = await Promise.all([
+    fetchAllRows(()=> sb.from("usage_events").select("device_id,ts").eq("kind","open")
+      .gte("ts", from.toISOString()).lt("ts", to.toISOString()).order("ts",{ascending:true})),
+    loadFirstInstalls()
+  ]);
+  const err = openRes.error || instRes.error;
+  if(err){ toast("Could not load statistics: "+err.message); return null; }
+  statsFirstInstall = instRes.first;
+  const usedSets = {}, instSets = {};
+  openRes.data.forEach(r=>{ const k = dayKey(r.ts); (usedSets[k] = usedSets[k] || new Set()).add(r.device_id); });
+  Object.entries(instRes.first).forEach(([dev,k])=>{ (instSets[k] = instSets[k] || new Set()).add(dev); });
+  const days = [];
+  for(let k = fromKey; k <= toKey; k = addDays(k, 1)){
+    const d = keyToDate(k);
+    days.push({ key:k, day:d.getDate(), mon:MON_SHORT[d.getMonth()], used: usedSets[k]?usedSets[k].size:0, installed: instSets[k]?instSets[k].size:0 });
   }
+  return days;
+}
+async function loadFloor(){
+  const { data } = await sb.from("usage_events").select("ts").order("ts",{ascending:true}).limit(1);
+  tlFloor = (data && data[0]) ? dayKey(data[0].ts) : null;
+}
+async function initTimeline(){
+  const today = dayKey(Date.now());
+  await loadFloor();
+  let start = addDays(today, -(INITIAL_DAYS-1));
+  if(tlFloor && tlFloor > start) start = tlFloor;
+  const latestStart = addDays(today, -(MIN_DAYS-1));      // always show at least two weeks
+  if(start > latestStart) start = latestStart;
+  const days = await loadRangeStats(start, today);
+  if(days) tl = days;
+  return !!days;
+}
+// Load older days and put them on the left, keeping what you're looking at in place.
+async function extendBack(nDays){
+  if(tlLoading || !tl.length) return false;
+  const first = tl[0].key;
+  if(tlFloor && first <= tlFloor) return false;
+  let newStart = addDays(first, -Math.max(nDays, 1));
+  if(tlFloor && newStart < tlFloor) newStart = tlFloor;
+  tlLoading = true;
+  const more = await loadRangeStats(newStart, addDays(first, -1));
+  tlLoading = false;
+  if(!more || currentTab!=="trends") return false;
+  tl = more.concat(tl);
+  renderStatsCharts({ prepended: more.length });
+  return true;
+}
 
-  return { activeToday, currentlyActive, totalInstalls, totalSecondsToday, featureList, history };
+async function loadDayStats(key){
+  const from = keyToDate(key), to = new Date(from.getFullYear(), from.getMonth(), from.getDate()+1);
+  const res = await fetchAllRows(()=> sb.from("usage_events").select("device_id,kind,feature,ts")
+    .gte("ts", from.toISOString()).lt("ts", to.toISOString()).order("ts",{ascending:true}));
+  if(res.error){ toast("Could not load that day: "+res.error.message); return null; }
+  const rows = res.data;
+  const opens = rows.filter(r=>r.kind==="open");
+  const hb = rows.filter(r=>r.kind==="heartbeat");
+  const users = new Set(opens.map(r=>r.device_id));
+  const activeDevices = new Set(rows.filter(r=>r.kind==="open"||r.kind==="heartbeat").map(r=>r.device_id));
+  const installs = Object.keys(statsFirstInstall).filter(dev=>statsFirstInstall[dev]===key).length;
+  const hourSets = Array.from({length:24}, ()=>new Set());
+  rows.filter(r=>r.kind==="open"||r.kind==="heartbeat").forEach(r=>{ hourSets[new Date(r.ts).getHours()].add(r.device_id); });
+  const hours = hourSets.map(s=>s.size);
+  const featureSeconds = {};
+  hb.forEach(r=>{ const f = r.feature || "home"; featureSeconds[f] = (featureSeconds[f]||0) + HEARTBEAT_SECONDS; });
+  const featureList = Object.entries(featureSeconds).sort((a,b)=>b[1]-a[1]);
+  const seconds = hb.length * HEARTBEAT_SECONDS;
+  return { key, users: users.size, opens: opens.length, activeDevices: activeDevices.size, installs, seconds,
+           avgSeconds: activeDevices.size ? Math.round(seconds/activeDevices.size) : 0, hours, featureList };
 }
-// Looks up one specific date (any date at all — history is never deleted).
-async function lookupUsageForDate(dateStr){
-  const from = new Date(dateStr+"T00:00:00");
-  const to = new Date(from.getTime()+24*3600*1000);
-  const { data, error } = await sb.from("usage_events").select("device_id,kind")
-    .in("kind",["open","install"]).gte("ts", from.toISOString()).lt("ts", to.toISOString());
-  if(error){ toast("Could not look up that date: "+error.message); return null; }
-  const used = new Set((data||[]).filter(r=>r.kind==="open").map(r=>r.device_id)).size;
-  const installed = new Set((data||[]).filter(r=>r.kind==="install").map(r=>r.device_id)).size;
-  return { used, installed };
+
+function niceMax(v){
+  if(v <= 5) return 5;
+  const steps = [5,10,20,25,50,100,200,250,500,1000,2000,5000,10000];
+  for(const s of steps) if(v <= s) return s;
+  return Math.ceil(v/1000)*1000;
 }
+const COL_W = 46, CH_H = 200, PAD_T = 22, PAD_B = 40;
+function chartAxisSvg(yMax){
+  const plotH = CH_H-PAD_T-PAD_B;
+  let s = `<svg width="34" height="${CH_H}" viewBox="0 0 34 ${CH_H}" style="display:block">`;
+  [0,0.5,1].forEach(f=>{
+    const y = PAD_T + plotH - f*plotH;
+    s += `<text x="30" y="${y+4}" text-anchor="end" font-size="11" fill="var(--inkSoft)">${Math.round(yMax*f)}</text>`;
+  });
+  return s + `</svg>`;
+}
+function chartPlotSvg(days, field, color, yMax){
+  const W = days.length*COL_W, plotH = CH_H-PAD_T-PAD_B;
+  const yOf = v => PAD_T + plotH - (v/yMax)*plotH;
+  let s = `<svg width="${W}" height="${CH_H}" viewBox="0 0 ${W} ${CH_H}" style="display:block">`;
+  [0,0.5,1].forEach(f=>{ const y = PAD_T+plotH-f*plotH; s += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="${f===0?1.5:1}"/>`; });
+  days.forEach((d,i)=>{
+    const x = i*COL_W + COL_W/2, sel = d.key===statsSel;
+    if(sel) s += `<rect x="${i*COL_W}" y="0" width="${COL_W}" height="${CH_H}" fill="${color}" opacity=".10"/>`;
+    s += `<line x1="${x}" x2="${x}" y1="${PAD_T-6}" y2="${PAD_T+plotH}" stroke="var(--line)" stroke-width="1"/>`;
+    s += `<text x="${x}" y="${CH_H-22}" text-anchor="middle" font-size="12" font-weight="${sel?800:500}" fill="${sel?color:'var(--inkSoft)'}">${d.day}</text>`;
+    if(d.day===1 || i===0) s += `<text x="${x}" y="${CH_H-8}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--inkSoft)">${d.mon}</text>`;
+  });
+  const pts = days.map((d,i)=>[i*COL_W+COL_W/2, yOf(d[field]), d[field], d.key]);
+  if(pts.length > 1) s += `<polyline fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p[0]+","+p[1]).join(" ")}"/>`;
+  pts.forEach(p=>{
+    const sel = p[3]===statsSel;
+    s += `<circle cx="${p[0]}" cy="${p[1]}" r="${sel?5.5:3.5}" fill="${sel?color:'var(--card)'}" stroke="${color}" stroke-width="2"/>`;
+    if(p[2] > 0) s += `<text x="${p[0]}" y="${p[1]-9}" text-anchor="middle" font-size="11" font-weight="700" fill="${color}">${p[2]}</text>`;
+  });
+  days.forEach((d,i)=>{ s += `<rect x="${i*COL_W}" y="0" width="${COL_W}" height="${CH_H}" fill="transparent" data-day="${d.key}" style="cursor:pointer"/>`; });
+  return s + `</svg>`;
+}
+function statsChartBlock(id, title, color, field){
+  const yMax = niceMax(Math.max(...tl.map(d=>d[field]), 0));
+  return `<div class="st-block">
+    <div class="st-title" style="color:${color}">${esc(title)}</div>
+    <div class="st-wrap"><div class="st-axis">${chartAxisSvg(yMax)}</div>
+    <div class="st-scroll" id="${id}">${chartPlotSvg(tl, field, color, yMax)}</div></div></div>`;
+}
+function updateStatsRange(){
+  const a = document.getElementById("stScrollUsers"), lbl = document.getElementById("stRange");
+  if(!a || !lbl || !tl.length) return;
+  const i0 = Math.max(0, Math.floor(a.scrollLeft/COL_W));
+  const i1 = Math.min(tl.length-1, Math.floor((a.scrollLeft + a.clientWidth - 1)/COL_W));
+  const y = keyToDate(tl[i1].key).getFullYear();
+  lbl.textContent = fmtShort(tl[i0].key)+" – "+fmtShort(tl[i1].key)+" "+y;
+}
+function renderStatsCharts(opts){
+  opts = opts || {};
+  const box = document.getElementById("statsCharts");
+  if(!box || !tl.length) return;
+  const old = document.getElementById("stScrollUsers");
+  let left = old ? old.scrollLeft : null;
+  box.innerHTML =
+    statsChartBlock("stScrollUsers", "Users", "#1E6FD9", "used") +
+    statsChartBlock("stScrollInstalls", "Installs", "#D62828", "installed");
+  const a = document.getElementById("stScrollUsers"), b = document.getElementById("stScrollInstalls");
+  if(opts.centerKey){
+    const idx = tl.findIndex(d=>d.key===opts.centerKey);
+    left = idx<0 ? a.scrollWidth : Math.max(0, idx*COL_W - a.clientWidth/2 + COL_W/2);
+  } else if(opts.toEnd || left===null){
+    left = a.scrollWidth;                          // today is at the right-hand end
+  } else if(opts.prepended){
+    left += opts.prepended*COL_W;
+  }
+  a.scrollLeft = left; b.scrollLeft = left;
+  let lock = false;
+  const onScroll = (src, other)=> ()=>{
+    if(!lock){ lock = true; other.scrollLeft = src.scrollLeft; lock = false; }
+    updateStatsRange();
+    if(src.scrollLeft < 240 && !tlLoading) extendBack(CHUNK_DAYS);   // reached the left edge → load older days
+  };
+  a.addEventListener("scroll", onScroll(a,b)); b.addEventListener("scroll", onScroll(b,a));
+  [a,b].forEach(el=> el.addEventListener("click", e=>{
+    const k = e.target && e.target.getAttribute && e.target.getAttribute("data-day");
+    if(k) selectStatsDay(k);
+  }));
+  updateStatsRange();
+}
+function renderDayDetail(d){
+  const box = document.getElementById("statsDay");
+  if(!box) return;
+  if(!d){ box.innerHTML = `<div class="empty">Loading…</div>`; return; }
+  const maxH = Math.max(...d.hours, 1);
+  const bars = d.hours.map((v,i)=>`<div class="hr-col" title="${i}:00 — ${v} device${v===1?"":"s"}"><div class="hr-bar" style="height:${v?Math.max(6,v/maxH*100):2}%"></div><div class="hr-lbl">${i%3===0?i:""}</div></div>`).join("");
+  box.innerHTML = `
+    <div class="st-daytitle">${esc(fmtDayLabel(d.key))}</div>
+    <div class="tstat-grid">
+      <div class="tstat"><div class="tstat-num">${d.users}</div><div class="tstat-label">users (opened the app)</div></div>
+      <div class="tstat"><div class="tstat-num" style="color:var(--red)">${d.installs}</div><div class="tstat-label">new installs</div></div>
+      <div class="tstat"><div class="tstat-num">${d.opens}</div><div class="tstat-label">times opened</div></div>
+      <div class="tstat"><div class="tstat-num">${fmtDuration(d.seconds)}</div><div class="tstat-label">total time · avg ${fmtDuration(d.avgSeconds)}/user</div></div>
+    </div>
+    <div class="st-sub">Active devices by hour of day</div>
+    <div class="hr-chart">${bars}</div>
+    <div class="st-sub">Where time went</div>
+    ${d.featureList.length ? renderFeatureBars(d.featureList) : '<div class="empty">No activity recorded this day.</div>'}`;
+}
+async function selectStatsDay(key){
+  const today = dayKey(Date.now());
+  if(key > today){ toast("That date hasn't happened yet"); const di0 = document.getElementById("stDate"); if(di0) di0.value = statsSel; return; }
+  if(tl.length && key < tl[0].key){
+    if(tlFloor && key < tlFloor){ /* before any data: still show it as an empty day */ }
+    await extendBack(daysBetween(key, tl[0].key) + 3);
+  }
+  statsSel = key;
+  const di = document.getElementById("stDate"); if(di) di.value = key;
+  const ms = document.getElementById("stMonth"), ys = document.getElementById("stYear");
+  const d = keyToDate(key);
+  if(ms) ms.value = String(d.getMonth()); if(ys) ys.value = String(d.getFullYear());
+  renderStatsCharts({ centerKey: tl.some(x=>x.key===key) ? key : null });
+  renderDayDetail(null);
+  const det = await loadDayStats(key);
+  if(statsSel===key && currentTab==="trends") renderDayDetail(det);
+}
+function scrollStatsWeeks(n){
+  const a = document.getElementById("stScrollUsers");
+  if(a) a.scrollBy({ left: n*7*COL_W, behavior:"smooth" });
+}
+async function startStats(){
+  const box = document.getElementById("statsCharts");
+  if(box) box.innerHTML = `<div class="empty">Loading…</div>`;
+  const ok = await initTimeline();
+  if(!ok || currentTab!=="trends") return;
+  statsSel = dayKey(Date.now());
+  renderStatsCharts({ toEnd:true });       // starts on last week and ends on today
+  renderDayDetail(null);
+  const det = await loadDayStats(statsSel);
+  if(currentTab==="trends") renderDayDetail(det);
+}
+
 function renderTrends(){
   const el = document.getElementById("main");
   const todayStr = dayKey(Date.now());
+  const thisYear = new Date().getFullYear();
+  let yearOpts = ""; for(let y=thisYear; y>=thisYear-5; y--) yearOpts += `<option value="${y}">${y}</option>`;
+  const monthOpts = MONTH_NAMES.map((n,i)=>`<option value="${i}">${n}</option>`).join("");
+  tl = []; statsSel = todayStr;
   el.innerHTML = `
   <div class="card" id="trendsStats"><h2>Right now</h2><div class="empty">Loading…</div></div>
   <div class="card" id="trendsFeatures"><h2>Where time goes today</h2><div class="empty">Loading…</div></div>
   <div class="card" id="trendsHistory">
-    <h2>History</h2>
-    <div class="row" style="align-items:flex-end;margin-bottom:10px">
-      <div><label>Look up a date</label><input type="date" id="histDate" max="${todayStr}"></div>
-      <div style="flex:0 0 auto"><button class="btn btn-primary btn-sm" id="histSearchBtn">Search</button></div>
+    <h2>Statistics</h2>
+    <div class="muted" style="margin:-4px 0 8px">Starts from last week and ends on today. Swipe right to go back to older days, swipe left to come forward. Tap a day for its details.</div>
+    <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:6px">
+      <button class="btn btn-ghost btn-sm" id="stBack" title="Back one week">‹ Week</button>
+      <div id="stRange" style="font-size:13px;font-weight:800;text-align:center"></div>
+      <button class="btn btn-ghost btn-sm" id="stFwd" title="Forward one week">Week ›</button>
     </div>
-    <div id="histSearchResult"></div>
-    <div id="histList"><div class="empty">Loading…</div></div>
-  </div>`;
-  document.getElementById("histSearchBtn").onclick = async ()=>{
-    const v = document.getElementById("histDate").value;
-    if(!v){ toast("Pick a date first"); return; }
-    const r = await lookupUsageForDate(v);
-    if(!r) return;
-    document.getElementById("histSearchResult").innerHTML =
-      `<div class="list-item"><strong>${esc(fmtDayLabel(v))}</strong><div class="muted" style="margin-top:4px">${r.used} used it that day · ${r.installed} installed that day</div></div>`;
+    <div id="statsCharts"></div>
+    <div class="row" style="align-items:flex-end;margin-top:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:110px"><label>Jump to month</label><select id="stMonth">${monthOpts}</select></div>
+      <div style="flex:0 0 84px"><label>Year</label><select id="stYear">${yearOpts}</select></div>
+      <button class="btn btn-primary btn-sm" id="stShow">Show</button>
+    </div>
+    <div class="row" style="align-items:flex-end;margin-top:6px;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px"><label>Pick a date</label><input type="date" id="stDate" max="${todayStr}" value="${todayStr}"></div>
+      <button class="btn btn-ghost btn-sm" id="stYesterday">Yesterday</button>
+      <button class="btn btn-ghost btn-sm" id="stToday">Today</button>
+    </div>
+  </div>
+  <div class="card" id="statsDayCard"><h2>Day details</h2><div id="statsDay"><div class="empty">Loading…</div></div></div>`;
+  const q = id=>document.getElementById(id);
+  const n = new Date(); q("stMonth").value = String(n.getMonth()); q("stYear").value = String(n.getFullYear());
+  q("stShow").onclick = ()=>{
+    const y = +q("stYear").value, m = +q("stMonth").value;
+    const first = y+"-"+String(m+1).padStart(2,"0")+"-01";
+    if(first > dayKey(Date.now())){ toast("That month hasn't started yet"); return; }
+    selectStatsDay(first);
   };
+  q("stBack").onclick = ()=>scrollStatsWeeks(-1);
+  q("stFwd").onclick = ()=>scrollStatsWeeks(1);
+  q("stToday").onclick = ()=>selectStatsDay(dayKey(Date.now()));
+  q("stYesterday").onclick = ()=>selectStatsDay(dayKey(Date.now()-24*3600*1000));
+  q("stDate").onchange = ()=>{ const v = q("stDate").value; if(v) selectStatsDay(v); };
+  startStats();
   refreshTrends();
   if(trendsTimer) clearInterval(trendsTimer);
   trendsTimer = setInterval(refreshTrends, 20000);
@@ -1660,7 +1912,18 @@ async function refreshTrends(){
     <h2>Where time goes today</h2>
     ${stats.featureList.length ? renderFeatureBars(stats.featureList) : '<div class="empty">No activity yet today.</div>'}`;
 
-  document.getElementById("histList").innerHTML = renderHistoryList(stats.history);
+  // Keep the newest days live (and roll over to a new day at midnight) without moving the scroll position.
+  if(tl.length && !tlLoading){
+    const today = dayKey(Date.now());
+    const from = addDays(today, -1) < tl[0].key ? tl[0].key : addDays(today, -1);
+    const fresh = await loadRangeStats(from, today);
+    if(fresh && currentTab==="trends" && tl.length){
+      const keep = tl.filter(d=>d.key < from);
+      tl = keep.concat(fresh);
+      renderStatsCharts();
+      if(statsSel===today){ const det = await loadDayStats(today); if(currentTab==="trends" && statsSel===today) renderDayDetail(det); }
+    }
+  }
 }
 function renderFeatureBars(list){
   const max = Math.max(...list.map(([,s])=>s), 1);
@@ -1669,13 +1932,6 @@ function renderFeatureBars(list){
       <div class="trend-bar-label">${esc(fmtFeatureName(feature))}</div>
       <div class="trend-bar-track"><div class="trend-bar-fill" style="width:${Math.max(4,(secs/max*100))}%"></div></div>
       <div class="trend-bar-val">${fmtDuration(secs)}</div>
-    </div>`).join("") + `</div>`;
-}
-function renderHistoryList(history){
-  return `<div class="hist-list">` + history.map(d=>`
-    <div class="hist-row">
-      <div class="hist-day">${esc(fmtDayLabel(d.key))}</div>
-      <div class="hist-nums"><span title="Used it that day">${d.used} used</span><span title="Installed that day">${d.installed} installed</span></div>
     </div>`).join("") + `</div>`;
 }
 
