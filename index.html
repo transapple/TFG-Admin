@@ -1243,11 +1243,11 @@ function dsOpen(x){
 function gate(){
   openMenu(false);setHead('TFG Admin',false);$('menu').hidden=true;$('bell').hidden=true;
   app.innerHTML=`<div class="card" style="margin-top:24px"><h2 style="margin:0 0 4px;font-size:20px">TFG Admin</h2><div class="muted" style="margin-bottom:10px">Sign in once. Everything inside opens without asking again.</div><div id="gt_e"></div>
-  <div class="fl">Email</div><input class="fi" id="gt_u" type="email" autocomplete="username" autocapitalize="off">
+  <div class="fl">Username</div><input class="fi" id="gt_u" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
   <div class="fl">Password</div><input class="fi" id="gt_p" type="password" autocomplete="current-password">
   <button class="btn" id="gt_b">Sign in</button></div>`;
   const go=async()=>{
-    const e=$('gt_u').value.trim(),p=$('gt_p').value;if(!e||!p){toast('Enter email and password');return}
+    let e=$('gt_u').value.trim();const p=$('gt_p').value;if(!e||!p){toast('Enter username and password');return}if(e.indexOf('@')<0)e=e.toLowerCase()+'@tfg.ug';
     $('gt_b').disabled=true;$('gt_b').textContent='Signing in…';
     try{saveSes(await authCall('token?grant_type=password',{email:e,password:p}));await api({action:'ping'});render();loadFeed()}
     catch(x){saveSes(null);gate();$('gt_e').innerHTML=`<div class="note warn">${esc(/not an owner/i.test(x.message)?'This account is not set up as owner.':x.message)}</div>`}};
