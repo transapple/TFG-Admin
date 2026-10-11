@@ -1225,23 +1225,18 @@ setInterval(loadFeed,300000);
 
 
 /* ===== Parent Hub: parents and correction requests (own Supabase project, admin key) ===== */
-const PHB='https://kxsxwefzqyqyxnpwfowd.supabase.co',PHK='sb_publishable_ACK5WYStzJ6Tz-UfqsvKNQ_2hdKN9k8';
 const PHF={parent_name:'Parent full name',parent_dob:'Parent date of birth',child_name:"Child's name",child_dob:"Child's date of birth",child_id:"Child's student ID",other:'Other basic information'};
-let phKey='';try{phKey=sessionStorage.getItem('ph_admin_key')||''}catch(e){}
-async function phRpc(fn,a){let r;try{r=await fetch(PHB+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:PHK,Authorization:'Bearer '+PHK,'Content-Type':'application/json'},body:JSON.stringify(a)})}catch(e){throw new Error('No connection')}
-  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok)throw new Error((j&&j.message)||'Error '+r.status);return j}
 async function phScreen(){
   setHead('Parent Hub',false);
-  if(!phKey){app.innerHTML=`<div class="card"><h3>Parent Hub admin key</h3><p class="muted">Enter the key once for this session.</p><input id="phk" type="password" autocomplete="off" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:12px"><button class="btn" id="phg">Open</button></div>`;
-    $('phg').onclick=()=>{phKey=$('phk').value.trim();if(!phKey)return;try{sessionStorage.setItem('ph_admin_key',phKey)}catch(e){}phScreen()};return}
+  if(!ses.a){gate();return}
   app.innerHTML='<p class="muted">Loading...</p>';
-  let reqs,pars;try{[reqs,pars]=await Promise.all([phRpc('admin_requests',{k:phKey}),phRpc('admin_parents',{k:phKey})])}catch(e){phKey='';try{sessionStorage.removeItem('ph_admin_key')}catch(x){}app.innerHTML=`<div class="card"><h3>Could not open</h3><p class="muted">${esc(e.message)}</p><button class="btn" id="phr">Try again</button></div>`;$('phr').onclick=phScreen;return}
+  let reqs,pars;try{const [a,b]=await Promise.all([api({action:'ph.requests'}),api({action:'ph.parents'})]);reqs=a.requests;pars=b.parents}catch(e){if(!ses.a){gate();return}app.innerHTML=`<div class="card"><h3>Could not open</h3><p class="muted">${esc(e.message)}</p><button class="btn" id="phr">Try again</button></div>`;$('phr').onclick=phScreen;return}
   const pend=reqs.filter(r=>r.status=='pending');
   let h=`<div class="card"><h3>Correction requests</h3><span class="pill ${pend.length?'warn':'ok'}">${pend.length} pending</span><span class="pill soon">${pars.length} parents</span></div><div class="grid" style="margin-top:12px">`;
   h+=reqs.length?reqs.map(r=>`<div class="card"><b>${esc(PHF[r.field]||r.field)}</b> <span class="pill ${r.status=='pending'?'warn':r.status=='approved'?'ok':'bad'}">${esc(r.status)}</span><div class="muted">${esc(r.no)} - ${esc(r.date)}</div><p>${esc(r.value)}</p><div class="muted">${esc(r.parent_name)} (${esc(r.parent_code)}) - ${esc(r.phone)}</div>${r.note?`<div class="muted">Note: ${esc(r.note)}</div>`:''}${r.status=='pending'?`<button class="btn" data-ap="${r.id}">Approve</button><button class="btn danger" data-rj="${r.id}">Reject</button>`:''}</div>`).join(''):'<div class="card muted">No requests yet.</div>';
   h+=`</div><h3 style="margin:16px 0 8px">Parents</h3><div class="grid">`+(pars.length?pars.map(p=>`<div class="card"><b>${esc(p.name)}</b> <span class="pill">${esc(p.code)}</span><div class="muted">${esc(p.phone)} - ${esc(p.village||'')} ${esc(p.district)} - ${p.children} child${p.children==1?'':'ren'} linked</div></div>`).join(''):'<div class="card muted">No parents registered yet.</div>')+'</div>';
   app.innerHTML=h;
-  const go=async(id,ok)=>{const n=prompt(ok?'Note for the parent (optional):':'Reason for rejecting:');if(n===null)return;try{const m=await phRpc('admin_resolve',{k:phKey,rid:id,approve:ok,n});if(m)alert(m);phScreen()}catch(e){alert(e.message)}};
+  const go=async(id,ok)=>{const n=prompt(ok?'Note for the parent (optional):':'Reason for rejecting:');if(n===null)return;try{const r=await api({action:'ph.resolve',id,approve:ok,note:n});if(r.message)alert(r.message);phScreen()}catch(e){alert(e.message)}};
   app.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>go(b.dataset.ap,true));app.querySelectorAll('[data-rj]').forEach(b=>b.onclick=()=>go(b.dataset.rj,false));
 }
 const LIVE={parenthub:phScreen,gh_songs:ghLive,sh_creators:shCreators,schools:schoolsLive,ds_schools:dsSchools,ds_requests:dsRequests,gh_updates:ghUpdates,gh_believers:ghBelievers,gh_safety:ghSafety,gh_activity:ghActivity,sh_content:shContent,sh_community:shCommunity,sh_support:shSupport,sh_admin:shAdmin};
