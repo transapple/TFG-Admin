@@ -98,7 +98,7 @@ textarea{width:100%;min-height:80px;border-radius:12px;border:1px solid var(--li
 <main id="app"></main>
 <div id="toast"></div>
 <script>
-const DATA=[{"slug":"school-manager","name":"My School Manager","account":"Account 1","ref":"huczdzvnzgwunktxcdcj","desc":"School operations system","apps":["My School Manager"],"tables":[["admin_audit",["id","at","action","school_id","school_name","details"]],["admission_applications",["id","application_no","school_id","first_name","last_name","date_of_birth","gender","applying_class_id","previous_school","guardian_name","guardian_phone","notes","status","decision_note","decided_by","decided_at","student_id","created_by","created_at"]],["announcements",["id","school_id","class_id","title","body","created_by","created_at"]],["assessments",["id","school_id","class_id","subject_id","term_id","name","kind","max_score","created_by","created_at"]],["attendance",["id","school_id","student_id","class_id","attendance_date","status","marked_by","updated_at"]],["audit_logs",["id","user_id","school_id","action","table_name","record_id","details","created_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at"]],["classes",["id","school_id","name","stream","academic_year","class_teacher_id","created_at","capacity"]],["ds_config",["id","url","anon_key"]],["ds_links",["school_id","school_key","linked_at","last_push_at","last_pull_at","last_billing_push_at","last_dir_push_at","last_error"]],["ds_photo_state",["student_id","hash"]],["exam_types",["id","school_id","name","kind","created_at","max_score"]],["fee_structures",["id","school_id","term_id","class_id","name","amount"]],["grade_scales",["id","school_id","grade","min_percent","label"]],["guardian_students",["id","school_id","guardian_id","student_id","relationship","created_at"]],["invoices",["id","school_id","student_id","term_id","fee_structure_id","description","amount","created_at"]],["learning_items",["id","school_id","class_id","subject_id","kind","title","body","due_date","created_by","created_at"]],["password_resets",["id","user_id","token_hash","created_at","expires_at","used_at"]],["payments",["id","school_id","student_id","term_id","amount","method","reference","receipt_no","received_by","paid_at"]],["platform_settings",["key","value"]],["profiles",["id","school_id","full_name","role","staff_id","created_at","gender","phone","department","photo_url","signup_role","signup_info","username","dob","address","emergency_name","emergency_phone","qualification","experience_years","occupation","national_id"]],["report_card_archive",["id","school_id","term_id","class_id","student_id","student_name","class_name","term_name","academic_year","overall","overall_grade","rank","snapshot","print_count","first_saved_at","printed_at","printed_by"]],["report_comments",["id","school_id","student_id","term_id","class_teacher_comment","head_comment","updated_by","updated_at","edits"]],["reset_attempts",["k","fails","locked_until","updated_at"]],["results",["id","school_id","assessment_id","student_id","score","entered_by","updated_at"]],["schools",["id","school_code","name","district","level","created_at","location","size_range","status","status_reason","status_changed_at","deleted_at","modules","billing_plan","billing_status","billing_amount","billing_due","billing_note","logo_url","owner_id","motto","mission","vision","core_values","phone","phone2","email","website","address","po_box","brand_color","stamp_url","signature_url","signatory_name","signatory_title","receipt_header","receipt_footer","receipt_show_logo","receipt_show_stamp","registration","report_template"]],["staff_attendance",["id","school_id","staff_id","attendance_date","status","marked_by","updated_at"]],["staff_contacts",["id","school_id","full_name","phone","email","role","staff_id","created_by","created_at","subject_ids","i_am"]],["staff_find_attempts",["k","fails","locked_until","updated_at"]],["student_correction_requests",["id","school_id","student_id","national_student_id","student_name","changes","reason","status","mother_ref","last_error","created_by","created_at","sent_at"]],["student_promotions",["id","school_id","student_id","from_class_id","to_class_id","action","academic_year","created_by","created_at"]],["student_transfers",["id","student_id","national_student_id","student_name","from_school_id","from_school_name","to_school_id","to_school_name","from_class","to_class","prior_status","fee_balance","created_by","created_at","guardian_name","guardian_phone","balance_cleared","cleared_at","cleared_by"]],["students",["id","national_student_id","school_id","first_name","last_name","date_of_birth","gender","class_level","guardian_name","guardian_phone","status","created_at","class_id","user_id","photo_url","deleted_at","status_before_trash","guardian_relationship"]],["subjects",["id","school_id","name","code"]],["teaching_assignments",["id","school_id","class_id","subject_id","teacher_id"]],["terms",["id","school_id","name","academic_year","start_date","end_date"]],["timetable_periods",["id","school_id","period_no","name","start_time","end_time","is_break","created_at"]],["timetable_slots",["id","school_id","class_id","subject_id","teacher_id","period_id","day","created_at"]]],"color":"#1f5eff","inactive":false},{"slug":"digital-students","name":"Digital Students","account":"Account 1","ref":"mwjmqodwrcxrohidonmj","desc":"National student identity (SIN) system","apps":["Digital Students"],"tables":[["school_directory",["id","school_code","name","motto","village","sub_county","district","total_students","total_teachers","my_school_id","is_active","created_at","updated_at","api_key_hash","key_issued_at","last_sync_at","status"]],["school_directory_classes",["id","school_id","name","section"]],["school_directory_subjects",["id","school_id","name"]],["sin_access_windows",["id","school_id","opens_at","closes_at","note","created_at"]],["student_applications",["id","student_id","school_id","kind","status","notes","decision_note","submitted_at","resolved_at"]],["student_attendance",["id","student_id","school_id","attendance_date","status"]],["student_audit_log",["id","student_id","action","detail","at"]],["student_authorizations",["id","student_id","school_id","kind","status","notes","granted_by","requested_at","resolved_at"]],["student_corrections",["id","ref","student_id","changes","reason","status","decision_note","created_at","resolved_at","school_id","submitted_by","submitted_by_name"]],["student_enrollments",["id","student_id","school_id","status","class_name","stream","admission_date","left_date","created_at"]],["student_exam_results",["id","student_id","school_id","subject_name","term_name","exam_name","marks_obtained","max_marks","remarks","exam_date","created_at","external_id"]],["student_fee_records",["id","student_id","school_id","kind","amount","term_name","method","receipt_no","record_date","created_at","external_id","note"]],["student_identities",["id","sin","username","first_name","second_name","other_name","full_name","date_of_birth","gender","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","photo_url","password_hash","must_change_password","failed_attempts","locked_until","two_step_enabled","totp_secret","totp_pending_secret","self_locked","self_locked_at","verified","current_school_id","my_school_student_id","created_at","updated_at","guardians","issued_by_school_id"]],["student_login_attempts",["id","identifier","ok","at"]],["student_notifications",["id","student_id","title","body","type","link","is_read","created_at"]],["student_recovery_requests",["id","ref","student_id","sin","full_name","phone","kind","note","status","created_at","resolved_at"]],["student_sessions",["id","student_id","token_hash","device","remember","created_at","last_seen_at","expires_at","revoked_at"]],["student_timeline",["id","student_id","school_id","kind","summary","at"]],["student_transfer_otps",["id","student_id","otp_hash","duration_minutes","status","failed_attempts","created_at","expires_at","used_at","used_by_school_id"]]],"color":"#7a3cff","inactive":false},{"slug":"shalom-stream","name":"Shalom Stream","account":"Account 2","ref":"ixmyndnerktftrgqopry","desc":"Listener + creator apps","apps":["Shalom Stream","Shalom Admin"],"tables":[["admin_settings",["id","open_access"]],["admins",["user_id"]],["churches",["id","owner_id","name","location","contact_email","description","status","created_at"]],["comment_replies",["id","comment_id","content_id","creator_id","viewer_id","comment_body","body","created_at","read_at"]],["comments",["id","content_id","user_id","author_name","body","created_at"]],["content",["id","creator_id","kind","title","artist_name","speaker","church_name","category","description","duration_seconds","media_url","storage_path","thumbnail_url","meta","viewers","status","permission_confirmed","expires_at","play_count","view_count","download_count","created_at","like_count","genre","album"]],["content_events",["id","content_id","event","user_id","created_at"]],["creator_reset_attempts",["k","at"]],["creators",["id","user_id","type","name","location","description","permission_confirmed","verified","created_at","follower_count","avatar_url","upload_defaults","status","username","phone","category","contact_person","address","website","rejection_reason","reviewed_at"]],["follows",["viewer_id","creator_id","created_at"]],["likes",["viewer_id","content_id","created_at"]],["listener_reset_attempts",["phone","at"]],["live_presence",["viewer_id","content_id","last_seen"]],["playlist_items",["playlist_id","content_id","added_at"]],["playlists",["id","user_id","name","created_at"]],["support_messages",["id","creator_id","user_id","kind","subject","body","status","admin_reply","replied_at","creator_read_at","created_at"]],["trend_settings",["id","start_date","cycle","override","live_hours"]]],"color":"#e0561b","inactive":false},{"slug":"gospel-hymns","name":"Only Believe Gospel Hymns","account":"Account 2","ref":"xdlbeepqqbstchjcepgw","desc":"Hymns and connect community","apps":["Only Believe Gospel Hymns","Only Believe Gospel Hymns Admin"],"tables":[["admin_secret",["id","key_hash","updated_at"]],["believer_auth",["profile_id","believer_id","password_hash","updated_at"]],["believers",["id","name","phone","pastor","device","status","reg_ts"]],["comment_likes",["comment_id","liker_id","created_at"]],["comments",["id","post_id","parent_comment_id","author_id","text","likes","created_at"]],["connect_profiles",["id","name","username","church","pastor","bio","created_at","avatar_url","last_seen","verified","verified_at","badge_color"]],["follows",["follower_id","followee_id","created_at"]],["messages",["id","sender_id","recipient_id","text","kind","audio_url","duration","created_at","delivered_at","read_at"]],["notifications",["id","type","text","ts"]],["post_likes",["post_id","liker_id","created_at"]],["posts",["id","author_id","text","verse","image_url","likes","created_at"]],["reports",["id","kind","post_text","reported_by","from_user","reason","status","ts"]],["restricted",["id","name","phone","pastor","device","reason","ts"]],["songs",["id","lang_code","num","title","key","lyrics","snippet","created_at"]],["update_comments",["id","update_id","device_id","name","text","created_at","admin_reply","replied_at"]],["update_likes",["update_id","device_id","created_at"]],["update_stats",["update_id","likes","views","comments"]],["update_views",["update_id","device_id","created_at"]],["updates",["id","num","text","image_url","created_at","title"]],["usage_events",["id","device_id","kind","feature","ts"]]],"color":"#0f9d6b","inactive":false},{"slug":"excel-exam","name":"Excel Examination Services","account":"Account 3","ref":"vylcldfjzmqusdszhode","desc":"Learning materials and visitors","apps":["Excel Examination Services"],"tables":[["events",["id","visitor_id","session_id","event_type","subject","content_type","record_id","seconds","created_at","query","result_count"]],["materials",["id","hash","file_path","file_name","file_type","file_size","subject","academic_year","summary","confidence","page_count","quality_status","quality_notes","extracted_text_preview","created_at","class_level"]],["messages",["id","name","school_id","message","visitor_id","status","reply","created_at","replied_at"]],["visitors",["visitor_id","first_seen","last_seen","total_seconds","sessions_count","user_agent","last_subject","last_content_type"]]],"color":"#c4871a","inactive":false},{"slug":"excel-exam-primary","name":"Excel Examination Services Primary","account":"Account 4","ref":"ggubkuxgrmsqjccgireu","desc":"Catalog, carts and profiles","apps":["Excel Examination Services Primary"],"tables":[["admin_bootstrap",["id","secret_hash","created_at"]],["analytics_events",["id","event_type","value","device_id","event_date","created_at"]],["app_settings",["id","logo_url","motto","description","whatsapp_number","updated_at"]],["carts",["user_id","cart","updated_at"]],["catalog",["id","name","desc","icon","order","tags","format","formats","contentType","classes","subjects","isNew","isFree","price","isFeatured","deleted","newSince","isPastPaper","examBoard","examYear","isLatestPaper","created_at","updated_at"]],["profiles",["id","full_name","phone","role","created_at","updated_at"]]],"color":"#d6336c","inactive":false},{"slug":"nova-school-manager","name":"Nova School Manager","account":"Account 3","ref":"pjdtlpnlvumpefxjmjpv","desc":"Full school system with mother admin","apps":["Nova School Manager"],"tables":[["academic_years",["id","school_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["account_change_requests",["id","school_id","profile_id","full_name","department","message","status","created_at","resolved_at","deleted_at"]],["activity_log",["id","school_id","table_name","action","record_id","actor_id","actor_name","actor_role","description","details","created_at"]],["ai_conversations",["id","school_id","user_id","title","created_at","deleted_at"]],["ai_messages",["id","conversation_id","role","content","created_at","deleted_at"]],["app_sessions",["id","profile_id","token","created_at","last_seen_at","expires_at","revoked_at","deleted_at"]],["asset_maintenance",["id","school_id","item_id","asset_name","maintenance_date","description","status","cost","performed_by","next_due_date","notes","deleted_at","created_at"]],["attendance",["id","school_id","student_id","class_id","date","status","marked_by","created_at","deleted_at"]],["audit_log",["id","school_id","table_name","record_id","action","performed_by","performed_at","old_data","new_data","performed_by_label","deleted_at"]],["auth_attempts",["id","scope","key","created_at","deleted_at"]],["backup_log",["id","note","created_at","deleted_at"]],["circulars",["id","school_id","title","content","audience_type","audience_ref","published_by","published_at","audience","status","body","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at","deleted_at"]],["classes",["id","school_id","name","level","order_index","capacity","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","section","class_teacher_id","deleted_at"]],["comment_bank",["id","school_id","category","comment_text","context","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["department_nav_access",["department_id","nav_section_code","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["departments",["id","school_id","name","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","access_all","deleted_at"]],["dev_mode",["id","enabled","note","deleted_at"]],["enrollments",["id","school_id","student_id","academic_year_id","term_id","class_id","stream_id","status","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["exam_results",["id","school_id","exam_id","student_id","subject_id","marks_obtained","max_marks","remarks","created_at","component1_marks","component1_max","component2_marks","component2_max","teacher_initials","deleted_at"]],["exam_types",["id","school_id","name","max_score","deleted_at","created_at"]],["exams",["id","school_id","name","exam_type_id","class_id","term_id","exam_date","exam_end_date","deleted_at","created_at"]],["fee_payments",["id","school_id","student_id","term_id","amount_paid","method","note","receipt_no","received_by","payment_date","created_at","deleted_at"]],["fee_reminders",["id","school_id","student_id","title","message","created_by","deleted_at","created_at"]],["fee_structures",["id","school_id","class_id","term_id","item_name","amount","deleted_at","created_at"]],["feedback_responses",["id","feedback_request_id","school_id","user_id","response","submitted_at"]],["grades",["id","school_id","grade","min_score","max_score","remark","deleted_at","created_at"]],["grading_scale",["id","school_id","grade_name","min_score","max_score","comment","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["inventory_items",["id","school_id","module","name","category","location","quantity","unit","condition","reorder_level","unit_value","acquired_date","notes","deleted_at","created_at"]],["library_books",["id","school_id","title","author","category","total_copies","available_copies","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","isbn","publisher","shelf_location","condition","notes","deleted_at"]],["library_loans",["id","school_id","book_id","student_id","borrowed_at","due_date","returned_at","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","book_title","borrower_name","borrower_type","fine_amount","fine_paid","notes","deleted_at"]],["maintenance_windows",["id","starts_at","ends_at","message","cancelled","created_at","deleted_at"]],["mother_admins",["id","username","password_hash","full_name","role","active","created_at","session_token","session_expires_at","is_protected","session_remember","deleted_at"]],["mother_announcements",["id","title","body","target_all","target_school_ids","created_at","deleted_at","target_departments"]],["mother_audit_log",["id","actor_username","action","target_type","target_id","details","created_at","deleted_at"]],["mother_feedback_requests",["id","title","body","target_all","target_school_ids","target_departments","created_at","deleted_at"]],["mother_login_log",["id","username","success","created_at","deleted_at"]],["nav_sections",["code","label","deleted_at"]],["notifications",["id","school_id","user_id","title","body","type","link","is_read","created_at","deleted_at","snooze_until","opened_at","source_table","feedback_request_id"]],["parent_messages",["id","school_id","parent_id","parent_name","department","subject","message","status","created_at","deleted_at"]],["parent_students",["id","school_id","parent_id","student_id","created_at","deleted_at"]],["permissions",["id","code","module","description","deleted_at"]],["platform_changelog",["id","title","description","created_at","deleted_at","target_departments"]],["platform_error_log",["id","school_id","message","context","created_at","deleted_at"]],["prep_attendance",["id","school_id","session_id","session_date","present_count","total_count","recorded_at","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["prep_sessions",["id","school_id","name","kind","days_of_week","start_time","end_time","subject","teacher_name","audience","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["private_messages",["id","parent_id","parent_name","recipient_id","recipient_name","subject","message","status","sender_role","student_id","created_at","school_id","deleted_at"]],["profiles",["id","school_id","role_id","department_id","full_name","username","email","phone","whatsapp","photo_url","status","created_at","updated_at","last_login_at","department","role","position","is_owner","approval_status","pin","password_hash","suspended_at","deleted_at","linked_teacher_id","gender"]],["programs",["id","school_id","title","description","term_id","start_date","end_date","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["push_subscriptions_staff",["id","school_id","profile_id","department","endpoint","p256dh","auth","created_at","deleted_at"]],["report_cards",["id","exam_id","student_id","division","class_teacher_comment","head_teacher_comment","next_term_date","created_at","updated_at","school_id","deleted_at"]],["report_print_batches",["id","school_id","term_id","class_id","printed_by","printed_at","student_count","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["role_permissions",["role_id","permission_id","deleted_at"]],["roles",["id","school_id","name","is_system","is_admin","description","created_at","deleted_at"]],["school_assets",["id","school_id","name","category","location","quantity","condition","notes","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["school_communications",["id","school_id","type","title","message","audience","created_by","deleted_at","created_at"]],["school_events",["id","school_id","month","day","title","subtitle","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["school_meetings",["id","school_id","title","description","meeting_date","location","audience","created_by","deleted_at","created_at"]],["school_payments",["id","school_id","amount","method","note","extended_days","new_expires_at","created_at","deleted_at"]],["school_settings",["school_id","school_name","motto","mission","vision","logo_url","phone","email","address","brand_color","currency_symbol","stamp_head_teacher","stamp_deputy_head_teacher","stamp_bursar","stamp_other","receipt_prefix","receipt_digits","receipt_next_number","student_id_prefix","student_id_seq","student_id_digits","teacher_id_prefix","teacher_id_seq","teacher_id_digits","locked_departments","registration_open","teacher_eval_visibility","updated_at","school_levels","report_template_secondary","report_template_primary","report_template_pre_primary","active_level","deleted_at"]],["school_support_messages",["id","request_id","sender","sender_name","message","created_at","deleted_at"]],["school_support_requests",["id","school_id","subject","message","status","created_at","updated_at","deleted_at"]],["schools",["id","school_code","name","motto","logo_url","village","sub_county","district","size","created_at","updated_at","status","approved_at","plan","billing_cycle","subscription_amount","subscription_expires_at","features","size_range","deleted_at","upgrade_requested_at","upgrade_completed_at","school_levels"]],["sin_corrections",["id","ref","identity_id","school_id","submitted_by","changes","reason","status","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["sin_counters",["prefix","next_n","deleted_at"]],["sin_match_reviews",["id","ref","school_id","submitted_by","candidate","matches","status","resolved_identity_id","resolved_by","resolved_at","resolution_notes","created_at","deleted_at"]],["sin_registry",["sin","identity_id","issued_by","issued_at","deleted_at"]],["sin_transfer_windows",["id","identity_id","school_id","opened_by","opened_at","closes_at","closed_at","closed_by","status","deleted_at"]],["staff_attendance",["id","school_id","teacher_id","date","status","marked_by","created_at","deleted_at"]],["staff_directory",["id","school_id","name","contact","category","role","created_at","deleted_at"]],["streams",["id","school_id","class_id","name","capacity","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["student_applications",["id","student_identity_id","school_id","kind","status","payload","notes","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_authorizations",["id","student_identity_id","school_id","kind","status","requested_by","requested_at","resolved_at","resolved_by","notes","resolution_notes","granted_by","deleted_at"]],["student_identities",["id","sin","full_name","date_of_birth","gender","photo_url","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","medical_info","emergency_name","emergency_relation","emergency_contact","first_school_id","created_at","updated_at","password_hash","portal_status","last_login_at","username","first_name","second_name","other_name","totp_secret","totp_enabled","totp_last_step","must_change_password","self_locked","self_locked_at","suspended_at","suspended_reason","deleted_at","deleted_reason"]],["student_mother_messages",["id","thread_id","sender","sender_name","body","created_at","read_at","deleted_at"]],["student_mother_threads",["id","ref","identity_id","subject","status","created_at","last_message_at","closed_at","closed_by","deleted_at"]],["student_notifications",["id","student_identity_id","school_id","title","body","type","link","is_read","created_at","deleted_at"]],["student_records",["id","student_identity_id","school_id","school_name","kind","source_table","source_id","event_at","summary","detail","created_at","deleted_at"]],["student_recovery_requests",["id","ref","identity_id","typed_sin","typed_name","typed_phone","kind","note","status","created_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_sessions",["id","student_identity_id","token","created_at","last_seen_at","expires_at","revoked_at","device","deleted_at"]],["students",["id","school_id","admission_no","full_name","gender","date_of_birth","class_id","stream_id","previous_school","transfer_reason","village","sub_county","district","photo_url","medical_info","status","admission_date","created_at","updated_at","prev_school","parent_name","parent_relation","parent_contact","guardian_name","guardian_relation","guardian_contact","emergency_name","emergency_relation","emergency_contact","medical_notes","created_by","updated_by","created_by_label","updated_by_label","deleted_at","student_identity_id","sin_status","sin_entered","sin_review_id","balance_cleared_at","balance_cleared_by","sin"]],["subject_allocation",["id","school_id","subject_id","class_id","teacher_id","term_id","created_at","teacher_name","periods","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["subjects",["id","school_id","name","code","level","subject_type","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_assignment",["id","school_id","teacher_id","subject_id","class_id","stream_id","term_id","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_documents",["id","school_id","teacher_id","doc_type","title","file_url","notes","deleted_at","created_at"]],["teacher_evaluation_audit",["id","school_id","evaluation_id","action","actor_profile_id","actor_name","snapshot","created_at","deleted_at"]],["teacher_evaluations",["id","school_id","teacher_id","evaluator_profile_id","evaluator_name","evaluation_date","evaluation_period","scores","overall_score","strengths","areas_for_improvement","recommendation","deleted_at","created_at","updated_at"]],["teacher_identities",["id","nova_id","full_name","national_id_no","date_of_birth","gender","photo_url","created_at","deleted_at"]],["teacher_profiles",["id","school_id","teacher_id","date_of_birth","date_joined","employment_type","current_position","professional_reg_no","years_experience","subjects_specialization","bio","created_at","updated_at","deleted_at"]],["teacher_qualifications",["id","school_id","teacher_id","qualification_name","institution","year_obtained","certificate_url","status","deleted_at","created_at"]],["teachers",["id","school_id","staff_no","full_name","phone","email","gender","specialty","qualification","grade","village","subcounty","district","emergency_name","emergency_relationship","emergency_phone","status","photo_url","teacher_identity_id","nova_teacher_id","deleted_at","created_at","updated_at"]],["teaching_resources",["id","school_id","subject_id","title","file_url","uploaded_by","created_at","kind","qty","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["terms",["id","school_id","academic_year_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["website_visits",["session_id","first_seen","last_seen","seconds_spent","page","referrer","user_agent","created_at","deleted_at"]]],"color":"#0b7a8a","inactive":true}];
+const DATA=[{"slug":"school-manager","name":"My School Manager","account":"Account 1","ref":"huczdzvnzgwunktxcdcj","desc":"School operations system","apps":["My School Manager"],"tables":[["admin_audit",["id","at","action","school_id","school_name","details"]],["admission_applications",["id","application_no","school_id","first_name","last_name","date_of_birth","gender","applying_class_id","previous_school","guardian_name","guardian_phone","notes","status","decision_note","decided_by","decided_at","student_id","created_by","created_at"]],["announcements",["id","school_id","class_id","title","body","created_by","created_at"]],["assessments",["id","school_id","class_id","subject_id","term_id","name","kind","max_score","created_by","created_at"]],["attendance",["id","school_id","student_id","class_id","attendance_date","status","marked_by","updated_at"]],["audit_logs",["id","user_id","school_id","action","table_name","record_id","details","created_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at"]],["classes",["id","school_id","name","stream","academic_year","class_teacher_id","created_at","capacity"]],["ds_config",["id","url","anon_key"]],["ds_links",["school_id","school_key","linked_at","last_push_at","last_pull_at","last_billing_push_at","last_dir_push_at","last_error"]],["ds_photo_state",["student_id","hash"]],["exam_types",["id","school_id","name","kind","created_at","max_score"]],["fee_structures",["id","school_id","term_id","class_id","name","amount"]],["grade_scales",["id","school_id","grade","min_percent","label"]],["invoices",["id","school_id","student_id","term_id","fee_structure_id","description","amount","created_at"]],["learning_items",["id","school_id","class_id","subject_id","kind","title","body","due_date","created_by","created_at"]],["password_resets",["id","user_id","token_hash","created_at","expires_at","used_at"]],["payments",["id","school_id","student_id","term_id","amount","method","reference","receipt_no","received_by","paid_at"]],["platform_settings",["key","value"]],["profiles",["id","school_id","full_name","role","staff_id","created_at","gender","phone","department","photo_url","signup_role","signup_info","username","dob","address","emergency_name","emergency_phone","qualification","experience_years","occupation","national_id"]],["report_card_archive",["id","school_id","term_id","class_id","student_id","student_name","class_name","term_name","academic_year","overall","overall_grade","rank","snapshot","print_count","first_saved_at","printed_at","printed_by"]],["report_comments",["id","school_id","student_id","term_id","class_teacher_comment","head_comment","updated_by","updated_at","edits"]],["reset_attempts",["k","fails","locked_until","updated_at"]],["results",["id","school_id","assessment_id","student_id","score","entered_by","updated_at"]],["schools",["id","school_code","name","district","level","created_at","location","size_range","status","status_reason","status_changed_at","deleted_at","modules","billing_plan","billing_status","billing_amount","billing_due","billing_note","logo_url","owner_id","motto","mission","vision","core_values","phone","phone2","email","website","address","po_box","brand_color","stamp_url","signature_url","signatory_name","signatory_title","receipt_header","receipt_footer","receipt_show_logo","receipt_show_stamp","registration","report_template"]],["staff_attendance",["id","school_id","staff_id","attendance_date","status","marked_by","updated_at"]],["staff_contacts",["id","school_id","full_name","phone","email","role","staff_id","created_by","created_at","subject_ids","i_am"]],["staff_find_attempts",["k","fails","locked_until","updated_at"]],["student_correction_requests",["id","school_id","student_id","national_student_id","student_name","changes","reason","status","mother_ref","last_error","created_by","created_at","sent_at"]],["student_promotions",["id","school_id","student_id","from_class_id","to_class_id","action","academic_year","created_by","created_at"]],["student_transfers",["id","student_id","national_student_id","student_name","from_school_id","from_school_name","to_school_id","to_school_name","from_class","to_class","prior_status","fee_balance","created_by","created_at","guardian_name","guardian_phone","balance_cleared","cleared_at","cleared_by"]],["students",["id","national_student_id","school_id","first_name","last_name","date_of_birth","gender","class_level","guardian_name","guardian_phone","status","created_at","class_id","user_id","photo_url","deleted_at","status_before_trash","guardian_relationship"]],["subjects",["id","school_id","name","code"]],["teaching_assignments",["id","school_id","class_id","subject_id","teacher_id"]],["terms",["id","school_id","name","academic_year","start_date","end_date"]],["timetable_periods",["id","school_id","period_no","name","start_time","end_time","is_break","created_at"]],["timetable_slots",["id","school_id","class_id","subject_id","teacher_id","period_id","day","created_at"]]],"color":"#1f5eff","inactive":false},{"slug":"digital-students","name":"Digital Students","account":"Account 1","ref":"mwjmqodwrcxrohidonmj","desc":"National student identity (SIN) system","apps":["Digital Students"],"tables":[["school_directory",["id","school_code","name","motto","village","sub_county","district","total_students","total_teachers","my_school_id","is_active","created_at","updated_at","api_key_hash","key_issued_at","last_sync_at","status"]],["school_directory_classes",["id","school_id","name","section"]],["school_directory_subjects",["id","school_id","name"]],["sin_access_windows",["id","school_id","opens_at","closes_at","note","created_at"]],["student_applications",["id","student_id","school_id","kind","status","notes","decision_note","submitted_at","resolved_at"]],["student_attendance",["id","student_id","school_id","attendance_date","status"]],["student_audit_log",["id","student_id","action","detail","at"]],["student_authorizations",["id","student_id","school_id","kind","status","notes","granted_by","requested_at","resolved_at"]],["student_corrections",["id","ref","student_id","changes","reason","status","decision_note","created_at","resolved_at","school_id","submitted_by","submitted_by_name"]],["student_enrollments",["id","student_id","school_id","status","class_name","stream","admission_date","left_date","created_at"]],["student_exam_results",["id","student_id","school_id","subject_name","term_name","exam_name","marks_obtained","max_marks","remarks","exam_date","created_at","external_id"]],["student_fee_records",["id","student_id","school_id","kind","amount","term_name","method","receipt_no","record_date","created_at","external_id","note"]],["student_identities",["id","sin","username","first_name","second_name","other_name","full_name","date_of_birth","gender","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","photo_url","password_hash","must_change_password","failed_attempts","locked_until","two_step_enabled","totp_secret","totp_pending_secret","self_locked","self_locked_at","verified","current_school_id","my_school_student_id","created_at","updated_at","guardians","issued_by_school_id"]],["student_login_attempts",["id","identifier","ok","at"]],["student_notifications",["id","student_id","title","body","type","link","is_read","created_at"]],["student_recovery_requests",["id","ref","student_id","sin","full_name","phone","kind","note","status","created_at","resolved_at"]],["student_sessions",["id","student_id","token_hash","device","remember","created_at","last_seen_at","expires_at","revoked_at"]],["student_timeline",["id","student_id","school_id","kind","summary","at"]],["student_transfer_otps",["id","student_id","otp_hash","duration_minutes","status","failed_attempts","created_at","expires_at","used_at","used_by_school_id"]]],"color":"#7a3cff","inactive":false},{"slug":"shalom-stream","name":"Shalom Stream","account":"Account 2","ref":"ixmyndnerktftrgqopry","desc":"Listener + creator apps","apps":["Shalom Stream","Shalom Admin"],"tables":[["admin_settings",["id","open_access"]],["admins",["user_id"]],["churches",["id","owner_id","name","location","contact_email","description","status","created_at"]],["comment_replies",["id","comment_id","content_id","creator_id","viewer_id","comment_body","body","created_at","read_at"]],["comments",["id","content_id","user_id","author_name","body","created_at"]],["content",["id","creator_id","kind","title","artist_name","speaker","church_name","category","description","duration_seconds","media_url","storage_path","thumbnail_url","meta","viewers","status","permission_confirmed","expires_at","play_count","view_count","download_count","created_at","like_count","genre","album"]],["content_events",["id","content_id","event","user_id","created_at"]],["creator_reset_attempts",["k","at"]],["creators",["id","user_id","type","name","location","description","permission_confirmed","verified","created_at","follower_count","avatar_url","upload_defaults","status","username","phone","category","contact_person","address","website","rejection_reason","reviewed_at"]],["follows",["viewer_id","creator_id","created_at"]],["likes",["viewer_id","content_id","created_at"]],["listener_reset_attempts",["phone","at"]],["live_presence",["viewer_id","content_id","last_seen"]],["playlist_items",["playlist_id","content_id","added_at"]],["playlists",["id","user_id","name","created_at"]],["support_messages",["id","creator_id","user_id","kind","subject","body","status","admin_reply","replied_at","creator_read_at","created_at"]],["trend_settings",["id","start_date","cycle","override","live_hours"]]],"color":"#e0561b","inactive":false},{"slug":"gospel-hymns","name":"Only Believe Gospel Hymns","account":"Account 2","ref":"xdlbeepqqbstchjcepgw","desc":"Hymns and connect community","apps":["Only Believe Gospel Hymns","Only Believe Gospel Hymns Admin"],"tables":[["admin_secret",["id","key_hash","updated_at"]],["believer_auth",["profile_id","believer_id","password_hash","updated_at"]],["believers",["id","name","phone","pastor","device","status","reg_ts"]],["comment_likes",["comment_id","liker_id","created_at"]],["comments",["id","post_id","parent_comment_id","author_id","text","likes","created_at"]],["connect_profiles",["id","name","username","church","pastor","bio","created_at","avatar_url","last_seen","verified","verified_at","badge_color"]],["follows",["follower_id","followee_id","created_at"]],["messages",["id","sender_id","recipient_id","text","kind","audio_url","duration","created_at","delivered_at","read_at"]],["notifications",["id","type","text","ts"]],["post_likes",["post_id","liker_id","created_at"]],["posts",["id","author_id","text","verse","image_url","likes","created_at"]],["reports",["id","kind","post_text","reported_by","from_user","reason","status","ts"]],["restricted",["id","name","phone","pastor","device","reason","ts"]],["songs",["id","lang_code","num","title","key","lyrics","snippet","created_at"]],["update_comments",["id","update_id","device_id","name","text","created_at","admin_reply","replied_at"]],["update_likes",["update_id","device_id","created_at"]],["update_stats",["update_id","likes","views","comments"]],["update_views",["update_id","device_id","created_at"]],["updates",["id","num","text","image_url","created_at","title"]],["usage_events",["id","device_id","kind","feature","ts"]]],"color":"#0f9d6b","inactive":false},{"slug":"excel-exam","name":"Excel Examination Services","account":"Account 3","ref":"vylcldfjzmqusdszhode","desc":"Learning materials and visitors","apps":["Excel Examination Services"],"tables":[["events",["id","visitor_id","session_id","event_type","subject","content_type","record_id","seconds","created_at","query","result_count"]],["materials",["id","hash","file_path","file_name","file_type","file_size","subject","academic_year","summary","confidence","page_count","quality_status","quality_notes","extracted_text_preview","created_at","class_level"]],["messages",["id","name","school_id","message","visitor_id","status","reply","created_at","replied_at"]],["visitors",["visitor_id","first_seen","last_seen","total_seconds","sessions_count","user_agent","last_subject","last_content_type"]]],"color":"#c4871a","inactive":false},{"slug":"excel-exam-primary","name":"Excel Examination Services Primary","account":"Account 4","ref":"ggubkuxgrmsqjccgireu","desc":"Catalog, carts and profiles","apps":["Excel Examination Services Primary"],"tables":[["admin_bootstrap",["id","secret_hash","created_at"]],["analytics_events",["id","event_type","value","device_id","event_date","created_at"]],["app_settings",["id","logo_url","motto","description","whatsapp_number","updated_at"]],["carts",["user_id","cart","updated_at"]],["catalog",["id","name","desc","icon","order","tags","format","formats","contentType","classes","subjects","isNew","isFree","price","isFeatured","deleted","newSince","isPastPaper","examBoard","examYear","isLatestPaper","created_at","updated_at"]],["profiles",["id","full_name","phone","role","created_at","updated_at"]]],"color":"#d6336c","inactive":false},{"slug":"nova-school-manager","name":"Nova School Manager","account":"Account 3","ref":"pjdtlpnlvumpefxjmjpv","desc":"Full school system with mother admin","apps":["Nova School Manager"],"tables":[["academic_years",["id","school_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["account_change_requests",["id","school_id","profile_id","full_name","department","message","status","created_at","resolved_at","deleted_at"]],["activity_log",["id","school_id","table_name","action","record_id","actor_id","actor_name","actor_role","description","details","created_at"]],["ai_conversations",["id","school_id","user_id","title","created_at","deleted_at"]],["ai_messages",["id","conversation_id","role","content","created_at","deleted_at"]],["app_sessions",["id","profile_id","token","created_at","last_seen_at","expires_at","revoked_at","deleted_at"]],["asset_maintenance",["id","school_id","item_id","asset_name","maintenance_date","description","status","cost","performed_by","next_due_date","notes","deleted_at","created_at"]],["attendance",["id","school_id","student_id","class_id","date","status","marked_by","created_at","deleted_at"]],["audit_log",["id","school_id","table_name","record_id","action","performed_by","performed_at","old_data","new_data","performed_by_label","deleted_at"]],["auth_attempts",["id","scope","key","created_at","deleted_at"]],["backup_log",["id","note","created_at","deleted_at"]],["circulars",["id","school_id","title","content","audience_type","audience_ref","published_by","published_at","audience","status","body","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at","deleted_at"]],["classes",["id","school_id","name","level","order_index","capacity","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","section","class_teacher_id","deleted_at"]],["comment_bank",["id","school_id","category","comment_text","context","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["department_nav_access",["department_id","nav_section_code","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["departments",["id","school_id","name","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","access_all","deleted_at"]],["dev_mode",["id","enabled","note","deleted_at"]],["enrollments",["id","school_id","student_id","academic_year_id","term_id","class_id","stream_id","status","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["exam_results",["id","school_id","exam_id","student_id","subject_id","marks_obtained","max_marks","remarks","created_at","component1_marks","component1_max","component2_marks","component2_max","teacher_initials","deleted_at"]],["exam_types",["id","school_id","name","max_score","deleted_at","created_at"]],["exams",["id","school_id","name","exam_type_id","class_id","term_id","exam_date","exam_end_date","deleted_at","created_at"]],["fee_payments",["id","school_id","student_id","term_id","amount_paid","method","note","receipt_no","received_by","payment_date","created_at","deleted_at"]],["fee_reminders",["id","school_id","student_id","title","message","created_by","deleted_at","created_at"]],["fee_structures",["id","school_id","class_id","term_id","item_name","amount","deleted_at","created_at"]],["feedback_responses",["id","feedback_request_id","school_id","user_id","response","submitted_at"]],["grades",["id","school_id","grade","min_score","max_score","remark","deleted_at","created_at"]],["grading_scale",["id","school_id","grade_name","min_score","max_score","comment","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["inventory_items",["id","school_id","module","name","category","location","quantity","unit","condition","reorder_level","unit_value","acquired_date","notes","deleted_at","created_at"]],["library_books",["id","school_id","title","author","category","total_copies","available_copies","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","isbn","publisher","shelf_location","condition","notes","deleted_at"]],["library_loans",["id","school_id","book_id","student_id","borrowed_at","due_date","returned_at","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","book_title","borrower_name","borrower_type","fine_amount","fine_paid","notes","deleted_at"]],["maintenance_windows",["id","starts_at","ends_at","message","cancelled","created_at","deleted_at"]],["mother_admins",["id","username","password_hash","full_name","role","active","created_at","session_token","session_expires_at","is_protected","session_remember","deleted_at"]],["mother_announcements",["id","title","body","target_all","target_school_ids","created_at","deleted_at","target_departments"]],["mother_audit_log",["id","actor_username","action","target_type","target_id","details","created_at","deleted_at"]],["mother_feedback_requests",["id","title","body","target_all","target_school_ids","target_departments","created_at","deleted_at"]],["mother_login_log",["id","username","success","created_at","deleted_at"]],["nav_sections",["code","label","deleted_at"]],["notifications",["id","school_id","user_id","title","body","type","link","is_read","created_at","deleted_at","snooze_until","opened_at","source_table","feedback_request_id"]],["parent_messages",["id","school_id","parent_id","parent_name","department","subject","message","status","created_at","deleted_at"]],["parent_students",["id","school_id","parent_id","student_id","created_at","deleted_at"]],["permissions",["id","code","module","description","deleted_at"]],["platform_changelog",["id","title","description","created_at","deleted_at","target_departments"]],["platform_error_log",["id","school_id","message","context","created_at","deleted_at"]],["prep_attendance",["id","school_id","session_id","session_date","present_count","total_count","recorded_at","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["prep_sessions",["id","school_id","name","kind","days_of_week","start_time","end_time","subject","teacher_name","audience","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["private_messages",["id","parent_id","parent_name","recipient_id","recipient_name","subject","message","status","sender_role","student_id","created_at","school_id","deleted_at"]],["profiles",["id","school_id","role_id","department_id","full_name","username","email","phone","whatsapp","photo_url","status","created_at","updated_at","last_login_at","department","role","position","is_owner","approval_status","pin","password_hash","suspended_at","deleted_at","linked_teacher_id","gender"]],["programs",["id","school_id","title","description","term_id","start_date","end_date","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["push_subscriptions_staff",["id","school_id","profile_id","department","endpoint","p256dh","auth","created_at","deleted_at"]],["report_cards",["id","exam_id","student_id","division","class_teacher_comment","head_teacher_comment","next_term_date","created_at","updated_at","school_id","deleted_at"]],["report_print_batches",["id","school_id","term_id","class_id","printed_by","printed_at","student_count","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["role_permissions",["role_id","permission_id","deleted_at"]],["roles",["id","school_id","name","is_system","is_admin","description","created_at","deleted_at"]],["school_assets",["id","school_id","name","category","location","quantity","condition","notes","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["school_communications",["id","school_id","type","title","message","audience","created_by","deleted_at","created_at"]],["school_events",["id","school_id","month","day","title","subtitle","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["school_meetings",["id","school_id","title","description","meeting_date","location","audience","created_by","deleted_at","created_at"]],["school_payments",["id","school_id","amount","method","note","extended_days","new_expires_at","created_at","deleted_at"]],["school_settings",["school_id","school_name","motto","mission","vision","logo_url","phone","email","address","brand_color","currency_symbol","stamp_head_teacher","stamp_deputy_head_teacher","stamp_bursar","stamp_other","receipt_prefix","receipt_digits","receipt_next_number","student_id_prefix","student_id_seq","student_id_digits","teacher_id_prefix","teacher_id_seq","teacher_id_digits","locked_departments","registration_open","teacher_eval_visibility","updated_at","school_levels","report_template_secondary","report_template_primary","report_template_pre_primary","active_level","deleted_at"]],["school_support_messages",["id","request_id","sender","sender_name","message","created_at","deleted_at"]],["school_support_requests",["id","school_id","subject","message","status","created_at","updated_at","deleted_at"]],["schools",["id","school_code","name","motto","logo_url","village","sub_county","district","size","created_at","updated_at","status","approved_at","plan","billing_cycle","subscription_amount","subscription_expires_at","features","size_range","deleted_at","upgrade_requested_at","upgrade_completed_at","school_levels"]],["sin_corrections",["id","ref","identity_id","school_id","submitted_by","changes","reason","status","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["sin_counters",["prefix","next_n","deleted_at"]],["sin_match_reviews",["id","ref","school_id","submitted_by","candidate","matches","status","resolved_identity_id","resolved_by","resolved_at","resolution_notes","created_at","deleted_at"]],["sin_registry",["sin","identity_id","issued_by","issued_at","deleted_at"]],["sin_transfer_windows",["id","identity_id","school_id","opened_by","opened_at","closes_at","closed_at","closed_by","status","deleted_at"]],["staff_attendance",["id","school_id","teacher_id","date","status","marked_by","created_at","deleted_at"]],["staff_directory",["id","school_id","name","contact","category","role","created_at","deleted_at"]],["streams",["id","school_id","class_id","name","capacity","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["student_applications",["id","student_identity_id","school_id","kind","status","payload","notes","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_authorizations",["id","student_identity_id","school_id","kind","status","requested_by","requested_at","resolved_at","resolved_by","notes","resolution_notes","granted_by","deleted_at"]],["student_identities",["id","sin","full_name","date_of_birth","gender","photo_url","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","medical_info","emergency_name","emergency_relation","emergency_contact","first_school_id","created_at","updated_at","password_hash","portal_status","last_login_at","username","first_name","second_name","other_name","totp_secret","totp_enabled","totp_last_step","must_change_password","self_locked","self_locked_at","suspended_at","suspended_reason","deleted_at","deleted_reason"]],["student_mother_messages",["id","thread_id","sender","sender_name","body","created_at","read_at","deleted_at"]],["student_mother_threads",["id","ref","identity_id","subject","status","created_at","last_message_at","closed_at","closed_by","deleted_at"]],["student_notifications",["id","student_identity_id","school_id","title","body","type","link","is_read","created_at","deleted_at"]],["student_records",["id","student_identity_id","school_id","school_name","kind","source_table","source_id","event_at","summary","detail","created_at","deleted_at"]],["student_recovery_requests",["id","ref","identity_id","typed_sin","typed_name","typed_phone","kind","note","status","created_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_sessions",["id","student_identity_id","token","created_at","last_seen_at","expires_at","revoked_at","device","deleted_at"]],["students",["id","school_id","admission_no","full_name","gender","date_of_birth","class_id","stream_id","previous_school","transfer_reason","village","sub_county","district","photo_url","medical_info","status","admission_date","created_at","updated_at","prev_school","parent_name","parent_relation","parent_contact","guardian_name","guardian_relation","guardian_contact","emergency_name","emergency_relation","emergency_contact","medical_notes","created_by","updated_by","created_by_label","updated_by_label","deleted_at","student_identity_id","sin_status","sin_entered","sin_review_id","balance_cleared_at","balance_cleared_by","sin"]],["subject_allocation",["id","school_id","subject_id","class_id","teacher_id","term_id","created_at","teacher_name","periods","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["subjects",["id","school_id","name","code","level","subject_type","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_assignment",["id","school_id","teacher_id","subject_id","class_id","stream_id","term_id","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_documents",["id","school_id","teacher_id","doc_type","title","file_url","notes","deleted_at","created_at"]],["teacher_evaluation_audit",["id","school_id","evaluation_id","action","actor_profile_id","actor_name","snapshot","created_at","deleted_at"]],["teacher_evaluations",["id","school_id","teacher_id","evaluator_profile_id","evaluator_name","evaluation_date","evaluation_period","scores","overall_score","strengths","areas_for_improvement","recommendation","deleted_at","created_at","updated_at"]],["teacher_identities",["id","nova_id","full_name","national_id_no","date_of_birth","gender","photo_url","created_at","deleted_at"]],["teacher_profiles",["id","school_id","teacher_id","date_of_birth","date_joined","employment_type","current_position","professional_reg_no","years_experience","subjects_specialization","bio","created_at","updated_at","deleted_at"]],["teacher_qualifications",["id","school_id","teacher_id","qualification_name","institution","year_obtained","certificate_url","status","deleted_at","created_at"]],["teachers",["id","school_id","staff_no","full_name","phone","email","gender","specialty","qualification","grade","village","subcounty","district","emergency_name","emergency_relationship","emergency_phone","status","photo_url","teacher_identity_id","nova_teacher_id","deleted_at","created_at","updated_at"]],["teaching_resources",["id","school_id","subject_id","title","file_url","uploaded_by","created_at","kind","qty","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["terms",["id","school_id","academic_year_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["website_visits",["session_id","first_seen","last_seen","seconds_spent","page","referrer","user_agent","created_at","deleted_at"]]],"color":"#0b7a8a","inactive":true}];
 const SENS=/(password|passwd|secret|token|key_hash|secret_hash|anon_key|totp|^pin$|otp_hash|^auth$|p256dh|endpoint|api_key)/i;
 const FEATURES=[
  ['Schools','List, open and block schools','S'],
@@ -137,10 +137,12 @@ function drawerHTML(){
   drawer.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>jump({t:b.dataset.go}));
   drawer.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>jump({t:'project',p:+b.dataset.p}));
 }
+function notLive(t){setHead(t,true);app.innerHTML=`<div class="card"><h3>Not connected yet</h3><p class="muted">This screen has no live data yet, so it shows nothing instead of sample records. It will appear here when it is connected.</p></div>`}
 function setHead(t,showBack){title.textContent=t;back.hidden=!showBack;$('menu').hidden=showBack}
 const LOGIN_ON=true; /* login is ON: sign in with the owner account. Set to false only to look at sample screens. */
 function render(){
   if(LOGIN_ON&&!ses.a){gate();return}
+  if(LOGIN_ON&&typeof LIVE!='undefined'&&!LIVE[view.t]&&(view.t=='schools'||view.t=='students'||view.t=='fees'||(typeof GS!='undefined'&&GS[view.t]))){notLive('Not connected');return}
   $('bell').hidden=false;
   drawerHTML();
   if(LOGIN_ON&&typeof LIVE!='undefined'&&LIVE[view.t])LIVE[view.t]();else if(view.t=='home')home();else if(view.t=='features')features();else if(view.t=='schools')schools();else if(view.t=='section')section(view.p,view.n);else if(view.t=='students')students();else if(view.t=='fees')fees();else if(GS[view.t])gscreen(view.t);else if(view.t=='project')project(view.p);else table(view.p,view.j);
@@ -154,16 +156,7 @@ function home(){
   app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>nav({t:'project',p:+b.dataset.p}));
 }
 
-const SCHOOLS=[
- {id:1,app:'school-manager',name:'Sample Hill Primary',code:'SM-0001',district:'Kampala',level:'Primary',status:'active',plan:'Standard',amount:450000,due:'2026-11-15',bill:'paid'},
- {id:2,app:'school-manager',name:'Sample Valley Secondary',code:'SM-0002',district:'Wakiso',level:'Secondary',status:'active',plan:'Premium',amount:900000,due:'2026-10-20',bill:'due'},
- {id:3,app:'school-manager',name:'Sample Lake Nursery',code:'SM-0003',district:'Mukono',level:'Nursery',status:'blocked',reason:'Subscription unpaid for 2 terms',plan:'Basic',amount:200000,due:'2026-08-30',bill:'overdue'},
- {id:4,app:'school-manager',name:'Sample River Primary',code:'SM-0004',district:'Jinja',level:'Primary',status:'pending',plan:'Standard',amount:450000,due:'2026-12-01',bill:'paid'},
- {id:5,app:'nova-school-manager',name:'Sample Star Academy',code:'NV-0001',district:'Kampala',level:'Primary',status:'active',plan:'Premium',amount:1200000,due:'2026-11-30',bill:'paid'},
- {id:6,app:'nova-school-manager',name:'Sample Rock College',code:'NV-0002',district:'Entebbe',level:'Secondary',status:'active',plan:'Standard',amount:700000,due:'2026-10-12',bill:'due'},
- {id:7,app:'nova-school-manager',name:'Sample Dawn Junior',code:'NV-0003',district:'Gulu',level:'Primary',status:'blocked',reason:'Requested by owner',plan:'Basic',amount:300000,due:'2026-09-15',bill:'overdue'},
- {id:8,app:'nova-school-manager',name:'Sample Peak Primary',code:'NV-0004',district:'Mbarara',level:'Primary',status:'pending',plan:'Standard',amount:600000,due:'2026-12-10',bill:'paid'}
-];
+const SCHOOLS=[];
 let sApp='all',sStat='all',sQ='';
 const money=n=>'UGX '+Number(n).toLocaleString('en-US');
 const appBy=slug=>DATA.find(p=>p.slug==slug)||{name:slug,color:'#475467'};
@@ -204,35 +197,7 @@ function schoolSheet(id){
 
 const OKW=['active','approved','promoted','cleared','paid','present','unlocked','printed','done'],BADW=['rejected','suspended','trash','repeated','owing','absent','locked','delete'];
 const pill2=x=>`<span class="pill ${OKW.includes(x)?'ok':BADW.includes(x)?'bad':'warn'}">${x[0].toUpperCase()+x.slice(1)}</span>`;
-const STU={
- students:[
-  {id:1,name:'Sample Learner 01',cls:'P.5',gender:'F',dob:'2015-03-12',guardian:'Parent A',phone:'0700 000 001',rel:'Mother',status:'active',nid:'NSN-0001'},
-  {id:2,name:'Sample Learner 02',cls:'P.5',gender:'M',dob:'2015-07-02',guardian:'Parent B',phone:'0700 000 002',rel:'Father',status:'active',nid:'NSN-0002'},
-  {id:3,name:'Sample Learner 03',cls:'P.6',gender:'F',dob:'2014-11-21',guardian:'Parent C',phone:'0700 000 003',rel:'Guardian',status:'active',nid:'NSN-0003'},
-  {id:4,name:'Sample Learner 04',cls:'P.6',gender:'M',dob:'2014-01-30',guardian:'Parent D',phone:'0700 000 004',rel:'Father',status:'suspended',nid:'NSN-0004'},
-  {id:5,name:'Sample Learner 05',cls:'P.7',gender:'F',dob:'2013-05-09',guardian:'Parent E',phone:'0700 000 005',rel:'Mother',status:'active',nid:'NSN-0005'},
-  {id:6,name:'Sample Learner 06',cls:'P.7',gender:'M',dob:'2013-09-17',guardian:'Parent F',phone:'0700 000 006',rel:'Uncle',status:'transferred',nid:'NSN-0006'},
-  {id:7,name:'Sample Learner 07',cls:'P.4',gender:'F',dob:'2016-02-14',guardian:'Parent G',phone:'0700 000 007',rel:'Mother',status:'active',nid:'NSN-0007'},
-  {id:8,name:'Sample Learner 08',cls:'P.4',gender:'M',dob:'2016-08-25',guardian:'Parent H',phone:'0700 000 008',rel:'Father',status:'active',nid:'NSN-0008'}],
- adm:[
-  {id:1,no:'ADM-2026-001',name:'Sample Applicant 01',cls:'P.1',prev:'None',guardian:'Parent J',phone:'0700 000 011',status:'pending'},
-  {id:2,no:'ADM-2026-002',name:'Sample Applicant 02',cls:'P.3',prev:'Sample Hill Nursery',guardian:'Parent K',phone:'0700 000 012',status:'pending'},
-  {id:3,no:'ADM-2026-003',name:'Sample Applicant 03',cls:'P.5',prev:'Sample Lake Primary',guardian:'Parent L',phone:'0700 000 013',status:'approved',note:'Documents complete'},
-  {id:4,no:'ADM-2026-004',name:'Sample Applicant 04',cls:'S.1',prev:'Sample River Primary',guardian:'Parent M',phone:'0700 000 014',status:'rejected',note:'Class full'}],
- trf:[
-  {id:1,name:'Sample Learner 06',from:'Sample Hill Primary',to:'Sample Star Academy',fc:'P.7',tc:'P.7',bal:150000,cleared:false},
-  {id:2,name:'Sample Learner 09',from:'Sample Rock College',to:'Sample Hill Primary',fc:'S.1',tc:'S.1',bal:0,cleared:true},
-  {id:3,name:'Sample Learner 10',from:'Sample Hill Primary',to:'Sample Peak Primary',fc:'P.3',tc:'P.3',bal:60000,cleared:false}],
- pro:[
-  {id:1,name:'Sample Learner 01',from:'P.4',to:'P.5',action:'promoted',year:'2025/2026'},
-  {id:2,name:'Sample Learner 02',from:'P.4',to:'P.5',action:'promoted',year:'2025/2026'},
-  {id:3,name:'Sample Learner 04',from:'P.6',to:'P.6',action:'repeated',year:'2025/2026'},
-  {id:4,name:'Sample Learner 05',from:'P.6',to:'P.7',action:'promoted',year:'2025/2026'}],
- cor:[
-  {id:1,name:'Sample Learner 03',changes:'Date of birth: 2014-11-21 to 2014-11-12',reason:'Typing mistake at registration',status:'pending'},
-  {id:2,name:'Sample Learner 07',changes:'Guardian phone updated',reason:'Parent changed number',status:'pending'},
-  {id:3,name:'Sample Learner 08',changes:'Gender: M to F',reason:'Wrong entry',status:'rejected',note:'Needs birth certificate'}]
-};
+const STU={students:[],adm:[],trf:[],pro:[],cor:[]};
 const STTABS=[['students','Students'],['adm','Admissions'],['trf','Transfers'],['pro','Promotions'],['cor','Corrections']];
 let stTab='students',stQ='',stF='all';
 const initials=n=>n.replace('Sample ','').split(' ').map(w=>w[0]).join('').slice(0,2);
@@ -301,23 +266,7 @@ function stuSheet(tab,id){
 }
 
 
-const FEE={
- struct:[
-  {id:1,cls:'P.5',term:'Term 1',item:'Tuition',amount:350000},
-  {id:2,cls:'P.5',term:'Term 1',item:'Lunch',amount:120000},
-  {id:3,cls:'P.6',term:'Term 1',item:'Tuition',amount:380000},
-  {id:4,cls:'P.7',term:'Term 1',item:'Tuition',amount:420000},
-  {id:5,cls:'P.7',term:'Term 1',item:'Exam fee',amount:50000}],
- inv:[
-  {id:1,name:'Sample Learner 01',desc:'Tuition, Term 1',amount:350000,paid:350000},
-  {id:2,name:'Sample Learner 02',desc:'Tuition + Lunch, Term 1',amount:470000,paid:200000},
-  {id:3,name:'Sample Learner 03',desc:'Tuition, Term 1',amount:380000,paid:0},
-  {id:4,name:'Sample Learner 05',desc:'Tuition + Exam fee, Term 1',amount:470000,paid:470000}],
- pay:[
-  {id:1,name:'Sample Learner 01',amount:350000,method:'Cash',rcpt:'RC-0001',date:'2026-09-02'},
-  {id:2,name:'Sample Learner 02',amount:200000,method:'Mobile money',rcpt:'RC-0002',date:'2026-09-05'},
-  {id:3,name:'Sample Learner 05',amount:470000,method:'Bank',rcpt:'RC-0003',date:'2026-09-09'}]
-};
+const FEE={struct:[],inv:[],pay:[]};
 const FTABS=[['inv','Invoices'],['pay','Payments'],['struct','Fee structure']];
 let fTab='inv';
 function fees(){
@@ -387,125 +336,76 @@ function gscreen(key){
 const setStatus=(x,st,msg)=>{x.status=st;return msg};
 const GS={
  staff:{title:'Staff & Accounts',tabs:[
-  {k:'staff',l:'Staff',items:[
-    {id:1,name:'Sample Head Teacher',role:'Head teacher',dept:'Administration',phone:'0700 100 001',status:'active'},
-    {id:2,name:'Sample Teacher 01',role:'Teacher',dept:'Academics',phone:'0700 100 002',status:'active'},
-    {id:3,name:'Sample Teacher 02',role:'Teacher',dept:'Academics',phone:'0700 100 003',status:'active'},
-    {id:4,name:'Sample Bursar',role:'Bursar',dept:'Finance',phone:'0700 100 004',status:'active'},
-    {id:5,name:'Sample Secretary',role:'Secretary',dept:'Administration',phone:'0700 100 005',status:'suspended'}],
+  {k:'staff',l:'Staff',items:[],
    card:x=>({t:x.name,s:`${x.role} · ${x.dept}`,p:pill2(x.status)}),
    detail:x=>[['Role',esc(x.role)],['Department',esc(x.dept)],['Phone',x.phone],['Status',pill2(x.status)]],
    actions:x=>x.status=='active'?[{l:'Suspend account',c:'danger',run:x=>setStatus(x,'suspended',x.name+' suspended')}]:[{l:'Reactivate account',run:x=>setStatus(x,'active',x.name+' reactivated')}]},
-  {k:'contacts',l:'Contacts',items:[
-    {id:1,name:'Sample Driver',role:'Transport',phone:'0700 200 001',email:'driver@sample.test'},
-    {id:2,name:'Sample Nurse',role:'Health',phone:'0700 200 002',email:'nurse@sample.test'}],
+  {k:'contacts',l:'Contacts',items:[],
    card:x=>({t:x.name,s:`${x.role} · ${x.phone}`}),detail:x=>[['Role',esc(x.role)],['Phone',x.phone],['Email',esc(x.email)]],
    add:{l:'Add contact',fields:[{k:'name',l:'Name'},{k:'role',l:'Role'},{k:'phone',l:'Phone'},{k:'email',l:'Email'}],make:v=>v}},
-  {k:'assign',l:'Assignments',items:[
-    {id:1,teacher:'Sample Teacher 01',cls:'P.5',subject:'Mathematics'},
-    {id:2,teacher:'Sample Teacher 01',cls:'P.6',subject:'Mathematics'},
-    {id:3,teacher:'Sample Teacher 02',cls:'P.5',subject:'English'}],
+  {k:'assign',l:'Assignments',items:[],
    card:x=>({t:x.teacher,s:`${x.cls} · ${x.subject}`}),detail:x=>[['Teacher',esc(x.teacher)],['Class',x.cls],['Subject',esc(x.subject)]],
    actions:x=>[{l:'Remove assignment',c:'danger',run:x=>{GS.staff.tabs[2].items.splice(GS.staff.tabs[2].items.indexOf(x),1);return 'assignment removed'}}],
    add:{l:'Add assignment',fields:[{k:'teacher',l:'Teacher',o:()=>GS.staff.tabs[0].items.filter(i=>i.role=='Teacher').map(i=>i.name)},{k:'cls',l:'Class',o:['P.4','P.5','P.6','P.7']},{k:'subject',l:'Subject',o:['Mathematics','English','Science','Social Studies']}],make:v=>v}},
-  {k:'locks',l:'Locked accounts',items:[
-    {id:1,who:'sample.teacher02',kind:'Password reset',fails:5,until:'2026-10-10 18:00',status:'locked'},
-    {id:2,who:'sample.bursar',kind:'Staff lookup',fails:4,until:'2026-10-10 17:30',status:'locked'}],
+  {k:'locks',l:'Locked accounts',items:[],
    card:x=>({t:x.who,s:`${x.kind} · ${x.fails} failed tries`,p:pill2(x.status),av:'!'}),detail:x=>[['Account',esc(x.who)],['Reason',x.kind],['Failed tries',x.fails],['Locked until',x.until],['Status',pill2(x.status)]],
    actions:x=>x.status=='locked'?[{l:'Unlock now',run:x=>{x.fails=0;return setStatus(x,'unlocked',x.who+' unlocked')}}]:[]}
  ]},
  academics:{title:'Classes & Learning',tabs:[
-  {k:'classes',l:'Classes',items:[
-    {id:1,name:'P.4',stream:'A',year:'2026',cap:50,teacher:'Sample Teacher 03'},
-    {id:2,name:'P.5',stream:'A',year:'2026',cap:50,teacher:'Sample Teacher 01'},
-    {id:3,name:'P.6',stream:'A',year:'2026',cap:45,teacher:'Sample Teacher 02'},
-    {id:4,name:'P.7',stream:'A',year:'2026',cap:45,teacher:'Sample Teacher 04'}],
+  {k:'classes',l:'Classes',items:[],
    card:x=>({t:`${x.name} ${x.stream}`,s:`Capacity ${x.cap} · ${x.teacher}`,av:x.name}),detail:x=>[['Class',x.name],['Stream',x.stream],['Year',x.year],['Capacity',x.cap],['Class teacher',esc(x.teacher)]],
    add:{l:'Add class',fields:[{k:'name',l:'Class name',ph:'e.g. P.3'},{k:'stream',l:'Stream',ph:'e.g. A'},{k:'year',l:'Academic year',ph:'2026'},{k:'cap',l:'Capacity',n:1},{k:'teacher',l:'Class teacher'}],make:v=>v}},
-  {k:'subjects',l:'Subjects',items:[
-    {id:1,name:'Mathematics',code:'MTC'},{id:2,name:'English',code:'ENG'},{id:3,name:'Science',code:'SCI'},{id:4,name:'Social Studies',code:'SST'}],
+  {k:'subjects',l:'Subjects',items:[],
    card:x=>({t:x.name,s:'Code '+x.code,av:x.code}),detail:x=>[['Subject',esc(x.name)],['Code',x.code]],
    add:{l:'Add subject',fields:[{k:'name',l:'Subject name'},{k:'code',l:'Code',ph:'e.g. REL'}],make:v=>v}},
-  {k:'terms',l:'Terms',items:[
-    {id:1,name:'Term 1',year:'2026',start:'2026-02-02',end:'2026-05-08'},
-    {id:2,name:'Term 2',year:'2026',start:'2026-05-25',end:'2026-08-21'},
-    {id:3,name:'Term 3',year:'2026',start:'2026-09-07',end:'2026-12-04'}],
+  {k:'terms',l:'Terms',items:[],
    card:x=>({t:`${x.name} ${x.year}`,s:`${x.start} to ${x.end}`,av:x.name.replace('Term ','T')}),detail:x=>[['Term',x.name],['Year',x.year],['Starts',x.start],['Ends',x.end]],
    add:{l:'Add term',fields:[{k:'name',l:'Name',ph:'Term 1'},{k:'year',l:'Year',ph:'2027'},{k:'start',l:'Start date',ph:'YYYY-MM-DD'},{k:'end',l:'End date',ph:'YYYY-MM-DD'}],make:v=>v}},
-  {k:'periods',l:'Timetable',items:[
-    {id:1,no:1,name:'Period 1',time:'08:00 to 08:40',brk:false},{id:2,no:2,name:'Period 2',time:'08:40 to 09:20',brk:false},
-    {id:3,no:3,name:'Break',time:'09:20 to 09:50',brk:true},{id:4,no:4,name:'Period 3',time:'09:50 to 10:30',brk:false}],
+  {k:'periods',l:'Timetable',items:[],
    card:x=>({t:x.name,s:x.time,p:x.brk?'<span class="pill warn">Break</span>':'',av:String(x.no)}),detail:x=>[['Order',x.no],['Time',x.time],['Break',x.brk?'Yes':'No']],
    add:{l:'Add period',fields:[{k:'name',l:'Name',ph:'Period 5'},{k:'time',l:'Time',ph:'10:30 to 11:10'}],make:v=>({no:99,name:v.name,time:v.time,brk:false})}},
-  {k:'learning',l:'Learning',items:[
-    {id:1,kind:'Assignment',title:'Fractions worksheet',cls:'P.5',subject:'Mathematics',due:'2026-10-16'},
-    {id:2,kind:'Notes',title:'Parts of a plant',cls:'P.6',subject:'Science',due:''}],
+  {k:'learning',l:'Learning',items:[],
    card:x=>({t:x.title,s:`${x.kind} · ${x.cls} · ${x.subject}`,p:x.due?`<span class="pill">Due ${x.due}</span>`:''}),detail:x=>[['Type',x.kind],['Class',x.cls],['Subject',esc(x.subject)],['Due',x.due||'None']],
    add:{l:'Add learning item',fields:[{k:'kind',l:'Type',o:['Assignment','Notes','Quiz']},{k:'title',l:'Title'},{k:'cls',l:'Class',o:['P.4','P.5','P.6','P.7']},{k:'subject',l:'Subject',o:['Mathematics','English','Science','Social Studies']}],make:v=>Object.assign(v,{due:''})}},
-  {k:'ann',l:'Announcements',items:[
-    {id:1,title:'Term 3 begins',body:'School reopens on 7 September.',cls:'All classes'},
-    {id:2,title:'Parents meeting',body:'Saturday 18 October, 10:00.',cls:'All classes'}],
+  {k:'ann',l:'Announcements',items:[],
    card:x=>({t:x.title,s:x.body,av:'!'}),detail:x=>[['Audience',x.cls],['Message',esc(x.body)]],
    actions:x=>[{l:'Delete announcement',c:'danger',run:x=>{const a=GS.academics.tabs[5].items;a.splice(a.indexOf(x),1);return 'announcement deleted'}}],
    add:{l:'New announcement',fields:[{k:'title',l:'Title'},{k:'body',l:'Message'},{k:'cls',l:'Audience',o:['All classes','P.4','P.5','P.6','P.7']}],make:v=>v}}
  ]},
  exams:{title:'Exams & Reports',tabs:[
-  {k:'assess',l:'Assessments',items:[
-    {id:1,name:'Mid-term Maths',kind:'Test',cls:'P.5',subject:'Mathematics',term:'Term 3',max:100},
-    {id:2,name:'English Composition',kind:'Assignment',cls:'P.6',subject:'English',term:'Term 3',max:50}],
+  {k:'assess',l:'Assessments',items:[],
    card:x=>({t:x.name,s:`${x.cls} · ${x.subject} · ${x.term} · out of ${x.max}`}),detail:x=>[['Type',x.kind],['Class',x.cls],['Subject',esc(x.subject)],['Term',x.term],['Max score',x.max]],
    add:{l:'Add assessment',fields:[{k:'name',l:'Name'},{k:'kind',l:'Type',o:['Test','Assignment','Exam']},{k:'cls',l:'Class',o:['P.4','P.5','P.6','P.7']},{k:'subject',l:'Subject',o:['Mathematics','English','Science','Social Studies']},{k:'term',l:'Term',o:['Term 1','Term 2','Term 3']},{k:'max',l:'Max score',n:1}],make:v=>v}},
-  {k:'results',l:'Results',items:[
-    {id:1,student:'Sample Learner 01',assess:'Mid-term Maths',score:82,max:100},
-    {id:2,student:'Sample Learner 02',assess:'Mid-term Maths',score:67,max:100},
-    {id:3,student:'Sample Learner 03',assess:'English Composition',score:41,max:50}],
+  {k:'results',l:'Results',items:[],
    card:x=>({t:x.student,s:`${x.assess}: ${x.score}/${x.max}`,p:`<span class="pill ${x.score/x.max>=.5?'ok':'bad'}">${Math.round(x.score/x.max*100)}%</span>`}),
    detail:x=>[['Assessment',esc(x.assess)],['Score',`${x.score} / ${x.max}`]],
    add:{l:'Enter a result',fields:[{k:'student',l:'Student',o:()=>['Sample Learner 01','Sample Learner 02','Sample Learner 03','Sample Learner 05']},{k:'assess',l:'Assessment',o:()=>GS.exams.tabs[0].items.map(a=>a.name)},{k:'score',l:'Score',n:1}],make:v=>Object.assign(v,{max:(GS.exams.tabs[0].items.find(a=>a.name==v.assess)||{max:100}).max})}},
-  {k:'grades',l:'Grading',items:[
-    {id:1,grade:'D1',min:80,label:'Distinction'},{id:2,grade:'D2',min:70,label:'Very good'},{id:3,grade:'C3',min:60,label:'Good'},{id:4,grade:'P7',min:40,label:'Pass'},{id:5,grade:'F9',min:0,label:'Fail'}],
+  {k:'grades',l:'Grading',items:[],
    card:x=>({t:`${x.grade}: ${x.label}`,s:`From ${x.min}%`,av:x.grade}),detail:x=>[['Grade',x.grade],['Minimum percent',x.min],['Label',esc(x.label)]],
    add:{l:'Add grade',fields:[{k:'grade',l:'Grade',ph:'e.g. C4'},{k:'min',l:'Minimum percent',n:1},{k:'label',l:'Label'}],make:v=>v}},
-  {k:'types',l:'Exam types',items:[
-    {id:1,name:'Mid-term',kind:'Test',max:100},{id:2,name:'End of term',kind:'Exam',max:100},{id:3,name:'Quiz',kind:'Quiz',max:20}],
+  {k:'types',l:'Exam types',items:[],
    card:x=>({t:x.name,s:`${x.kind} · out of ${x.max}`}),detail:x=>[['Name',x.name],['Kind',x.kind],['Max score',x.max]],
    add:{l:'Add exam type',fields:[{k:'name',l:'Name'},{k:'kind',l:'Kind',o:['Test','Exam','Quiz']},{k:'max',l:'Max score',n:1}],make:v=>v}},
-  {k:'cards',l:'Report cards',items:[
-    {id:1,student:'Sample Learner 01',cls:'P.5',term:'Term 2 2026',overall:78,grade:'D2',rank:3,prints:1},
-    {id:2,student:'Sample Learner 02',cls:'P.5',term:'Term 2 2026',overall:64,grade:'C3',rank:9,prints:0},
-    {id:3,student:'Sample Learner 05',cls:'P.7',term:'Term 2 2026',overall:85,grade:'D1',rank:1,prints:2}],
+  {k:'cards',l:'Report cards',items:[],
    card:x=>({t:x.student,s:`${x.cls} · ${x.term} · ${x.overall}% · ${x.grade} · rank ${x.rank}`,p:pill2(x.prints?'printed':'pending')}),
    detail:x=>[['Class',x.cls],['Term',x.term],['Overall',x.overall+'%'],['Grade',x.grade],['Rank',x.rank],['Times printed',x.prints]],
    actions:x=>[{l:'Mark as printed',run:x=>{x.prints++;return 'report card for '+x.student+' marked printed'}}]},
-  {k:'comments',l:'Comments',items:[
-    {id:1,student:'Sample Learner 01',ct:'Hardworking and polite.',head:'Keep it up.'},
-    {id:2,student:'Sample Learner 02',ct:'Needs more practice in Maths.',head:''}],
+  {k:'comments',l:'Comments',items:[],
    card:x=>({t:x.student,s:x.ct,p:x.head?'':'<span class="pill warn">No head teacher comment</span>'}),
    detail:x=>[['Class teacher',esc(x.ct)],['Head teacher',esc(x.head||'None yet')]],
    actions:x=>[{l:'Save head teacher comment',note:'required',ph:'Head teacher comment',run:(x,n)=>{x.head=n;return 'comment saved for '+x.student}}]}
  ]},
  attendance:{title:'Attendance',stats:()=>{const a=GS.attendance.tabs[0].items,p=a.filter(x=>x.status=='present').length;return [['Present',p],['Absent',a.filter(x=>x.status=='absent').length],['Late',a.filter(x=>x.status=='late').length],['Rate',Math.round(p/a.length*100)+'%']]},
   tabs:[
-  {k:'students',l:'Students today',items:[
-    {id:1,name:'Sample Learner 01',cls:'P.5',status:'present'},{id:2,name:'Sample Learner 02',cls:'P.5',status:'present'},
-    {id:3,name:'Sample Learner 03',cls:'P.6',status:'absent'},{id:4,name:'Sample Learner 04',cls:'P.6',status:'late'},
-    {id:5,name:'Sample Learner 05',cls:'P.7',status:'present'},{id:6,name:'Sample Learner 07',cls:'P.4',status:'present'}],
+  {k:'students',l:'Students today',items:[],
    card:x=>({t:x.name,s:x.cls,p:pill2(x.status)}),detail:x=>[['Class',x.cls],['Today',pill2(x.status)]],
    actions:x=>['present','absent','late'].filter(st=>st!=x.status).map(st=>({l:'Mark '+st,c:st=='present'?'':'ghost',run:x=>setStatus(x,st,x.name+' marked '+st)}))},
-  {k:'staff',l:'Staff today',items:[
-    {id:1,name:'Sample Head Teacher',status:'present'},{id:2,name:'Sample Teacher 01',status:'present'},
-    {id:3,name:'Sample Teacher 02',status:'absent'},{id:4,name:'Sample Bursar',status:'late'}],
+  {k:'staff',l:'Staff today',items:[],
    card:x=>({t:x.name,s:'Staff',p:pill2(x.status)}),detail:x=>[['Today',pill2(x.status)]],
    actions:x=>['present','absent','late'].filter(st=>st!=x.status).map(st=>({l:'Mark '+st,c:st=='present'?'':'ghost',run:x=>setStatus(x,st,x.name+' marked '+st)}))}
  ]},
  audit:{title:'System & Audit',tabs:[
-  {k:'log',l:'Audit trail',items:[
-    {id:1,action:'update',table:'schools',who:'Sample Admin',time:'2026-10-10 08:12',details:'Status changed to blocked'},
-    {id:2,action:'create',table:'payments',who:'Sample Bursar',time:'2026-10-10 08:40',details:'New payment recorded'},
-    {id:3,action:'delete',table:'announcements',who:'Sample Head Teacher',time:'2026-10-09 15:05',details:'Announcement removed'},
-    {id:4,action:'update',table:'students',who:'Sample Secretary',time:'2026-10-09 11:30',details:'Guardian phone changed'},
-    {id:5,action:'create',table:'admission_applications',who:'Sample Secretary',time:'2026-10-08 10:02',details:'New application'},
-    {id:6,action:'update',table:'results',who:'Sample Teacher 01',time:'2026-10-08 09:15',details:'Score corrected'}],
+  {k:'log',l:'Audit trail',items:[],
    card:x=>({t:`${x.action[0].toUpperCase()+x.action.slice(1)} in ${x.table}`,s:`${x.who} · ${x.time}`,p:`<span class="pill ${x.action=='delete'?'bad':x.action=='create'?'ok':'warn'}">${x.action}</span>`,av:x.action[0].toUpperCase()}),
    detail:x=>[['Action',x.action],['Table',x.table],['By',esc(x.who)],['When',x.time],['Details',esc(x.details)]]}
  ]}
@@ -516,70 +416,55 @@ const GS={
 const shOk=x=>x.status;
 Object.assign(GS,{
  sh_creators:{app:'shalom-stream',title:'Creators & Churches',stats:()=>{const c=GS.sh_creators.tabs[0].items;return [['Creators',c.length],['Pending',c.filter(x=>x.status=='pending').length],['Verified',c.filter(x=>x.verified).length]]},tabs:[
-  {k:'creators',l:'Creators',items:[
-    {id:1,name:'Sample Choir One',type:'Choir',cat:'Worship',loc:'Kampala',followers:420,status:'approved',verified:true},
-    {id:2,name:'Sample Preacher Two',type:'Preacher',cat:'Sermons',loc:'Jinja',followers:130,status:'pending',verified:false},
-    {id:3,name:'Sample Artist Three',type:'Artist',cat:'Gospel',loc:'Gulu',followers:85,status:'pending',verified:false},
-    {id:4,name:'Sample Band Four',type:'Band',cat:'Worship',loc:'Mbale',followers:12,status:'rejected',verified:false,note:'Incomplete details'}],
+  {k:'creators',l:'Creators',items:[],
    card:x=>({t:x.name,s:`${x.type} · ${x.cat} · ${x.loc} · ${x.followers} followers`,p:pill2(x.status)+(x.verified?'<span class="pill ok">Verified</span>':'')}),
    detail:x=>[['Type',x.type],['Category',x.cat],['Location',x.loc],['Followers',x.followers],['Status',pill2(x.status)],['Verified',x.verified?'Yes':'No']].concat(x.note?[['Rejection reason',esc(x.note)]]:[]),
    actions:x=>(x.status=='pending'?[{l:'Approve creator',run:x=>setStatus(x,'approved',x.name+' approved')},{l:'Reject (reason required)',c:'danger',note:'required',ph:'Reason for rejecting',run:(x,n)=>{x.note=n;return setStatus(x,'rejected',x.name+' rejected')}}]:[]).concat(x.status=='approved'?[{l:x.verified?'Remove verified badge':'Give verified badge',c:'ghost',run:x=>{x.verified=!x.verified;return x.name+(x.verified?' verified':' unverified')}}]:[])},
-  {k:'churches',l:'Churches',items:[
-    {id:1,name:'Sample Chapel A',loc:'Kampala',email:'a@sample.test',status:'approved'},
-    {id:2,name:'Sample Church B',loc:'Entebbe',email:'b@sample.test',status:'pending'}],
+  {k:'churches',l:'Churches',items:[],
    card:x=>({t:x.name,s:`${x.loc} · ${x.email}`,p:pill2(x.status)}),detail:x=>[['Location',x.loc],['Contact',esc(x.email)],['Status',pill2(x.status)]],
    actions:x=>x.status=='pending'?[{l:'Approve church',run:x=>setStatus(x,'approved',x.name+' approved')},{l:'Reject',c:'danger',run:x=>setStatus(x,'rejected',x.name+' rejected')}]:[]},
-  {k:'locks',l:'Locked creators',items:[{id:1,who:'sample.creator7',tries:5,status:'locked'}],
+  {k:'locks',l:'Locked creators',items:[],
    card:x=>({t:x.who,s:`${x.tries} failed password resets`,p:pill2(x.status),av:'!'}),detail:x=>[['Account',esc(x.who)],['Failed tries',x.tries],['Status',pill2(x.status)]],
    actions:x=>x.status=='locked'?[{l:'Unlock now',run:x=>{x.tries=0;return setStatus(x,'unlocked',x.who+' unlocked')}}]:[]}
  ]},
  sh_content:{app:'shalom-stream',title:'Content & Trending',stats:()=>{const c=GS.sh_content.tabs[0].items;return [['Items',c.length],['Plays',c.reduce((n,x)=>n+x.plays,0)],['Likes',c.reduce((n,x)=>n+x.likes,0)]]},tabs:[
-  {k:'content',l:'Content',items:[
-    {id:1,title:'Sample Praise Song',kind:'Song',by:'Sample Choir One',cat:'Worship',plays:1200,likes:96,downloads:40,status:'published'},
-    {id:2,title:'Sample Sunday Sermon',kind:'Sermon',by:'Sample Preacher Two',cat:'Sermons',plays:310,likes:22,downloads:5,status:'published'},
-    {id:3,title:'Sample New Upload',kind:'Song',by:'Sample Artist Three',cat:'Gospel',plays:0,likes:0,downloads:0,status:'pending'},
-    {id:4,title:'Sample Reported Video',kind:'Video',by:'Sample Band Four',cat:'Worship',plays:55,likes:1,downloads:0,status:'removed'}],
+  {k:'content',l:'Content',items:[],
    card:x=>({t:x.title,s:`${x.kind} · ${x.by} · ${x.plays} plays`,p:pill2(x.status=='published'?'active':x.status=='removed'?'rejected':'pending').replace(/>[A-Za-z]+</,'>'+x.status[0].toUpperCase()+x.status.slice(1)+'<')}),
    detail:x=>[['Type',x.kind],['By',esc(x.by)],['Category',x.cat],['Plays',x.plays],['Likes',x.likes],['Downloads',x.downloads],['Status',x.status]],
    actions:x=>x.status=='pending'?[{l:'Publish',run:x=>setStatus(x,'published',x.title+' published')},{l:'Reject',c:'danger',run:x=>setStatus(x,'removed',x.title+' rejected')}]:x.status=='published'?[{l:'Remove content',c:'danger',run:x=>setStatus(x,'removed',x.title+' removed')}]:[{l:'Restore content',run:x=>setStatus(x,'published',x.title+' restored')}]},
-  {k:'trend',l:'Trending',items:[{id:1,start:'2026-10-01',cycle:7,override:false,live:24}],
+  {k:'trend',l:'Trending',items:[],
    card:x=>({t:'Trending settings',s:`Every ${x.cycle} days · live window ${x.live} hours`,p:x.override?'<span class="pill warn">Manual override on</span>':'',av:'T'}),
    detail:x=>[['Cycle starts',x.start],['Cycle length',x.cycle+' days'],['Live window',x.live+' hours'],['Manual override',x.override?'On':'Off']],
    actions:x=>[{l:x.override?'Turn manual override off':'Turn manual override on',run:x=>{x.override=!x.override;return 'override '+(x.override?'on':'off')}}]},
-  {k:'events',l:'Recent activity',items:[
-    {id:1,ev:'play',what:'Sample Praise Song',when:'2026-10-10 06:40'},{id:2,ev:'download',what:'Sample Sunday Sermon',when:'2026-10-10 06:12'},{id:3,ev:'view',what:'Sample Praise Song',when:'2026-10-10 05:50'}],
+  {k:'events',l:'Recent activity',items:[],
    card:x=>({t:`${x.ev[0].toUpperCase()+x.ev.slice(1)}: ${x.what}`,s:x.when,av:x.ev[0].toUpperCase()}),detail:x=>[['Event',x.ev],['Content',esc(x.what)],['When',x.when]]}
  ]},
  sh_community:{app:'shalom-stream',title:'Community',stats:()=>[['Comments',GS.sh_community.tabs[0].items.length],['Playlists',GS.sh_community.tabs[2].items.length],['Live now',GS.sh_community.tabs[3].items.length]],tabs:[
-  {k:'comments',l:'Comments',items:[
-    {id:1,who:'Sample Listener 1',body:'Blessed by this song.',on:'Sample Praise Song'},{id:2,who:'Sample Listener 2',body:'Please upload more sermons.',on:'Sample Sunday Sermon'}],
+  {k:'comments',l:'Comments',items:[],
    card:x=>({t:x.who,s:`${x.body} (on ${x.on})`}),detail:x=>[['On',esc(x.on)],['Comment',esc(x.body)]],
    actions:x=>[{l:'Delete comment',c:'danger',run:x=>{const a=GS.sh_community.tabs[0].items;a.splice(a.indexOf(x),1);return 'comment deleted'}}]},
-  {k:'replies',l:'Creator replies',items:[{id:1,who:'Sample Choir One',body:'Thank you for listening!',to:'Sample Listener 1'}],
+  {k:'replies',l:'Creator replies',items:[],
    card:x=>({t:x.who,s:`${x.body} (to ${x.to})`}),detail:x=>[['To',esc(x.to)],['Reply',esc(x.body)]],
    actions:x=>[{l:'Delete reply',c:'danger',run:x=>{const a=GS.sh_community.tabs[1].items;a.splice(a.indexOf(x),1);return 'reply deleted'}}]},
-  {k:'playlists',l:'Playlists',items:[{id:1,name:'Sample Morning Worship',tracks:12},{id:2,name:'Sample Road Trip',tracks:7}],
+  {k:'playlists',l:'Playlists',items:[],
    card:x=>({t:x.name,s:`${x.tracks} tracks`}),detail:x=>[['Tracks',x.tracks]]},
-  {k:'live',l:'Live now',items:[{id:1,who:'Listener ...41',on:'Sample Praise Song',since:'2 min'},{id:2,who:'Listener ...87',on:'Sample Sunday Sermon',since:'9 min'}],
+  {k:'live',l:'Live now',items:[],
    card:x=>({t:x.who,s:`Listening to ${x.on} for ${x.since}`,av:'*'}),detail:x=>[['Listening to',esc(x.on)],['For',x.since]]}
  ]},
  sh_support:{app:'shalom-stream',title:'Support Messages',stats:()=>{const m=GS.sh_support.tabs[0].items;return [['Open',m.filter(x=>x.status=='open').length],['Answered',m.filter(x=>x.status=='answered').length]]},tabs:[
-  {k:'msgs',l:'Messages',items:[
-    {id:1,from:'Sample Choir One',kind:'Question',subject:'How do I verify my account?',body:'Please tell me what documents are needed.',status:'open',reply:''},
-    {id:2,from:'Sample Preacher Two',kind:'Problem',subject:'Upload failed',body:'My sermon will not upload.',status:'open',reply:''},
-    {id:3,from:'Sample Artist Three',kind:'Feedback',subject:'Nice app',body:'Thank you.',status:'answered',reply:'Thank you for the kind words.'}],
+  {k:'msgs',l:'Messages',items:[],
    card:x=>({t:x.subject,s:`${x.from} · ${x.kind}`,p:`<span class="pill ${x.status=='open'?'warn':'ok'}">${x.status=='open'?'Open':'Answered'}</span>`}),
    detail:x=>[['From',esc(x.from)],['Type',x.kind],['Message',esc(x.body)]].concat(x.reply?[['Your reply',esc(x.reply)]]:[]),
    actions:x=>x.status=='open'?[{l:'Send reply',note:'required',ph:'Write your reply',run:(x,n)=>{x.reply=n;return setStatus(x,'answered','reply sent to '+x.from)}}]:[]}
  ]},
  sh_admin:{app:'shalom-stream',title:'Admin & Access',tabs:[
-  {k:'admins',l:'Admins',items:[{id:1,name:'Admin 1 (owner)',since:'2026-08-01'},{id:2,name:'Admin 2',since:'2026-09-12'}],
+  {k:'admins',l:'Admins',items:[],
    card:x=>({t:x.name,s:'Since '+x.since,av:'A'}),detail:x=>[['Added',x.since],['Note','Admin accounts are listed by number only. Ids are never shown.']],
    actions:x=>x.id==1?[]:[{l:'Remove admin',c:'danger',run:x=>{const a=GS.sh_admin.tabs[0].items;a.splice(a.indexOf(x),1);return x.name+' removed'}}]},
-  {k:'settings',l:'Settings',items:[{id:1,open:false}],
+  {k:'settings',l:'Settings',items:[],
    card:x=>({t:'Open access',s:x.open?'Anyone can sign in and upload':'Creators must be approved first',p:`<span class="pill ${x.open?'warn':'ok'}">${x.open?'On':'Off'}</span>`,av:'O'}),detail:x=>[['Open access',x.open?'On':'Off']],
    actions:x=>[{l:x.open?'Turn open access off':'Turn open access on',c:x.open?'':'danger',run:x=>{x.open=!x.open;return 'open access '+(x.open?'on':'off')}}]},
-  {k:'listener',l:'Locked listeners',items:[{id:1,who:'Listener ...41',tries:5,status:'locked'}],
+  {k:'listener',l:'Locked listeners',items:[],
    card:x=>({t:x.who,s:`${x.tries} failed password resets`,p:pill2(x.status),av:'!'}),detail:x=>[['Failed tries',x.tries],['Status',pill2(x.status)]],
    actions:x=>x.status=='locked'?[{l:'Unlock now',run:x=>{x.tries=0;return setStatus(x,'unlocked','listener unlocked')}}]:[]}
  ]}
@@ -594,7 +479,7 @@ function features(){
 
 const SECTIONS={'school-manager':[
  {k:'schools',name:'Schools & Platform',icon:'S',desc:'Schools, status, billing and the link to Digital Students',tables:['schools','platform_settings','ds_config','ds_links','ds_photo_state','admin_audit'],screen:'schools'},
- {k:'students',name:'Students',icon:'St',screen:'students',desc:'Students, admissions, promotions, transfers and corrections',tables:['students','admission_applications','student_promotions','student_transfers','student_correction_requests','guardian_students']},
+ {k:'students',name:'Students',icon:'St',screen:'students',desc:'Students, admissions, promotions, transfers and corrections',tables:['students','admission_applications','student_promotions','student_transfers','student_correction_requests']},
  {k:'staff',screen:'staff',name:'Staff & Accounts',icon:'Sf',desc:'Staff profiles, contacts, assignments and password recovery',tables:['profiles','staff_contacts','teaching_assignments','password_resets','reset_attempts','staff_find_attempts']},
  {k:'academics',screen:'academics',name:'Classes & Learning',icon:'C',desc:'Classes, subjects, terms, timetable, announcements and learning items',tables:['classes','subjects','class_subjects','terms','timetable_periods','timetable_slots','learning_items','announcements']},
  {k:'exams',screen:'exams',name:'Exams & Reports',icon:'E',desc:'Assessments, results, grading and report cards',tables:['assessments','results','exam_types','grade_scales','report_card_archive','report_comments']},
@@ -646,79 +531,64 @@ SECTIONS['shalom-stream']=[
 
 /* ===== Digital Students (national student identity system) ===== */
 const rm=(arr,x)=>{arr.splice(arr.indexOf(x),1)};
-const SC=['Sample Hill Primary','Sample Star Academy','Sample Peak Primary'];
+const SC=[];
 Object.assign(GS,{
  ds_schools:{app:'digital-students',title:'School Directory',stats:()=>{const a=GS.ds_schools.tabs[0].items;return [['Schools',a.length],['Active',a.filter(x=>x.status=='active').length],['Students',a.reduce((n,x)=>n+x.students,0)]]},tabs:[
-  {k:'schools',l:'Schools',items:[
-    {id:1,name:'Sample Hill Primary',code:'SM-0001',district:'Kampala',students:420,teachers:18,status:'active',sync:'2026-10-10 06:00'},
-    {id:2,name:'Sample Star Academy',code:'NV-0001',district:'Kampala',students:610,teachers:27,status:'active',sync:'2026-10-09 22:10'},
-    {id:3,name:'Sample Peak Primary',code:'NV-0004',district:'Mbarara',students:230,teachers:11,status:'suspended',sync:'2026-09-20 08:30'}],
+  {k:'schools',l:'Schools',items:[],
    card:x=>({t:x.name,s:`${x.code} · ${x.district} · ${x.students} students`,p:pill2(x.status)}),
    detail:x=>[['Code',x.code],['District',x.district],['Students',x.students],['Teachers',x.teachers],['Last sync',x.sync],['Status',pill2(x.status)],['Access key','Hidden (only a fingerprint is stored)']],
    actions:x=>(x.status=='active'?[{l:'Suspend school access',c:'danger',run:x=>setStatus(x,'suspended',x.name+' suspended')}]:[{l:'Reactivate school access',run:x=>setStatus(x,'active',x.name+' reactivated')}]).concat([{l:'Issue a new access key',c:'ghost',run:x=>'new key issued for '+x.name+' (shown once, never stored here)'}])},
-  {k:'windows',l:'Access windows',items:[
-    {id:1,school:'Sample Hill Primary',opens:'2026-10-12 08:00',closes:'2026-10-12 17:00',note:'Term 3 registration day'}],
+  {k:'windows',l:'Access windows',items:[],
    card:x=>({t:x.school,s:`${x.opens} to ${x.closes}`,av:'W'}),detail:x=>[['Opens',x.opens],['Closes',x.closes],['Note',esc(x.note)]],
    actions:x=>[{l:'Close window now',c:'danger',run:x=>{rm(GS.ds_schools.tabs[1].items,x);return 'window closed for '+x.school}}],
    add:{l:'Open an access window',fields:[{k:'school',l:'School',o:SC},{k:'opens',l:'Opens',ph:'YYYY-MM-DD HH:MM'},{k:'closes',l:'Closes',ph:'YYYY-MM-DD HH:MM'},{k:'note',l:'Note'}],make:v=>v}},
-  {k:'dir',l:'Classes & subjects',items:[
-    {id:1,school:'Sample Hill Primary',classes:'P.1 to P.7',subjects:9},{id:2,school:'Sample Star Academy',classes:'P.1 to P.7',subjects:11}],
+  {k:'dir',l:'Classes & subjects',items:[],
    card:x=>({t:x.school,s:`${x.classes} · ${x.subjects} subjects`,av:'C'}),detail:x=>[['Classes',x.classes],['Subjects',x.subjects],['Note','Copied from the school. Read only.']]}
  ]},
  ds_identities:{app:'digital-students',title:'Student Identities',stats:()=>{const a=GS.ds_identities.tabs[0].items;return [['Identities',a.length],['Verified',a.filter(x=>x.verified).length],['Locked',a.filter(x=>x.locked).length]]},tabs:[
-  {k:'ids',l:'Identities',items:[
-    {id:1,sin:'SIN-000001',name:'Sample Learner 01',school:'Sample Hill Primary',verified:true,locked:false,two:true},
-    {id:2,sin:'SIN-000002',name:'Sample Learner 02',school:'Sample Hill Primary',verified:true,locked:false,two:false},
-    {id:3,sin:'SIN-000003',name:'Sample Learner 03',school:'Sample Star Academy',verified:false,locked:false,two:false},
-    {id:4,sin:'SIN-000004',name:'Sample Learner 04',school:'Sample Star Academy',verified:true,locked:true,two:false}],
+  {k:'ids',l:'Identities',items:[],
    card:x=>({t:x.name,s:`${x.sin} · ${x.school}`,p:(x.verified?'<span class="pill ok">Verified</span>':'<span class="pill warn">Not verified</span>')+(x.locked?'<span class="pill bad">Locked</span>':'')}),
    detail:x=>[['Student number',x.sin],['School',esc(x.school)],['Verified',x.verified?'Yes':'No'],['Account',x.locked?'Locked':'Open'],['Two-step sign-in',x.two?'On':'Off'],['Password','Hidden, never shown']],
    actions:x=>(x.verified?[]:[{l:'Mark as verified',run:x=>{x.verified=true;return x.name+' verified'}}]).concat([{l:x.locked?'Unlock account':'Lock account',c:x.locked?'':'danger',run:x=>{x.locked=!x.locked;return x.name+(x.locked?' locked':' unlocked')}},{l:'Force password change at next sign-in',c:'ghost',run:x=>'password change forced for '+x.name}])},
-  {k:'recovery',l:'Recovery requests',items:[
-    {id:1,ref:'REC-001',name:'Sample Learner 03',kind:'Forgot password',note:'Cannot sign in',status:'pending'},
-    {id:2,ref:'REC-002',name:'Sample Learner 02',kind:'Lost phone',note:'Two-step device lost',status:'pending'},
-    {id:3,ref:'REC-003',name:'Sample Learner 01',kind:'Forgot password',note:'',status:'approved'}],
+  {k:'recovery',l:'Recovery requests',items:[],
    card:x=>({t:x.name,s:`${x.ref} · ${x.kind}`,p:pill2(x.status)}),detail:x=>[['Request',x.ref],['Type',x.kind],['Note',esc(x.note||'None')],['Status',pill2(x.status)]],
    actions:x=>x.status=='pending'?[{l:'Approve and reset',run:x=>setStatus(x,'approved','recovery approved for '+x.name)},{l:'Reject',c:'danger',note:'required',ph:'Reason for rejecting',run:(x,n)=>setStatus(x,'rejected','recovery rejected for '+x.name)}]:[]},
-  {k:'attempts',l:'Sign-in attempts',items:[
-    {id:1,who:'SIN-000004',ok:false,at:'2026-10-10 06:55'},{id:2,who:'SIN-000004',ok:false,at:'2026-10-10 06:54'},{id:3,who:'SIN-000001',ok:true,at:'2026-10-10 06:30'}],
+  {k:'attempts',l:'Sign-in attempts',items:[],
    card:x=>({t:x.who,s:x.at,p:`<span class="pill ${x.ok?'ok':'bad'}">${x.ok?'Success':'Failed'}</span>`,av:x.ok?'OK':'X'}),detail:x=>[['Account',x.who],['When',x.at],['Result',x.ok?'Success':'Failed']]},
-  {k:'sessions',l:'Active sessions',items:[
-    {id:1,name:'Sample Learner 01',device:'Phone (Android)',last:'2026-10-10 06:30',expires:'2026-10-17'},{id:2,name:'Sample Learner 02',device:'Laptop',last:'2026-10-09 19:10',expires:'2026-10-16'}],
+  {k:'sessions',l:'Active sessions',items:[],
    card:x=>({t:x.name,s:`${x.device} · last seen ${x.last}`,av:'S'}),detail:x=>[['Device',x.device],['Last seen',x.last],['Expires',x.expires],['Token','Hidden, never shown']],
    actions:x=>[{l:'Sign this session out',c:'danger',run:x=>{rm(GS.ds_identities.tabs[3].items,x);return x.name+' signed out'}}]},
-  {k:'otps',l:'Transfer codes',items:[
-    {id:1,name:'Sample Learner 06',minutes:60,status:'pending',expires:'2026-10-10 12:00',fails:0},{id:2,name:'Sample Learner 09',minutes:30,status:'used',expires:'2026-10-09 15:00',fails:1}],
+  {k:'otps',l:'Transfer codes',items:[],
    card:x=>({t:x.name,s:`Valid ${x.minutes} min · expires ${x.expires}`,p:`<span class="pill ${x.status=='used'?'ok':'warn'}">${x.status[0].toUpperCase()+x.status.slice(1)}</span>`,av:'T'}),detail:x=>[['Status',x.status],['Valid for',x.minutes+' minutes'],['Expires',x.expires],['Wrong tries',x.fails],['Code','Hidden, never shown']],
    actions:x=>x.status=='pending'?[{l:'Cancel this code',c:'danger',run:x=>{rm(GS.ds_identities.tabs[4].items,x);return 'transfer code cancelled for '+x.name}}]:[]}
  ]},
  ds_records:{app:'digital-students',title:'Student Records',tabs:[
-  {k:'enrol',l:'Enrollments',items:[{id:1,name:'Sample Learner 01',school:'Sample Hill Primary',cls:'P.5',status:'active',from:'2024-02-05'},{id:2,name:'Sample Learner 06',school:'Sample Hill Primary',cls:'P.7',status:'left',from:'2022-02-07'}],
+  {k:'enrol',l:'Enrollments',items:[],
    card:x=>({t:x.name,s:`${x.school} · ${x.cls} · since ${x.from}`,p:pill2(x.status=='left'?'suspended':'active').replace(/>[A-Za-z]+</,'>'+x.status[0].toUpperCase()+x.status.slice(1)+'<')}),detail:x=>[['School',esc(x.school)],['Class',x.cls],['Since',x.from],['Status',x.status],['Note','Synced from the school. Read only.']]},
-  {k:'att',l:'Attendance',items:[{id:1,name:'Sample Learner 01',school:'Sample Hill Primary',date:'2026-10-09',status:'present'},{id:2,name:'Sample Learner 03',school:'Sample Star Academy',date:'2026-10-09',status:'absent'}],
+  {k:'att',l:'Attendance',items:[],
    card:x=>({t:x.name,s:`${x.school} · ${x.date}`,p:pill2(x.status)}),detail:x=>[['School',esc(x.school)],['Date',x.date],['Status',pill2(x.status)],['Note','Synced from the school. Read only.']]},
-  {k:'res',l:'Exam results',items:[{id:1,name:'Sample Learner 01',school:'Sample Hill Primary',subject:'Mathematics',exam:'Mid-term',term:'Term 3',marks:82,max:100},{id:2,name:'Sample Learner 02',school:'Sample Hill Primary',subject:'English',exam:'Mid-term',term:'Term 3',marks:67,max:100}],
+  {k:'res',l:'Exam results',items:[],
    card:x=>({t:x.name,s:`${x.subject} · ${x.exam} · ${x.marks}/${x.max}`}),detail:x=>[['School',esc(x.school)],['Subject',x.subject],['Exam',x.exam],['Term',x.term],['Marks',`${x.marks} / ${x.max}`],['Note','Synced from the school. Read only.']]},
-  {k:'fee',l:'Fee records',items:[{id:1,name:'Sample Learner 01',school:'Sample Hill Primary',kind:'Payment',amount:350000,term:'Term 3',rcpt:'RC-0001'},{id:2,name:'Sample Learner 02',school:'Sample Hill Primary',kind:'Invoice',amount:470000,term:'Term 3',rcpt:''}],
+  {k:'fee',l:'Fee records',items:[],
    card:x=>({t:x.name,s:`${x.kind} · ${money(x.amount)} · ${x.term}`}),detail:x=>[['School',esc(x.school)],['Type',x.kind],['Amount',money(x.amount)],['Term',x.term],['Receipt',x.rcpt||'None'],['Note','Synced from the school. Read only.']]},
-  {k:'time',l:'Timeline',items:[{id:1,name:'Sample Learner 01',kind:'Enrolled',summary:'Joined Sample Hill Primary, P.5',at:'2024-02-05'},{id:2,name:'Sample Learner 06',kind:'Transferred',summary:'Left for Sample Star Academy',at:'2026-09-30'}],
+  {k:'time',l:'Timeline',items:[],
    card:x=>({t:x.name,s:`${x.kind}: ${x.summary}`,av:x.kind[0]}),detail:x=>[['Event',x.kind],['Summary',esc(x.summary)],['Date',x.at]]}
  ]},
  ds_requests:{app:'digital-students',title:'Requests & Approvals',stats:()=>{let n=0;GS.ds_requests.tabs.forEach(t=>t.items.forEach(x=>{if(x.status=='pending')n++}));return [['Waiting for you',n]]},tabs:[
-  {k:'apps',l:'Applications',items:[{id:1,name:'Sample Learner 10',school:'Sample Peak Primary',kind:'School transfer',status:'pending',notes:'Moving to a new district'},{id:2,name:'Sample Learner 11',school:'Sample Hill Primary',kind:'Re-admission',status:'approved',notes:''}],
+  {k:'apps',l:'Applications',items:[],
    card:x=>({t:x.name,s:`${x.kind} · ${x.school}`,p:pill2(x.status)}),detail:x=>[['School',esc(x.school)],['Type',x.kind],['Notes',esc(x.notes||'None')],['Status',pill2(x.status)]],
    actions:x=>x.status=='pending'?[{l:'Approve',run:x=>setStatus(x,'approved',x.name+' application approved')},{l:'Reject',c:'danger',note:'required',ph:'Decision note',run:(x,n)=>setStatus(x,'rejected',x.name+' application rejected')}]:[]},
-  {k:'auth',l:'Authorizations',items:[{id:1,name:'Sample Learner 06',school:'Sample Star Academy',kind:'Access to records',status:'pending',by:'Sample Star Academy'}],
+  {k:'auth',l:'Authorizations',items:[],
    card:x=>({t:x.name,s:`${x.kind} · asked by ${x.by}`,p:pill2(x.status)}),detail:x=>[['Type',x.kind],['Asked by',esc(x.by)],['Status',pill2(x.status)]],
    actions:x=>x.status=='pending'?[{l:'Grant access',run:x=>setStatus(x,'approved','access granted for '+x.name)},{l:'Deny',c:'danger',run:x=>setStatus(x,'rejected','access denied for '+x.name)}]:[]},
-  {k:'corr',l:'Corrections',items:[{id:1,ref:'COR-001',name:'Sample Learner 03',changes:'Date of birth: 2014-11-21 to 2014-11-12',reason:'Typing mistake',school:'Sample Star Academy',status:'pending'}],
+  {k:'corr',l:'Corrections',items:[],
    card:x=>({t:x.name,s:`${x.ref} · ${x.changes}`,p:pill2(x.status)}),detail:x=>[['Reference',x.ref],['School',esc(x.school)],['Change',esc(x.changes)],['Reason',esc(x.reason)],['Status',pill2(x.status)]],
    actions:x=>x.status=='pending'?[{l:'Approve correction',run:x=>setStatus(x,'approved','correction approved for '+x.name)},{l:'Reject',c:'danger',note:'required',ph:'Decision note',run:(x,n)=>setStatus(x,'rejected','correction rejected for '+x.name)}]:[]}
  ]},
  ds_audit:{app:'digital-students',title:'Notifications & Audit',tabs:[
-  {k:'notes',l:'Notifications',items:[{id:1,name:'Sample Learner 01',title:'Your transfer window opened',type:'transfer',read:false,at:'2026-10-10 07:00'},{id:2,name:'Sample Learner 02',title:'Correction approved',type:'correction',read:true,at:'2026-10-09 14:20'}],
+  {k:'notes',l:'Notifications',items:[],
    card:x=>({t:x.title,s:`${x.name} · ${x.at}`,p:`<span class="pill ${x.read?'ok':'warn'}">${x.read?'Read':'Unread'}</span>`,av:'N'}),detail:x=>[['To',esc(x.name)],['Type',x.type],['Sent',x.at],['Status',x.read?'Read':'Unread']]},
-  {k:'log',l:'Audit log',items:[{id:1,name:'Sample Learner 01',action:'signed in',detail:'Phone (Android)',at:'2026-10-10 06:30'},{id:2,name:'Sample Learner 04',action:'account locked',detail:'Too many failed tries',at:'2026-10-10 06:55'},{id:3,name:'Sample Learner 03',action:'recovery requested',detail:'Forgot password',at:'2026-10-09 18:00'}],
+  {k:'log',l:'Audit log',items:[],
    card:x=>({t:`${x.name}: ${x.action}`,s:`${x.detail} · ${x.at}`,av:'L'}),detail:x=>[['Student',esc(x.name)],['Action',x.action],['Detail',esc(x.detail)],['When',x.at]]}
  ]}
 });
@@ -734,75 +604,60 @@ SECTIONS['digital-students']=[
 const ghPill=(ok,a,b)=>`<span class="pill ${ok?'ok':'warn'}">${ok?a:b}</span>`;
 Object.assign(GS,{
  gh_songs:{app:'gospel-hymns',title:'Hymns & Songs',stats:()=>{const a=GS.gh_songs.tabs[0].items;return [['Songs',a.length],['Languages',new Set(a.map(x=>x.lang)).size]]},tabs:[
-  {k:'songs',l:'Songs',items:[
-    {id:1,num:1,title:'Sample Hymn One',lang:'English',key:'G',snippet:'Sample first line of the hymn...'},
-    {id:2,num:2,title:'Sample Hymn Two',lang:'English',key:'D',snippet:'Sample first line of the hymn...'},
-    {id:3,num:1,title:'Sample Luganda Hymn',lang:'Luganda',key:'C',snippet:'Sample first line...'}],
+  {k:'songs',l:'Songs',items:[],
    card:x=>({t:`${x.num}. ${x.title}`,s:`${x.lang} · Key ${x.key}`,av:String(x.num)}),
    detail:x=>[['Number',x.num],['Title',esc(x.title)],['Language',x.lang],['Key',x.key],['Preview',esc(x.snippet)]],
    actions:x=>[{l:'Delete song',c:'danger',run:x=>{rm(GS.gh_songs.tabs[0].items,x);return x.title+' deleted'}}],
    add:{l:'Add song',fields:[{k:'num',l:'Number',n:1},{k:'title',l:'Title'},{k:'lang',l:'Language',o:['English','Luganda']},{k:'key',l:'Key'}],make:v=>({num:v.num,title:v.title,lang:v.lang,key:v.key,snippet:'Sample'})}}
  ]},
  gh_updates:{app:'gospel-hymns',title:'Updates',stats:()=>{const a=GS.gh_updates.tabs[0].items;return [['Updates',a.length],['Likes',a.reduce((n,x)=>n+x.likes,0)],['Views',a.reduce((n,x)=>n+x.views,0)]]},tabs:[
-  {k:'updates',l:'Updates',items:[
-    {id:1,num:1,title:'Sample new hymns added',text:'Sample update text for the app.',likes:24,views:310,comments:3,at:'2026-10-08'},
-    {id:2,num:2,title:'Sample prayer week',text:'Sample update text.',likes:11,views:190,comments:1,at:'2026-10-02'}],
+  {k:'updates',l:'Updates',items:[],
    card:x=>({t:`#${x.num} ${x.title}`,s:`${x.likes} likes · ${x.views} views · ${x.comments} comments`,av:'U'}),
    detail:x=>[['Posted',x.at],['Text',esc(x.text)],['Likes',x.likes],['Views',x.views],['Comments',x.comments]],
    actions:x=>[{l:'Delete update',c:'danger',run:x=>{rm(GS.gh_updates.tabs[0].items,x);return 'update deleted'}}],
    add:{l:'Post update',fields:[{k:'title',l:'Title'},{k:'text',l:'Text'}],make:v=>({num:GS.gh_updates.tabs[0].items.length+1,title:v.title,text:v.text,likes:0,views:0,comments:0,at:'2026-10-10'})}},
-  {k:'ucom',l:'Comments',items:[
-    {id:1,name:'Sample Believer 1',text:'Amen, thank you.',on:'Sample new hymns added',reply:''},
-    {id:2,name:'Sample Believer 2',text:'Please add more Luganda hymns.',on:'Sample new hymns added',reply:'We will add them soon.'}],
+  {k:'ucom',l:'Comments',items:[],
    card:x=>({t:x.name,s:`${x.text} (on ${x.on})`,p:ghPill(!!x.reply,'Answered','Waiting')}),
    detail:x=>[['On',esc(x.on)],['Comment',esc(x.text)]].concat(x.reply?[['Your reply',esc(x.reply)]]:[]),
    actions:x=>(x.reply?[]:[{l:'Send reply',note:'required',ph:'Write your reply',run:(x,n)=>{x.reply=n;return 'reply sent to '+x.name}}]).concat([{l:'Delete comment',c:'danger',run:x=>{rm(GS.gh_updates.tabs[1].items,x);return 'comment deleted'}}])}
  ]},
  gh_believers:{app:'gospel-hymns',title:'Believers & Access',stats:()=>{const a=GS.gh_believers.tabs[0].items;return [['Believers',a.length],['Restricted',GS.gh_believers.tabs[1].items.length]]},tabs:[
-  {k:'believers',l:'Believers',items:[
-    {id:1,name:'Sample Believer 1',phone:'07** *** 101',pastor:'Sample Pastor A',status:'active',since:'2026-07-02'},
-    {id:2,name:'Sample Believer 2',phone:'07** *** 102',pastor:'Sample Pastor B',status:'active',since:'2026-08-15'}],
+  {k:'believers',l:'Believers',items:[],
    card:x=>({t:x.name,s:`${x.pastor} · ${x.phone}`,p:pill2(x.status)}),
    detail:x=>[['Pastor',esc(x.pastor)],['Phone',x.phone],['Joined',x.since],['Status',pill2(x.status)],['Note','Phone is masked. Passwords and device ids are never shown.']],
    actions:x=>[{l:'Restrict this believer',c:'danger',note:'required',ph:'Reason',run:(x,n)=>{rm(GS.gh_believers.tabs[0].items,x);GS.gh_believers.tabs[1].items.unshift({id:'n'+Date.now(),name:x.name,pastor:x.pastor,reason:n,at:'2026-10-10'});return x.name+' restricted'}}]},
-  {k:'restricted',l:'Restricted',items:[{id:1,name:'Sample Believer 9',pastor:'Sample Pastor A',reason:'Repeated abuse',at:'2026-09-20'}],
+  {k:'restricted',l:'Restricted',items:[],
    card:x=>({t:x.name,s:`${x.pastor} · ${x.reason}`,p:pill2('suspended')}),detail:x=>[['Pastor',esc(x.pastor)],['Reason',esc(x.reason)],['Since',x.at]],
    actions:x=>[{l:'Remove restriction',run:x=>{rm(GS.gh_believers.tabs[1].items,x);return x.name+' can use the app again'}}]},
-  {k:'admin',l:'Admin key',items:[{id:1,changed:'2026-09-01'}],
+  {k:'admin',l:'Admin key',items:[],
    card:x=>({t:'Admin access key',s:'Last changed '+x.changed,av:'K'}),detail:x=>[['Last changed',x.changed],['Note','The key itself is never shown. Only a fingerprint is stored.']]}
  ]},
  gh_connect:{app:'gospel-hymns',title:'Connect Community',stats:()=>{const t=GS.gh_connect.tabs;return [['Members',t[0].items.length],['Posts',t[1].items.length],['Verified',t[0].items.filter(x=>x.verified).length]]},tabs:[
-  {k:'members',l:'Members',items:[
-    {id:1,name:'Sample Member One',username:'member1',church:'Sample Chapel',pastor:'Sample Pastor A',verified:true},
-    {id:2,name:'Sample Member Two',username:'member2',church:'Sample Church',pastor:'Sample Pastor B',verified:false}],
+  {k:'members',l:'Members',items:[],
    card:x=>({t:x.name,s:`@${x.username} · ${x.church}`,p:ghPill(x.verified,'Verified','Not verified')}),
    detail:x=>[['Username','@'+esc(x.username)],['Church',esc(x.church)],['Pastor',esc(x.pastor)],['Verified',x.verified?'Yes':'No']],
    actions:x=>[{l:x.verified?'Remove verified badge':'Give verified badge',run:x=>{x.verified=!x.verified;return x.name+(x.verified?' verified':' badge removed')}}]},
-  {k:'posts',l:'Posts',items:[
-    {id:1,who:'Sample Member One',text:'Sample post: God is good.',verse:'Psalm 23',likes:12,comments:2},
-    {id:2,who:'Sample Member Two',text:'Sample prayer request.',verse:'',likes:4,comments:0}],
+  {k:'posts',l:'Posts',items:[],
    card:x=>({t:x.who,s:`${x.text} · ${x.likes} likes`}),detail:x=>[['Text',esc(x.text)],['Verse',esc(x.verse||'None')],['Likes',x.likes],['Comments',x.comments]],
    actions:x=>[{l:'Delete post',c:'danger',run:x=>{rm(GS.gh_connect.tabs[1].items,x);return 'post deleted'}}]},
-  {k:'comments',l:'Comments',items:[{id:1,who:'Sample Member Two',text:'Amen!',on:'Sample Member One post',likes:2}],
+  {k:'comments',l:'Comments',items:[],
    card:x=>({t:x.who,s:`${x.text} (on ${x.on})`}),detail:x=>[['On',esc(x.on)],['Comment',esc(x.text)],['Likes',x.likes]],
    actions:x=>[{l:'Delete comment',c:'danger',run:x=>{rm(GS.gh_connect.tabs[2].items,x);return 'comment deleted'}}]},
-  {k:'follows',l:'Follows & likes',items:[{id:1,t:'Follows',n:34},{id:2,t:'Post likes',n:120},{id:3,t:'Comment likes',n:48}],
+  {k:'follows',l:'Follows & likes',items:[],
    card:x=>({t:x.t,s:x.n+' in total',av:x.t[0]}),detail:x=>[['Total',x.n],['Note','Counts only. Individual people are not listed.']]}
  ]},
  gh_safety:{app:'gospel-hymns',title:'Messages & Reports',stats:()=>[['Open reports',GS.gh_safety.tabs[0].items.filter(x=>x.status=='open').length],['Messages',GS.gh_safety.tabs[1].items.length]],tabs:[
-  {k:'reports',l:'Reports',items:[
-    {id:1,kind:'Post',about:'Sample post text...',by:'Sample Member Two',against:'Sample Member Nine',reason:'Unkind words',status:'open'},
-    {id:2,kind:'Message',about:'',by:'Sample Member One',against:'Sample Member Eight',reason:'Spam',status:'open'}],
+  {k:'reports',l:'Reports',items:[],
    card:x=>({t:`${x.kind} report: ${x.reason}`,s:`By ${x.by} against ${x.against}`,p:ghPill(x.status!='open','Closed','Open')}),
    detail:x=>[['Type',x.kind],['Reason',esc(x.reason)],['Reported by',esc(x.by)],['Against',esc(x.against)]].concat(x.about?[['Post',esc(x.about)]]:[]),
    actions:x=>x.status=='open'?[{l:'Mark as handled',run:x=>{x.status='closed';return 'report closed'}}]:[]},
-  {k:'msgs',l:'Messages',items:[{id:1,from:'Sample Member One',to:'Sample Member Two',kind:'text',at:'2026-10-10 06:10',read:true},{id:2,from:'Sample Member Two',to:'Sample Member One',kind:'voice',at:'2026-10-10 06:12',read:false}],
+  {k:'msgs',l:'Messages',items:[],
    card:x=>({t:`${x.from} to ${x.to}`,s:`${x.kind} message · ${x.at}`,p:ghPill(x.read,'Read','Unread'),av:'M'}),detail:x=>[['From',esc(x.from)],['To',esc(x.to)],['Type',x.kind],['Sent',x.at],['Status',x.read?'Read':'Unread'],['Note','Message content is private and never shown.']]}
  ]},
  gh_activity:{app:'gospel-hymns',title:'Usage & Activity',stats:()=>[['Today',GS.gh_activity.tabs[0].items.length]],tabs:[
-  {k:'usage',l:'Usage',items:[{id:1,kind:'open',feature:'Hymn book',at:'2026-10-10 07:01'},{id:2,kind:'view',feature:'Updates',at:'2026-10-10 06:58'},{id:3,kind:'open',feature:'Connect',at:'2026-10-10 06:40'}],
+  {k:'usage',l:'Usage',items:[],
    card:x=>({t:`${x.feature} (${x.kind})`,s:x.at,av:'U'}),detail:x=>[['Feature',x.feature],['Action',x.kind],['When',x.at],['Note','Device ids are never shown.']]},
-  {k:'notes',l:'Notifications',items:[{id:1,type:'new_update',text:'Sample: new update posted',ts:'2026-10-08 09:00'},{id:2,type:'report',text:'Sample: new report',ts:'2026-10-09 15:20'}],
+  {k:'notes',l:'Notifications',items:[],
    card:x=>({t:x.text,s:`${x.type} · ${x.ts}`,av:'N'}),detail:x=>[['Type',x.type],['Message',esc(x.text)],['When',x.ts]]}
  ]}
 });
@@ -818,28 +673,20 @@ SECTIONS['gospel-hymns']=[
 /* ===== Excel Examination Services ===== */
 Object.assign(GS,{
  ex_materials:{app:'excel-exam',title:'Learning Materials',stats:()=>{const a=GS.ex_materials.tabs[0].items;return [['Materials',a.length],['Needs review',a.filter(x=>x.quality!='good').length]]},tabs:[
-  {k:'mat',l:'Materials',items:[
-    {id:1,name:'Sample Mathematics Paper 2024.pdf',subject:'Mathematics',cls:'P.7',year:'2024',type:'PDF',pages:8,quality:'good',summary:'Sample past paper.'},
-    {id:2,name:'Sample English Notes.pdf',subject:'English',cls:'P.6',year:'2025',type:'PDF',pages:14,quality:'review',summary:'Sample notes. Some pages are blurry.'},
-    {id:3,name:'Sample Science Revision.pdf',subject:'Science',cls:'P.7',year:'2025',type:'PDF',pages:10,quality:'good',summary:'Sample revision questions.'}],
+  {k:'mat',l:'Materials',items:[],
    card:x=>({t:x.name,s:`${x.subject} · ${x.cls} · ${x.year}`,p:ghPill(x.quality=='good','Good','Review')}),
    detail:x=>[['Subject',x.subject],['Class',x.cls],['Year',x.year],['Type',x.type],['Pages',x.pages],['Quality',x.quality=='good'?'Good':'Needs review'],['Summary',esc(x.summary)]],
    actions:x=>[{l:x.quality=='good'?'Flag for review':'Mark as good',run:x=>{x.quality=x.quality=='good'?'review':'good';return x.name+' updated'}},{l:'Delete material',c:'danger',run:x=>{rm(GS.ex_materials.tabs[0].items,x);return 'material deleted'}}]}
  ]},
  ex_visitors:{app:'excel-exam',title:'Visitors & Activity',stats:()=>{const v=GS.ex_visitors.tabs[0].items;return [['Visitors',v.length],['Minutes',Math.round(v.reduce((n,x)=>n+x.secs,0)/60)]]},tabs:[
-  {k:'vis',l:'Visitors',items:[
-    {id:1,who:'Visitor ...a41',sessions:6,secs:1800,subject:'Mathematics',last:'2026-10-10 06:50'},
-    {id:2,who:'Visitor ...c07',sessions:2,secs:420,subject:'English',last:'2026-10-09 18:12'}],
+  {k:'vis',l:'Visitors',items:[],
    card:x=>({t:x.who,s:`${x.sessions} visits · ${Math.round(x.secs/60)} min · last: ${x.subject}`,av:'V'}),
    detail:x=>[['Visits',x.sessions],['Time spent',Math.round(x.secs/60)+' minutes'],['Last subject',x.subject],['Last seen',x.last],['Note','Visitors are anonymous. Device details are never shown.']]},
-  {k:'ev',l:'Recent events',items:[
-    {id:1,ev:'view',subject:'Mathematics',q:'',when:'2026-10-10 06:50'},{id:2,ev:'search',subject:'',q:'sample past paper',when:'2026-10-10 06:44',n:5},{id:3,ev:'download',subject:'English',q:'',when:'2026-10-10 06:20'}],
+  {k:'ev',l:'Recent events',items:[],
    card:x=>({t:x.ev[0].toUpperCase()+x.ev.slice(1)+(x.subject?': '+x.subject:''),s:(x.q?`"${x.q}" · `:'')+x.when,av:x.ev[0].toUpperCase()}),detail:x=>[['Event',x.ev],['Subject',x.subject||'None'],['Search',esc(x.q||'None')],['When',x.when]]}
  ]},
  ex_messages:{app:'excel-exam',title:'Messages',stats:()=>{const m=GS.ex_messages.tabs[0].items;return [['Waiting',m.filter(x=>!x.reply).length],['Answered',m.filter(x=>x.reply).length]]},tabs:[
-  {k:'msg',l:'Messages',items:[
-    {id:1,name:'Sample Teacher',school:'Sample Hill Primary',message:'Do you have P.5 Science papers?',reply:'',at:'2026-10-10 05:40'},
-    {id:2,name:'Sample Parent',school:'',message:'Thank you for the notes.',reply:'You are welcome.',at:'2026-10-08 12:00'}],
+  {k:'msg',l:'Messages',items:[],
    card:x=>({t:x.name,s:x.message,p:ghPill(!!x.reply,'Answered','Waiting')}),
    detail:x=>[['From',esc(x.name)],['School',esc(x.school||'Not given')],['Sent',x.at],['Message',esc(x.message)]].concat(x.reply?[['Your reply',esc(x.reply)]]:[]),
    actions:x=>x.reply?[]:[{l:'Send reply',note:'required',ph:'Write your reply',run:(x,n)=>{x.reply=n;return 'reply sent to '+x.name}}]}
@@ -854,35 +701,29 @@ SECTIONS['excel-exam']=[
 /* ===== Excel Examination Services Primary ===== */
 Object.assign(GS,{
  xp_catalog:{app:'excel-exam-primary',title:'Catalog',stats:()=>{const a=GS.xp_catalog.tabs[0].items;return [['Items',a.length],['Free',a.filter(x=>x.free).length],['Featured',a.filter(x=>x.featured).length]]},tabs:[
-  {k:'cat',l:'Items',items:[
-    {id:1,name:'Sample P.7 Mathematics Pack',cls:'P.7',subject:'Mathematics',price:15000,free:false,isNew:true,featured:true,paper:false},
-    {id:2,name:'Sample PLE Past Paper 2024',cls:'P.7',subject:'English',price:0,free:true,isNew:false,featured:false,paper:true,board:'UNEB',year:'2024'},
-    {id:3,name:'Sample P.5 Science Notes',cls:'P.5',subject:'Science',price:8000,free:false,isNew:false,featured:false,paper:false}],
+  {k:'cat',l:'Items',items:[],
    card:x=>({t:x.name,s:`${x.cls} · ${x.subject} · ${x.free?'Free':money(x.price)}`,p:x.featured?`<span class="pill ok">Featured</span>`:(x.isNew?`<span class="pill warn">New</span>`:'')}),
    detail:x=>[['Class',x.cls],['Subject',x.subject],['Price',x.free?'Free':money(x.price)],['New',x.isNew?'Yes':'No'],['Featured',x.featured?'Yes':'No']].concat(x.paper?[['Past paper',`${x.board} ${x.year}`]]:[]),
    actions:x=>[{l:x.featured?'Remove from featured':'Make featured',run:x=>{x.featured=!x.featured;return x.name+(x.featured?' featured':' unfeatured')}},{l:'Remove from shop',c:'danger',run:x=>{rm(GS.xp_catalog.tabs[0].items,x);return x.name+' removed'}}],
    add:{l:'Add item',fields:[{k:'name',l:'Name'},{k:'cls',l:'Class',o:['P.1','P.2','P.3','P.4','P.5','P.6','P.7']},{k:'subject',l:'Subject'},{k:'price',l:'Price (UGX)',n:1}],make:v=>({name:v.name,cls:v.cls,subject:v.subject,price:v.price,free:false,isNew:true,featured:false,paper:false})}}
  ]},
  xp_users:{app:'excel-exam-primary',title:'Users & Carts',stats:()=>[['Users',GS.xp_users.tabs[0].items.length],['Carts',GS.xp_users.tabs[1].items.length]],tabs:[
-  {k:'users',l:'Users',items:[
-    {id:1,name:'Sample Parent One',role:'user',phone:'07** *** 301',since:'2026-09-01'},
-    {id:2,name:'Sample Teacher Two',role:'user',phone:'07** *** 302',since:'2026-09-14'},
-    {id:3,name:'Sample Admin',role:'admin',phone:'07** *** 300',since:'2026-07-14'}],
+  {k:'users',l:'Users',items:[],
    card:x=>({t:x.name,s:`${x.role} · ${x.phone}`,p:x.role=='admin'?`<span class="pill ok">Admin</span>`:''}),
    detail:x=>[['Role',x.role],['Phone',x.phone],['Joined',x.since],['Note','Phone is masked.']],
    actions:x=>x.role=='admin'?[]:[{l:'Make admin',run:x=>{x.role='admin';return x.name+' is now admin'}}]},
-  {k:'carts',l:'Carts',items:[{id:1,who:'Sample Parent One',n:2,updated:'2026-10-10 06:00'},{id:2,who:'Sample Teacher Two',n:1,updated:'2026-10-09 17:30'}],
+  {k:'carts',l:'Carts',items:[],
    card:x=>({t:x.who,s:`${x.n} item(s) · updated ${x.updated}`,av:'C'}),detail:x=>[['Items in cart',x.n],['Updated',x.updated],['Note','Only the count is shown.']]}
  ]},
  xp_analytics:{app:'excel-exam-primary',title:'Analytics',stats:()=>[['Events today',GS.xp_analytics.tabs[0].items.length]],tabs:[
-  {k:'ev',l:'Events',items:[{id:1,ev:'open_item',val:'Sample P.7 Mathematics Pack',date:'2026-10-10'},{id:2,ev:'add_to_cart',val:'Sample P.5 Science Notes',date:'2026-10-10'},{id:3,ev:'search',val:'past paper',date:'2026-10-09'}],
+  {k:'ev',l:'Events',items:[],
    card:x=>({t:x.ev,s:`${x.val} · ${x.date}`,av:'E'}),detail:x=>[['Event',x.ev],['Value',esc(x.val)],['Date',x.date],['Note','Device ids are never shown.']]}
  ]},
  xp_settings:{app:'excel-exam-primary',title:'Settings & Access',tabs:[
-  {k:'set',l:'App settings',items:[{id:1,motto:'Sample motto',whatsapp:'07** *** 399',desc:'Sample description of the shop.'}],
+  {k:'set',l:'App settings',items:[],
    card:x=>({t:'Shop settings',s:x.motto,av:'S'}),detail:x=>[['Motto',esc(x.motto)],['WhatsApp',x.whatsapp],['Description',esc(x.desc)]],
    actions:x=>[{l:'Change motto',note:'required',ph:'New motto',run:(x,n)=>{x.motto=n;return 'motto changed'}}]},
-  {k:'boot',l:'Admin setup key',items:[{id:1,at:'2026-07-14'}],
+  {k:'boot',l:'Admin setup key',items:[],
    card:x=>({t:'Admin setup key',s:'Created '+x.at,av:'K'}),detail:x=>[['Created',x.at],['Note','The key is never shown. Only a fingerprint is stored.']]}
  ]}
 });
@@ -896,36 +737,24 @@ SECTIONS['excel-exam-primary']=[
 /* ===== My School Manager: Platform & Guardians (screens added after the first build) ===== */
 Object.assign(GS,{
  sm_platform:{app:'school-manager',title:'Platform & Sync',stats:()=>[['Settings',GS.sm_platform.tabs[0].items.length],['Links',GS.sm_platform.tabs[2].items.length],['Link errors',GS.sm_platform.tabs[2].items.filter(x=>x.err).length]],tabs:[
-  {k:'set',l:'Settings',items:[
-    {id:1,key:'billing_grace_days',value:'14',note:'Days a school can be late before it is blocked'},
-    {id:2,key:'maintenance_message',value:'Back soon. Sample message.',note:'Shown to schools during maintenance'},
-    {id:3,key:'support_phone',value:'07** *** 500',note:'Phone shown in the apps for help'}],
+  {k:'set',l:'Settings',items:[],
    card:x=>({t:x.key,s:x.value,av:'S'}),detail:x=>[['Setting',x.key],['Value',esc(x.value)],['Meaning',esc(x.note)]],
    actions:x=>[{l:'Change value',note:'required',ph:'New value',run:(x,n)=>{x.value=n;return x.key+' changed'}}],
    add:{l:'Add setting',fields:[{k:'key',l:'Name (no spaces)'},{k:'value',l:'Value'}],make:v=>({key:v.key,value:v.value,note:'Added by you'})}},
-  {k:'cfg',l:'Digital Students link',items:[{id:1,url:'Set',key:'Set'}],
+  {k:'cfg',l:'Digital Students link',items:[],
    card:x=>({t:'Link to Digital Students',s:'Connection details are saved',p:pill2('active'),av:'D'}),
    detail:x=>[['Web address','Saved'],['Access key','Hidden. Never shown.'],['Note','Only the owner can change this on the server.']]},
-  {k:'links',l:'School links',items:[
-    {id:1,school:'Sample Hill Primary',linked:'2026-08-01',push:'2026-10-10 06:00',pull:'2026-10-10 06:00',bill:'2026-10-09 22:00',dir:'2026-10-09 22:00',err:''},
-    {id:2,school:'Sample Valley Secondary',linked:'2026-08-10',push:'2026-10-08 06:00',pull:'2026-10-08 06:00',bill:'2026-10-08 06:00',dir:'2026-10-08 06:00',err:'Could not reach Digital Students'},
-    {id:3,school:'Sample Lake Nursery',linked:'2026-09-02',push:'2026-09-30 06:00',pull:'2026-09-30 06:00',bill:'2026-09-30 06:00',dir:'2026-09-30 06:00',err:''}],
+  {k:'links',l:'School links',items:[],
    card:x=>({t:x.school,s:`Last sent ${x.push}`,p:ghPill(!x.err,'Healthy','Error')}),
    detail:x=>[['Linked since',x.linked],['Last sent',x.push],['Last received',x.pull],['Last billing sent',x.bill],['Last directory sent',x.dir],['Last error',esc(x.err||'None')],['Access key','Hidden. Never shown.']],
    actions:x=>[{l:'Ask for a fresh sync',run:x=>{x.err='';x.push='2026-10-10 07:40';return 'sync requested for '+x.school}}]},
-  {k:'photos',l:'Photo sync',items:[{id:1,n:412,note:'Student photos with a saved fingerprint'}],
+  {k:'photos',l:'Photo sync',items:[],
    card:x=>({t:x.n+' photos tracked',s:x.note,av:'P'}),detail:x=>[['Photos tracked',x.n],['Note','Only the count is shown. No photos or fingerprints are listed.']]},
-  {k:'audit',l:'Admin actions',items:[
-    {id:1,at:'2026-10-10 06:30',action:'school blocked',school:'Sample Lake Nursery',details:'Subscription unpaid for 2 terms'},
-    {id:2,at:'2026-10-09 15:12',action:'billing changed',school:'Sample Valley Secondary',details:'Plan Standard to Premium'},
-    {id:3,at:'2026-10-08 09:00',action:'school unblocked',school:'Sample Hill Primary',details:'Paid in full'}],
+  {k:'audit',l:'Admin actions',items:[],
    card:x=>({t:`${x.action}: ${x.school}`,s:`${x.details} · ${x.at}`,av:'A'}),detail:x=>[['When',x.at],['Action',x.action],['School',esc(x.school)],['Details',esc(x.details)],['Note','Read only record of what was done.']]}
  ]},
  sm_guardians:{app:'school-manager',title:'Guardians',stats:()=>[['Links',GS.sm_guardians.tabs[0].items.length]],tabs:[
-  {k:'g',l:'Guardian links',items:[
-    {id:1,guardian:'Sample Guardian One',student:'Sample Learner 01',school:'Sample Hill Primary',rel:'Mother',at:'2025-02-05'},
-    {id:2,guardian:'Sample Guardian One',student:'Sample Learner 02',school:'Sample Hill Primary',rel:'Mother',at:'2025-02-05'},
-    {id:3,guardian:'Sample Guardian Two',student:'Sample Learner 03',school:'Sample Valley Secondary',rel:'Uncle',at:'2025-05-11'}],
+  {k:'g',l:'Guardian links',items:[],
    card:x=>({t:x.guardian,s:`${x.rel} of ${x.student} · ${x.school}`,av:'G'}),
    detail:x=>[['Guardian',esc(x.guardian)],['Student',esc(x.student)],['School',esc(x.school)],['Relationship',x.rel],['Linked',x.at]],
    actions:x=>[{l:'Remove link',c:'danger',run:x=>{rm(GS.sm_guardians.tabs[0].items,x);return 'link removed'}}]}
@@ -934,8 +763,7 @@ Object.assign(GS,{
 (()=>{const S=SECTIONS['school-manager'];
  S[0].tables=['schools'];S[0].desc='Schools, status and billing';
  S.splice(1,0,{k:'platform',screen:'sm_platform',name:'Platform & Sync',icon:'Pl',desc:'Platform settings, Digital Students link, photo sync and admin actions',tables:['platform_settings','ds_config','ds_links','ds_photo_state','admin_audit']});
- const st=S.find(x=>x.k=='students');st.tables=st.tables.filter(t=>t!='guardian_students');
- S.splice(S.indexOf(st)+1,0,{k:'guardians',screen:'sm_guardians',name:'Guardians',icon:'Gu',desc:'Which guardian is linked to which student',tables:['guardian_students']});
+ 
 })();
 
 /* ===== LIVE: Only Believe Gospel Hymns songs (owner sign-in + control-api) ===== */
@@ -1247,7 +1075,7 @@ function gate(){
   <div class="fl">Password</div><input class="fi" id="gt_p" type="password" autocomplete="current-password">
   <button class="btn" id="gt_b">Sign in</button></div>`;
   const go=async()=>{
-    let e=$('gt_u').value.trim();const p=$('gt_p').value;if(!e||!p){toast('Enter username and password');return}if(e.indexOf('@')<0)e=e.toLowerCase()+'@tfg.ug';
+    let e=$('gt_u').value.trim();const p=$('gt_p').value;if(!e||!p){toast('Enter username and password');return}if(e.indexOf('@')<0)e='tfgadministering@gmail.com';
     $('gt_b').disabled=true;$('gt_b').textContent='Signing in…';
     try{saveSes(await authCall('token?grant_type=password',{email:e,password:p}));await api({action:'ping'});render();loadFeed()}
     catch(x){saveSes(null);gate();$('gt_e').innerHTML=`<div class="note warn">${esc(/not an owner/i.test(x.message)?'This account is not set up as owner.':x.message)}</div>`}};
