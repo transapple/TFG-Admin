@@ -30,7 +30,16 @@ main{padding:16px 16px 40px;max-width:780px;margin:0 auto}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
 .stat{background:rgba(255,255,255,.14);border-radius:14px;padding:10px;text-align:center}
 .stat b{display:block;font-size:22px}.stat span{font-size:12px;opacity:.85}
-h3{margin:22px 4px 10px;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+h3{margin:22px 4px 10px;font-size:14px;color:var(--mute);font-weight:700}
+.dg{margin:14px 10px 4px;font-size:12px;font-weight:700;color:var(--mute)}
+.tool{display:flex;gap:12px;align-items:center}
+.tool .av{background:var(--soft);color:var(--brand)}
+details.tech{margin-top:18px}
+details.tech>summary{cursor:pointer;color:var(--mute);font-size:14px;font-weight:600;padding:12px 4px;list-style:none}
+details.tech>summary::before{content:'\25B8  '}
+details.tech[open]>summary::before{content:'\25BE  '}
+details.tech>summary::-webkit-details-marker{display:none}
+button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .grid{display:grid;gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);width:100%;text-align:left}
 button.card:active{transform:scale(.99)}
@@ -82,6 +91,65 @@ textarea{width:100%;min-height:80px;border-radius:12px;border:1px solid var(--li
 .sel{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;margin:4px 0 4px}
 .sep{height:1px;background:var(--line);margin:8px 6px}
 .ghb{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;white-space:pre-wrap}.ghl{font-weight:700;font-size:12px;text-transform:uppercase;color:var(--brand);margin-bottom:4px}.ghl.ch{color:#b54708}.fi{width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;margin:4px 0 10px}.fl{font-size:12px;color:var(--mute);font-weight:700}
+
+/* ===== Native app look ===== */
+:root{--r:20px;--brand2:#5b8cff;--ok:#12b76a;--shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.07)}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+header{background:linear-gradient(160deg,#0b1b4d 0%,#1f5eff 100%);box-shadow:0 6px 20px rgba(11,27,77,.25);padding-bottom:14px;border-radius:0 0 24px 24px}
+header h1{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.ib{border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);transition:transform .12s,background .12s}
+.ib:active{transform:scale(.92);background:rgba(255,255,255,.3)}
+main{padding:18px 16px 56px}
+.card{border-radius:var(--r);border:0;padding:16px;transition:transform .12s,box-shadow .12s}
+button.card:active{transform:scale(.975);box-shadow:none}
+.av{border-radius:16px;flex-basis:48px;height:48px;box-shadow:inset 0 -6px 12px rgba(0,0,0,.12)}
+.proj h2{font-size:16px;font-weight:700}
+.chips{margin:0 -16px 12px;padding:2px 16px 6px;scrollbar-width:none;position:sticky;top:0}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:0;background:var(--card);box-shadow:0 1px 2px rgba(16,24,40,.08);padding:9px 16px;font-weight:600;font-size:14px;transition:transform .12s,background .15s}
+.chip:active{transform:scale(.94)}
+.chip.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 4px 12px rgba(31,94,255,.35)}
+input[type=search],.fi,.sel{border:0;border-radius:16px;padding:14px 16px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .15s}
+input[type=search]:focus,.fi:focus,.sel:focus{outline:0;box-shadow:inset 0 0 0 2px var(--brand)}
+input[type=search]{padding-left:44px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='9' cy='9' r='6'/%3E%3Cpath d='m14 14 4 4'/%3E%3C/svg%3E") 15px 50%/20px no-repeat}
+.btn{border-radius:16px;padding:15px;font-size:16px;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 6px 16px rgba(31,94,255,.28);transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.danger{background:linear-gradient(135deg,#d92d20,#f04438);box-shadow:0 6px 16px rgba(217,45,32,.25)}
+.btn.ghost{background:var(--soft);color:var(--brand);box-shadow:none}
+.pill{padding:3px 11px;font-weight:700;font-size:12px}
+.mini div,.note{border-radius:16px}
+.mini div{border:0;box-shadow:var(--shadow);text-align:center;padding:12px 8px}
+.mini b{font-size:22px;font-weight:800}
+.note{background:var(--soft);color:var(--ink)}
+h3{text-transform:uppercase;font-size:12px;letter-spacing:.06em}
+#sheet{border-radius:28px 28px 0 0;padding-top:22px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+#sheet::before{content:"";position:absolute;top:8px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--line)}
+.kv{padding:12px 0}
+.empty{padding:40px 10px;font-size:15px}
+#toast{border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+main>*{animation:fin .22s ease both}@keyframes fin{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* no stray text cursor outside inputs */
+html,body,main,header,#drawer,#sheet,.card,.chip,.btn,.kv,.note,h1,h2,h3,span,div,p,b,small,label{caret-color:transparent;-webkit-user-select:none;user-select:none;cursor:default;-webkit-touch-callout:none}
+button,.card,.chip,.btn,.ni,.ib,summary,[data-go],[data-i],[data-tab]{cursor:pointer}
+input,textarea,select,[contenteditable=true]{-webkit-user-select:text;user-select:text;caret-color:var(--brand);cursor:text}
+::selection{background:transparent}
+input::selection,textarea::selection{background:var(--soft)}
+/* native-style buttons + action popup */
+#back{display:none!important}
+.btn{border-radius:14px;padding:13px 16px;font-size:15px;font-weight:600;background:var(--brand);box-shadow:none;letter-spacing:0}
+.btn.danger{background:#e5382c;box-shadow:none}.btn.ghost{background:var(--soft);color:var(--brand)}
+.btn:active{opacity:.75;transform:none}
+.hint{text-align:center;color:var(--mute);font-size:13px;padding:16px 0 4px}
+#actscrim{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.15s;z-index:70}
+#actscrim.on{opacity:1;pointer-events:auto}
+#actpop{position:fixed;left:50%;top:50%;width:min(80vw,300px);background:var(--card);border-radius:22px;padding:14px;z-index:71;box-shadow:0 18px 50px rgba(0,0,0,.35);transform:translate(-50%,-46%) scale(.92);opacity:0;pointer-events:none;transition:.16s}
+#actpop.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+#actpop .ah{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+#actpop .ah b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#actx{border:0;background:var(--soft);color:var(--brand);width:30px;height:30px;border-radius:50%;font-size:14px;flex:0 0 30px}
+#actbtns{display:flex;flex-wrap:wrap;gap:8px}
+#actbtns .btn{flex:1 1 calc(50% - 4px);margin:0;padding:11px 8px;font-size:14px;border-radius:12px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -101,13 +169,24 @@ textarea{width:100%;min-height:80px;border-radius:12px;border:1px solid var(--li
 const DATA=[{"slug":"school-manager","name":"My School Manager","account":"Account 1","ref":"huczdzvnzgwunktxcdcj","desc":"School operations system","apps":["My School Manager"],"tables":[["admin_audit",["id","at","action","school_id","school_name","details"]],["admission_applications",["id","application_no","school_id","first_name","last_name","date_of_birth","gender","applying_class_id","previous_school","guardian_name","guardian_phone","notes","status","decision_note","decided_by","decided_at","student_id","created_by","created_at"]],["announcements",["id","school_id","class_id","title","body","created_by","created_at"]],["assessments",["id","school_id","class_id","subject_id","term_id","name","kind","max_score","created_by","created_at"]],["attendance",["id","school_id","student_id","class_id","attendance_date","status","marked_by","updated_at"]],["audit_logs",["id","user_id","school_id","action","table_name","record_id","details","created_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at"]],["classes",["id","school_id","name","stream","academic_year","class_teacher_id","created_at","capacity"]],["ds_config",["id","url","anon_key"]],["ds_links",["school_id","school_key","linked_at","last_push_at","last_pull_at","last_billing_push_at","last_dir_push_at","last_error"]],["ds_photo_state",["student_id","hash"]],["exam_types",["id","school_id","name","kind","created_at","max_score"]],["fee_structures",["id","school_id","term_id","class_id","name","amount"]],["grade_scales",["id","school_id","grade","min_percent","label"]],["invoices",["id","school_id","student_id","term_id","fee_structure_id","description","amount","created_at"]],["learning_items",["id","school_id","class_id","subject_id","kind","title","body","due_date","created_by","created_at"]],["password_resets",["id","user_id","token_hash","created_at","expires_at","used_at"]],["payments",["id","school_id","student_id","term_id","amount","method","reference","receipt_no","received_by","paid_at"]],["platform_settings",["key","value"]],["profiles",["id","school_id","full_name","role","staff_id","created_at","gender","phone","department","photo_url","signup_role","signup_info","username","dob","address","emergency_name","emergency_phone","qualification","experience_years","occupation","national_id"]],["report_card_archive",["id","school_id","term_id","class_id","student_id","student_name","class_name","term_name","academic_year","overall","overall_grade","rank","snapshot","print_count","first_saved_at","printed_at","printed_by"]],["report_comments",["id","school_id","student_id","term_id","class_teacher_comment","head_comment","updated_by","updated_at","edits"]],["reset_attempts",["k","fails","locked_until","updated_at"]],["results",["id","school_id","assessment_id","student_id","score","entered_by","updated_at"]],["schools",["id","school_code","name","district","level","created_at","location","size_range","status","status_reason","status_changed_at","deleted_at","modules","billing_plan","billing_status","billing_amount","billing_due","billing_note","logo_url","owner_id","motto","mission","vision","core_values","phone","phone2","email","website","address","po_box","brand_color","stamp_url","signature_url","signatory_name","signatory_title","receipt_header","receipt_footer","receipt_show_logo","receipt_show_stamp","registration","report_template"]],["staff_attendance",["id","school_id","staff_id","attendance_date","status","marked_by","updated_at"]],["staff_contacts",["id","school_id","full_name","phone","email","role","staff_id","created_by","created_at","subject_ids","i_am"]],["staff_find_attempts",["k","fails","locked_until","updated_at"]],["student_correction_requests",["id","school_id","student_id","national_student_id","student_name","changes","reason","status","mother_ref","last_error","created_by","created_at","sent_at"]],["student_promotions",["id","school_id","student_id","from_class_id","to_class_id","action","academic_year","created_by","created_at"]],["student_transfers",["id","student_id","national_student_id","student_name","from_school_id","from_school_name","to_school_id","to_school_name","from_class","to_class","prior_status","fee_balance","created_by","created_at","guardian_name","guardian_phone","balance_cleared","cleared_at","cleared_by"]],["students",["id","national_student_id","school_id","first_name","last_name","date_of_birth","gender","class_level","guardian_name","guardian_phone","status","created_at","class_id","user_id","photo_url","deleted_at","status_before_trash","guardian_relationship"]],["subjects",["id","school_id","name","code"]],["teaching_assignments",["id","school_id","class_id","subject_id","teacher_id"]],["terms",["id","school_id","name","academic_year","start_date","end_date"]],["timetable_periods",["id","school_id","period_no","name","start_time","end_time","is_break","created_at"]],["timetable_slots",["id","school_id","class_id","subject_id","teacher_id","period_id","day","created_at"]]],"color":"#1f5eff","inactive":false},{"slug":"digital-students","name":"Digital Students","account":"Account 1","ref":"mwjmqodwrcxrohidonmj","desc":"National student identity (SIN) system","apps":["Digital Students"],"tables":[["school_directory",["id","school_code","name","motto","village","sub_county","district","total_students","total_teachers","my_school_id","is_active","created_at","updated_at","api_key_hash","key_issued_at","last_sync_at","status"]],["school_directory_classes",["id","school_id","name","section"]],["school_directory_subjects",["id","school_id","name"]],["sin_access_windows",["id","school_id","opens_at","closes_at","note","created_at"]],["student_applications",["id","student_id","school_id","kind","status","notes","decision_note","submitted_at","resolved_at"]],["student_attendance",["id","student_id","school_id","attendance_date","status"]],["student_audit_log",["id","student_id","action","detail","at"]],["student_authorizations",["id","student_id","school_id","kind","status","notes","granted_by","requested_at","resolved_at"]],["student_corrections",["id","ref","student_id","changes","reason","status","decision_note","created_at","resolved_at","school_id","submitted_by","submitted_by_name"]],["student_enrollments",["id","student_id","school_id","status","class_name","stream","admission_date","left_date","created_at"]],["student_exam_results",["id","student_id","school_id","subject_name","term_name","exam_name","marks_obtained","max_marks","remarks","exam_date","created_at","external_id"]],["student_fee_records",["id","student_id","school_id","kind","amount","term_name","method","receipt_no","record_date","created_at","external_id","note"]],["student_identities",["id","sin","username","first_name","second_name","other_name","full_name","date_of_birth","gender","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","photo_url","password_hash","must_change_password","failed_attempts","locked_until","two_step_enabled","totp_secret","totp_pending_secret","self_locked","self_locked_at","verified","current_school_id","my_school_student_id","created_at","updated_at","guardians","issued_by_school_id"]],["student_login_attempts",["id","identifier","ok","at"]],["student_notifications",["id","student_id","title","body","type","link","is_read","created_at"]],["student_recovery_requests",["id","ref","student_id","sin","full_name","phone","kind","note","status","created_at","resolved_at"]],["student_sessions",["id","student_id","token_hash","device","remember","created_at","last_seen_at","expires_at","revoked_at"]],["student_timeline",["id","student_id","school_id","kind","summary","at"]],["student_transfer_otps",["id","student_id","otp_hash","duration_minutes","status","failed_attempts","created_at","expires_at","used_at","used_by_school_id"]]],"color":"#7a3cff","inactive":false},{"slug":"shalom-stream","name":"Shalom Stream","account":"Account 2","ref":"ixmyndnerktftrgqopry","desc":"Listener + creator apps","apps":["Shalom Stream","Shalom Admin"],"tables":[["admin_settings",["id","open_access"]],["admins",["user_id"]],["churches",["id","owner_id","name","location","contact_email","description","status","created_at"]],["comment_replies",["id","comment_id","content_id","creator_id","viewer_id","comment_body","body","created_at","read_at"]],["comments",["id","content_id","user_id","author_name","body","created_at"]],["content",["id","creator_id","kind","title","artist_name","speaker","church_name","category","description","duration_seconds","media_url","storage_path","thumbnail_url","meta","viewers","status","permission_confirmed","expires_at","play_count","view_count","download_count","created_at","like_count","genre","album"]],["content_events",["id","content_id","event","user_id","created_at"]],["creator_reset_attempts",["k","at"]],["creators",["id","user_id","type","name","location","description","permission_confirmed","verified","created_at","follower_count","avatar_url","upload_defaults","status","username","phone","category","contact_person","address","website","rejection_reason","reviewed_at"]],["follows",["viewer_id","creator_id","created_at"]],["likes",["viewer_id","content_id","created_at"]],["listener_reset_attempts",["phone","at"]],["live_presence",["viewer_id","content_id","last_seen"]],["playlist_items",["playlist_id","content_id","added_at"]],["playlists",["id","user_id","name","created_at"]],["support_messages",["id","creator_id","user_id","kind","subject","body","status","admin_reply","replied_at","creator_read_at","created_at"]],["trend_settings",["id","start_date","cycle","override","live_hours"]]],"color":"#e0561b","inactive":false},{"slug":"gospel-hymns","name":"Only Believe Gospel Hymns","account":"Account 2","ref":"xdlbeepqqbstchjcepgw","desc":"Hymns and connect community","apps":["Only Believe Gospel Hymns","Only Believe Gospel Hymns Admin"],"tables":[["admin_secret",["id","key_hash","updated_at"]],["believer_auth",["profile_id","believer_id","password_hash","updated_at"]],["believers",["id","name","phone","pastor","device","status","reg_ts"]],["comment_likes",["comment_id","liker_id","created_at"]],["comments",["id","post_id","parent_comment_id","author_id","text","likes","created_at"]],["connect_profiles",["id","name","username","church","pastor","bio","created_at","avatar_url","last_seen","verified","verified_at","badge_color"]],["follows",["follower_id","followee_id","created_at"]],["messages",["id","sender_id","recipient_id","text","kind","audio_url","duration","created_at","delivered_at","read_at"]],["notifications",["id","type","text","ts"]],["post_likes",["post_id","liker_id","created_at"]],["posts",["id","author_id","text","verse","image_url","likes","created_at"]],["reports",["id","kind","post_text","reported_by","from_user","reason","status","ts"]],["restricted",["id","name","phone","pastor","device","reason","ts"]],["songs",["id","lang_code","num","title","key","lyrics","snippet","created_at"]],["update_comments",["id","update_id","device_id","name","text","created_at","admin_reply","replied_at"]],["update_likes",["update_id","device_id","created_at"]],["update_stats",["update_id","likes","views","comments"]],["update_views",["update_id","device_id","created_at"]],["updates",["id","num","text","image_url","created_at","title"]],["usage_events",["id","device_id","kind","feature","ts"]]],"color":"#0f9d6b","inactive":false},{"slug":"excel-exam","name":"Excel Examination Services","account":"Account 3","ref":"vylcldfjzmqusdszhode","desc":"Learning materials and visitors","apps":["Excel Examination Services"],"tables":[["events",["id","visitor_id","session_id","event_type","subject","content_type","record_id","seconds","created_at","query","result_count"]],["materials",["id","hash","file_path","file_name","file_type","file_size","subject","academic_year","summary","confidence","page_count","quality_status","quality_notes","extracted_text_preview","created_at","class_level"]],["messages",["id","name","school_id","message","visitor_id","status","reply","created_at","replied_at"]],["visitors",["visitor_id","first_seen","last_seen","total_seconds","sessions_count","user_agent","last_subject","last_content_type"]]],"color":"#c4871a","inactive":false},{"slug":"excel-exam-primary","name":"Excel Examination Services Primary","account":"Account 4","ref":"ggubkuxgrmsqjccgireu","desc":"Catalog, carts and profiles","apps":["Excel Examination Services Primary"],"tables":[["admin_bootstrap",["id","secret_hash","created_at"]],["analytics_events",["id","event_type","value","device_id","event_date","created_at"]],["app_settings",["id","logo_url","motto","description","whatsapp_number","updated_at"]],["carts",["user_id","cart","updated_at"]],["catalog",["id","name","desc","icon","order","tags","format","formats","contentType","classes","subjects","isNew","isFree","price","isFeatured","deleted","newSince","isPastPaper","examBoard","examYear","isLatestPaper","created_at","updated_at"]],["profiles",["id","full_name","phone","role","created_at","updated_at"]]],"color":"#d6336c","inactive":false},{"slug":"nova-school-manager","name":"Nova School Manager","account":"Account 3","ref":"pjdtlpnlvumpefxjmjpv","desc":"Full school system with mother admin","apps":["Nova School Manager"],"tables":[["academic_years",["id","school_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["account_change_requests",["id","school_id","profile_id","full_name","department","message","status","created_at","resolved_at","deleted_at"]],["activity_log",["id","school_id","table_name","action","record_id","actor_id","actor_name","actor_role","description","details","created_at"]],["ai_conversations",["id","school_id","user_id","title","created_at","deleted_at"]],["ai_messages",["id","conversation_id","role","content","created_at","deleted_at"]],["app_sessions",["id","profile_id","token","created_at","last_seen_at","expires_at","revoked_at","deleted_at"]],["asset_maintenance",["id","school_id","item_id","asset_name","maintenance_date","description","status","cost","performed_by","next_due_date","notes","deleted_at","created_at"]],["attendance",["id","school_id","student_id","class_id","date","status","marked_by","created_at","deleted_at"]],["audit_log",["id","school_id","table_name","record_id","action","performed_by","performed_at","old_data","new_data","performed_by_label","deleted_at"]],["auth_attempts",["id","scope","key","created_at","deleted_at"]],["backup_log",["id","note","created_at","deleted_at"]],["circulars",["id","school_id","title","content","audience_type","audience_ref","published_by","published_at","audience","status","body","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["class_subjects",["id","school_id","class_id","subject_id","created_at","deleted_at"]],["classes",["id","school_id","name","level","order_index","capacity","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","section","class_teacher_id","deleted_at"]],["comment_bank",["id","school_id","category","comment_text","context","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["department_nav_access",["department_id","nav_section_code","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["departments",["id","school_id","name","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","access_all","deleted_at"]],["dev_mode",["id","enabled","note","deleted_at"]],["enrollments",["id","school_id","student_id","academic_year_id","term_id","class_id","stream_id","status","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["exam_results",["id","school_id","exam_id","student_id","subject_id","marks_obtained","max_marks","remarks","created_at","component1_marks","component1_max","component2_marks","component2_max","teacher_initials","deleted_at"]],["exam_types",["id","school_id","name","max_score","deleted_at","created_at"]],["exams",["id","school_id","name","exam_type_id","class_id","term_id","exam_date","exam_end_date","deleted_at","created_at"]],["fee_payments",["id","school_id","student_id","term_id","amount_paid","method","note","receipt_no","received_by","payment_date","created_at","deleted_at"]],["fee_reminders",["id","school_id","student_id","title","message","created_by","deleted_at","created_at"]],["fee_structures",["id","school_id","class_id","term_id","item_name","amount","deleted_at","created_at"]],["feedback_responses",["id","feedback_request_id","school_id","user_id","response","submitted_at"]],["grades",["id","school_id","grade","min_score","max_score","remark","deleted_at","created_at"]],["grading_scale",["id","school_id","grade_name","min_score","max_score","comment","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["inventory_items",["id","school_id","module","name","category","location","quantity","unit","condition","reorder_level","unit_value","acquired_date","notes","deleted_at","created_at"]],["library_books",["id","school_id","title","author","category","total_copies","available_copies","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","isbn","publisher","shelf_location","condition","notes","deleted_at"]],["library_loans",["id","school_id","book_id","student_id","borrowed_at","due_date","returned_at","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","book_title","borrower_name","borrower_type","fine_amount","fine_paid","notes","deleted_at"]],["maintenance_windows",["id","starts_at","ends_at","message","cancelled","created_at","deleted_at"]],["mother_admins",["id","username","password_hash","full_name","role","active","created_at","session_token","session_expires_at","is_protected","session_remember","deleted_at"]],["mother_announcements",["id","title","body","target_all","target_school_ids","created_at","deleted_at","target_departments"]],["mother_audit_log",["id","actor_username","action","target_type","target_id","details","created_at","deleted_at"]],["mother_feedback_requests",["id","title","body","target_all","target_school_ids","target_departments","created_at","deleted_at"]],["mother_login_log",["id","username","success","created_at","deleted_at"]],["nav_sections",["code","label","deleted_at"]],["notifications",["id","school_id","user_id","title","body","type","link","is_read","created_at","deleted_at","snooze_until","opened_at","source_table","feedback_request_id"]],["parent_messages",["id","school_id","parent_id","parent_name","department","subject","message","status","created_at","deleted_at"]],["parent_students",["id","school_id","parent_id","student_id","created_at","deleted_at"]],["permissions",["id","code","module","description","deleted_at"]],["platform_changelog",["id","title","description","created_at","deleted_at","target_departments"]],["platform_error_log",["id","school_id","message","context","created_at","deleted_at"]],["prep_attendance",["id","school_id","session_id","session_date","present_count","total_count","recorded_at","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["prep_sessions",["id","school_id","name","kind","days_of_week","start_time","end_time","subject","teacher_name","audience","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["private_messages",["id","parent_id","parent_name","recipient_id","recipient_name","subject","message","status","sender_role","student_id","created_at","school_id","deleted_at"]],["profiles",["id","school_id","role_id","department_id","full_name","username","email","phone","whatsapp","photo_url","status","created_at","updated_at","last_login_at","department","role","position","is_owner","approval_status","pin","password_hash","suspended_at","deleted_at","linked_teacher_id","gender"]],["programs",["id","school_id","title","description","term_id","start_date","end_date","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["push_subscriptions_staff",["id","school_id","profile_id","department","endpoint","p256dh","auth","created_at","deleted_at"]],["report_cards",["id","exam_id","student_id","division","class_teacher_comment","head_teacher_comment","next_term_date","created_at","updated_at","school_id","deleted_at"]],["report_print_batches",["id","school_id","term_id","class_id","printed_by","printed_at","student_count","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["role_permissions",["role_id","permission_id","deleted_at"]],["roles",["id","school_id","name","is_system","is_admin","description","created_at","deleted_at"]],["school_assets",["id","school_id","name","category","location","quantity","condition","notes","created_by","updated_by","created_by_label","updated_by_label","created_at","updated_at","deleted_at"]],["school_communications",["id","school_id","type","title","message","audience","created_by","deleted_at","created_at"]],["school_events",["id","school_id","month","day","title","subtitle","created_at","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["school_meetings",["id","school_id","title","description","meeting_date","location","audience","created_by","deleted_at","created_at"]],["school_payments",["id","school_id","amount","method","note","extended_days","new_expires_at","created_at","deleted_at"]],["school_settings",["school_id","school_name","motto","mission","vision","logo_url","phone","email","address","brand_color","currency_symbol","stamp_head_teacher","stamp_deputy_head_teacher","stamp_bursar","stamp_other","receipt_prefix","receipt_digits","receipt_next_number","student_id_prefix","student_id_seq","student_id_digits","teacher_id_prefix","teacher_id_seq","teacher_id_digits","locked_departments","registration_open","teacher_eval_visibility","updated_at","school_levels","report_template_secondary","report_template_primary","report_template_pre_primary","active_level","deleted_at"]],["school_support_messages",["id","request_id","sender","sender_name","message","created_at","deleted_at"]],["school_support_requests",["id","school_id","subject","message","status","created_at","updated_at","deleted_at"]],["schools",["id","school_code","name","motto","logo_url","village","sub_county","district","size","created_at","updated_at","status","approved_at","plan","billing_cycle","subscription_amount","subscription_expires_at","features","size_range","deleted_at","upgrade_requested_at","upgrade_completed_at","school_levels"]],["sin_corrections",["id","ref","identity_id","school_id","submitted_by","changes","reason","status","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["sin_counters",["prefix","next_n","deleted_at"]],["sin_match_reviews",["id","ref","school_id","submitted_by","candidate","matches","status","resolved_identity_id","resolved_by","resolved_at","resolution_notes","created_at","deleted_at"]],["sin_registry",["sin","identity_id","issued_by","issued_at","deleted_at"]],["sin_transfer_windows",["id","identity_id","school_id","opened_by","opened_at","closes_at","closed_at","closed_by","status","deleted_at"]],["staff_attendance",["id","school_id","teacher_id","date","status","marked_by","created_at","deleted_at"]],["staff_directory",["id","school_id","name","contact","category","role","created_at","deleted_at"]],["streams",["id","school_id","class_id","name","capacity","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["student_applications",["id","student_identity_id","school_id","kind","status","payload","notes","submitted_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_authorizations",["id","student_identity_id","school_id","kind","status","requested_by","requested_at","resolved_at","resolved_by","notes","resolution_notes","granted_by","deleted_at"]],["student_identities",["id","sin","full_name","date_of_birth","gender","photo_url","phone","email","village","sub_county","district","guardian_name","guardian_relation","guardian_contact","medical_info","emergency_name","emergency_relation","emergency_contact","first_school_id","created_at","updated_at","password_hash","portal_status","last_login_at","username","first_name","second_name","other_name","totp_secret","totp_enabled","totp_last_step","must_change_password","self_locked","self_locked_at","suspended_at","suspended_reason","deleted_at","deleted_reason"]],["student_mother_messages",["id","thread_id","sender","sender_name","body","created_at","read_at","deleted_at"]],["student_mother_threads",["id","ref","identity_id","subject","status","created_at","last_message_at","closed_at","closed_by","deleted_at"]],["student_notifications",["id","student_identity_id","school_id","title","body","type","link","is_read","created_at","deleted_at"]],["student_records",["id","student_identity_id","school_id","school_name","kind","source_table","source_id","event_at","summary","detail","created_at","deleted_at"]],["student_recovery_requests",["id","ref","identity_id","typed_sin","typed_name","typed_phone","kind","note","status","created_at","resolved_at","resolved_by","resolution_notes","deleted_at"]],["student_sessions",["id","student_identity_id","token","created_at","last_seen_at","expires_at","revoked_at","device","deleted_at"]],["students",["id","school_id","admission_no","full_name","gender","date_of_birth","class_id","stream_id","previous_school","transfer_reason","village","sub_county","district","photo_url","medical_info","status","admission_date","created_at","updated_at","prev_school","parent_name","parent_relation","parent_contact","guardian_name","guardian_relation","guardian_contact","emergency_name","emergency_relation","emergency_contact","medical_notes","created_by","updated_by","created_by_label","updated_by_label","deleted_at","student_identity_id","sin_status","sin_entered","sin_review_id","balance_cleared_at","balance_cleared_by","sin"]],["subject_allocation",["id","school_id","subject_id","class_id","teacher_id","term_id","created_at","teacher_name","periods","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["subjects",["id","school_id","name","code","level","subject_type","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_assignment",["id","school_id","teacher_id","subject_id","class_id","stream_id","term_id","teacher_name","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["teacher_documents",["id","school_id","teacher_id","doc_type","title","file_url","notes","deleted_at","created_at"]],["teacher_evaluation_audit",["id","school_id","evaluation_id","action","actor_profile_id","actor_name","snapshot","created_at","deleted_at"]],["teacher_evaluations",["id","school_id","teacher_id","evaluator_profile_id","evaluator_name","evaluation_date","evaluation_period","scores","overall_score","strengths","areas_for_improvement","recommendation","deleted_at","created_at","updated_at"]],["teacher_identities",["id","nova_id","full_name","national_id_no","date_of_birth","gender","photo_url","created_at","deleted_at"]],["teacher_profiles",["id","school_id","teacher_id","date_of_birth","date_joined","employment_type","current_position","professional_reg_no","years_experience","subjects_specialization","bio","created_at","updated_at","deleted_at"]],["teacher_qualifications",["id","school_id","teacher_id","qualification_name","institution","year_obtained","certificate_url","status","deleted_at","created_at"]],["teachers",["id","school_id","staff_no","full_name","phone","email","gender","specialty","qualification","grade","village","subcounty","district","emergency_name","emergency_relationship","emergency_phone","status","photo_url","teacher_identity_id","nova_teacher_id","deleted_at","created_at","updated_at"]],["teaching_resources",["id","school_id","subject_id","title","file_url","uploaded_by","created_at","kind","qty","created_by","updated_by","updated_at","created_by_label","updated_by_label","deleted_at"]],["terms",["id","school_id","academic_year_id","name","start_date","end_date","is_current","created_by","updated_by","created_at","updated_at","created_by_label","updated_by_label","deleted_at"]],["website_visits",["session_id","first_seen","last_seen","seconds_spent","page","referrer","user_agent","created_at","deleted_at"]]],"color":"#0b7a8a","inactive":true}];
 const SENS=/(password|passwd|secret|token|key_hash|secret_hash|anon_key|totp|^pin$|otp_hash|^auth$|p256dh|endpoint|api_key)/i;
 const FEATURES=[
- ['Schools','List, open and block schools','S'],
  ['Billing','Plans, amounts and due dates','B'],
  ['Communications','Announcements and messages','C'],
  ['Admin boards','Per-app admin tools','A'],
  ['Run migration','Change a project database in plain words','M']
 ];
-const $=id=>document.getElementById(id);
+const GROUPS=[
+  {label:'School systems',slugs:['school-manager','digital-students','nova-school-manager']},
+  {label:'Church and media apps',slugs:['gospel-hymns','shalom-stream']},
+  {label:'Exam study materials',slugs:['excel-exam','excel-exam-primary']}
+ ];
+ function groupedProjects(){
+  const used=new Set(),out=GROUPS.map(g=>({label:g.label,items:g.slugs.map(sl=>DATA.findIndex(p=>p.slug==sl)).filter(i=>i>=0)}));
+  out.forEach(g=>g.items.forEach(i=>used.add(i)));
+  const rest=DATA.map((p,i)=>i).filter(i=>!used.has(i));
+  if(rest.length)out.push({label:'Other apps',items:rest});
+  return out.filter(g=>g.items.length);
+ }
+ const $=id=>document.getElementById(id);
 const app=$('app'),title=$('title'),back=$('back'),drawer=$('drawer'),scrim=$('scrim');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ini=n=>n.split(' ').filter(w=>/^[A-Z]/.test(w)).slice(0,2).map(w=>w[0]).join('');
@@ -127,10 +206,14 @@ function jump(v){hist=[];view=v;openMenu(false);render();window.scrollTo(0,0)}
 function drawerHTML(){
   let h=`<div class="dh"><b>TFG Admin</b><div>Control center for all apps</div></div><div class="dl">`;
   h+=`<button class="ni ${view.t=='home'?'on':''}" data-go="home"><span class="av" style="background:#0b1b4d">&#8962;</span><span>Home</span></button>`;
+  h+=`<div class="dg">Tools for all apps</div>`;
+  h+=`<button class="ni ${view.t=='claude'?'on':''}" data-go="claude"><span class="av" style="background:#b54708">C</span><span>Instructions for Claude<small>How Claude runs backend changes</small></span></button>`;
   h+=`<button class="ni ${view.t=='schools'?'on':''}" data-go="schools"><span class="av" style="background:#067647">S</span><span>Schools<small>List and block</small></span></button>`;
-  h+=`<button class="ni ${view.t=='features'?'on':''}" data-go="features"><span class="av" style="background:#475467">&#9881;</span><span>Features</span></button>`;
-  h+=`<button class="ni ${view.t=='parenthub'?'on':''}" data-go="parenthub"><span class="av" style="background:#7a4bd1">P</span><span>Parent Hub<small>Parents and requests</small></span></button><div class="sep"></div>`;
-  DATA.forEach((p,i)=>{h+=`<button class="ni ${view.p===i&&view.t!='table'?'on':''}" data-p="${i}"><span class="av" style="background:${p.color}">${i+1}</span><span>${esc(p.name)}<small>${p.tables.length} tables${p.inactive?' · inactive':''}</small></span></button>`});
+  h+=`<button class="ni ${view.t=='parenthub'?'on':''}" data-go="parenthub"><span class="av" style="background:#7a4bd1">P</span><span>Parent Hub<small>Parents and requests</small></span></button>`;
+  groupedProjects().forEach(g=>{
+    h+=`<div class="dg">${esc(g.label)}</div>`;
+    g.items.forEach(i=>{const p=DATA[i];h+=`<button class="ni ${view.p===i&&view.t!='table'?'on':''}" data-p="${i}"><span class="av" style="background:${p.color}">${esc(ini(p.name)||p.name[0])}</span><span>${esc(p.name)}<small>${p.inactive?'Inactive':esc(p.apps.join(' + '))}</small></span></button>`});
+  });
   if(LOGIN_ON)h+=`<div class="sep"></div><button class="ni" id="so"><span class="av" style="background:#b42318">&#10162;</span><span>Sign out</span></button>`;
   drawer.innerHTML=h+`</div>`;
   if(LOGIN_ON)$('so').onclick=()=>{saveSes(null);openMenu(false);hist=[];view={t:'home'};ghS.langs=null;ghS.songs=null;SH.data=null;SH.churches=null;Object.keys(LV).forEach(k=>delete LV[k]);NOTIFS.length=0;render()};
@@ -145,15 +228,20 @@ function render(){
   if(LOGIN_ON&&typeof LIVE!='undefined'&&!LIVE[view.t]&&(view.t=='schools'||view.t=='students'||view.t=='fees'||(typeof GS!='undefined'&&GS[view.t]))){notLive('Not connected');return}
   $('bell').hidden=false;
   drawerHTML();
-  if(LOGIN_ON&&typeof LIVE!='undefined'&&LIVE[view.t])LIVE[view.t]();else if(view.t=='home')home();else if(view.t=='features')features();else if(view.t=='schools')schools();else if(view.t=='section')section(view.p,view.n);else if(view.t=='students')students();else if(view.t=='fees')fees();else if(GS[view.t])gscreen(view.t);else if(view.t=='project')project(view.p);else table(view.p,view.j);
+  if(LOGIN_ON&&typeof LIVE!='undefined'&&LIVE[view.t])LIVE[view.t]();else if(view.t=='home')home();else if(view.t=='claude')claudeHelp();else if(view.t=='features')features();else if(view.t=='schools')schools();else if(view.t=='section')section(view.p,view.n);else if(view.t=='students')students();else if(view.t=='fees')fees();else if(GS[view.t])gscreen(view.t);else if(view.t=='project')project(view.p);else table(view.p,view.j);
 }
 function home(){
   setHead('TFG Admin',false);
-  const tables=DATA.reduce((n,p)=>n+p.tables.length,0),apps=DATA.reduce((n,p)=>n+p.apps.length,0);
-  let h=`<div class="hero"><h2>Welcome</h2><p>One place for all your apps</p><div class="stats"><div class="stat"><b>${DATA.length}</b><span>Projects</span></div><div class="stat"><b>${apps}</b><span>Apps</span></div><div class="stat"><b>${tables}</b><span>Tables</span></div></div></div><h3>Projects</h3><div class="grid">`;
-  h+=DATA.map((p,i)=>`<button class="card proj" data-p="${i}"><span class="av" style="background:${p.color}">${i+1}</span><span><span class="num">${esc(p.account)}${p.inactive?' · <span class="pill soon" style="margin:0">Inactive</span>':''}</span><h2>${esc(p.name)}</h2><span class="muted">${esc(p.desc)}</span></span><span class="chev">&#8250;</span></button>`).join('')+`</div>`;
+  let h=`<div class="hero"><h2>Welcome</h2><p>Pick what you want to manage.</p></div><h3>Tools for all apps</h3><div class="grid">
+  <button class="card tool" data-go="claude"><span class="av">C</span><span><h2 style="margin:0;font-size:16px">Instructions for Claude</h2><span class="muted">Every Claude reads this first</span></span><span class="chev">&#8250;</span></button>
+  <button class="card tool" data-go="schools"><span class="av">S</span><span><h2 style="margin:0;font-size:16px">Schools</h2><span class="muted">View, bill and block schools</span></span><span class="chev">&#8250;</span></button>
+  <button class="card tool" data-go="parenthub"><span class="av">P</span><span><h2 style="margin:0;font-size:16px">Parent Hub</h2><span class="muted">Parents and correction requests</span></span><span class="chev">&#8250;</span></button></div>`;
+  groupedProjects().forEach(g=>{
+    h+=`<h3>${esc(g.label)}</h3><div class="grid">`+g.items.map(i=>{const p=DATA[i];return `<button class="card proj" data-p="${i}"><span class="av" style="background:${p.color}">${esc(ini(p.name)||p.name[0])}</span><span style="flex:1;min-width:0"><h2>${esc(p.name)}</h2><span class="muted">${esc(p.desc)}</span>${p.inactive?'<br><span class="pill soon" style="margin-left:0">Inactive</span>':''}</span><span class="chev">&#8250;</span></button>`}).join('')+`</div>`;
+  });
   app.innerHTML=h;
   app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>nav({t:'project',p:+b.dataset.p}));
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>nav({t:b.dataset.go}));
 }
 
 const SCHOOLS=[];
@@ -211,8 +299,8 @@ function students(){
     const L=STU.students.filter(x=>(stF=='all'||x.status==stF)&&(!q||(x.name+x.cls+x.nid).toLowerCase().includes(q)));
     h+=`<div class="chips">${['all','active','suspended','transferred','trash'].map(f=>`<button class="chip ${stF==f?'on':''}" data-f="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}</div><input type="search" id="stq" placeholder="Search name, class or number" value="${esc(stQ)}"><div class="grid">`+(L.map(x=>`<button class="card proj" data-i="${x.id}"><span class="av" style="background:${col}">${initials(x.name)}</span><span style="flex:1;min-width:0"><h2 style="margin:0">${esc(x.name)}</h2><span class="muted">${esc(x.nid)} · ${esc(x.cls)} · ${x.gender}</span><br>${pill2(x.status)}</span><span class="chev">&#8250;</span></button>`).join('')||'<div class="muted" style="padding:12px">No students match.</div>')+`</div>`;
   }else{
-    const L=STU[stTab];
-    h+=`<div class="grid">`+L.map(x=>{
+    const L=STU[stTab].filter(x=>!q||JSON.stringify(Object.values(x)).toLowerCase().includes(q));
+    h+=`<input type="search" id="stq" placeholder="Search this list" value="${esc(stQ)}"><div class="grid">`+(L.length?'':'<div class="empty">Nothing here yet.</div>')+L.map(x=>{
       let a='',b='';
       if(stTab=='adm'){a=`${x.no} · applying ${x.cls}`;b=pill2(x.status)}
       if(stTab=='trf'){a=`${x.from} to ${x.to}`;b=pill2(x.cleared?'cleared':'owing')+(x.cleared?'':`<span class="pill">${money(x.bal)}</span>`)}
@@ -268,17 +356,20 @@ function stuSheet(tab,id){
 
 const FEE={struct:[],inv:[],pay:[]};
 const FTABS=[['inv','Invoices'],['pay','Payments'],['struct','Fee structure']];
-let fTab='inv';
+let fTab='inv',fQ='',fF='all';
 function fees(){
   setHead('Fees & Payments',false);
   const inv=FEE.inv.reduce((n,x)=>n+x.amount,0),got=FEE.pay.reduce((n,x)=>n+x.amount,0);
   let h=`<div class="note">Sample data. The login is not added yet, so nothing here touches your real fees.</div><div class="mini" style="grid-template-columns:repeat(3,1fr)"><div><b style="font-size:15px">${money(inv)}</b><span class="muted">Invoiced</span></div><div><b style="font-size:15px">${money(got)}</b><span class="muted">Collected</span></div><div><b style="font-size:15px">${money(Math.max(inv-got,0))}</b><span class="muted">Outstanding</span></div></div><div class="chips" style="margin-top:10px">${FTABS.map(t=>`<button class="chip ${fTab==t[0]?'on':''}" data-tab="${t[0]}">${t[1]} (${FEE[t[0]].length})</button>`).join('')}</div>`;
-  const col=appBy('school-manager').color;
-  if(fTab=='inv')h+=`<div class="grid">`+FEE.inv.map(x=>{const bal=x.amount-x.paid;return `<button class="card proj" data-i="${x.id}"><span class="av" style="background:${col}">${initials(x.name)}</span><span style="flex:1;min-width:0"><h2 style="margin:0">${esc(x.name)}</h2><span class="muted">${esc(x.desc)} · ${money(x.amount)}</span><br>${pill2(bal==0?'paid':'owing')}${bal?`<span class="pill">${money(bal)} left</span>`:''}</span><span class="chev">&#8250;</span></button>`}).join('')+`</div>`;
-  if(fTab=='pay')h+=`<button class="btn" id="addp" style="margin:0 0 12px">Record a payment</button><div class="grid">`+FEE.pay.map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><b>${money(x.amount)}</b></div><div class="muted">${esc(x.method)} · ${x.rcpt} · ${x.date}</div></div>`).join('')+`</div>`;
-  if(fTab=='struct')h+=`<button class="btn" id="addf" style="margin:0 0 12px">Add fee item</button><div class="grid">`+FEE.struct.map(x=>`<div class="card"><div class="row"><b>${esc(x.item)}</b><b>${money(x.amount)}</b></div><div class="muted">${x.cls} · ${x.term}</div></div>`).join('')+`</div>`;
+  const col=appBy('school-manager').color,fq=fQ.toLowerCase(),has=(x,k)=>!fq||k.map(a=>x[a]).join(' ').toLowerCase().includes(fq);
+  h+=(fTab=='inv'?`<div class="chips">${['all','owing','paid'].map(f=>`<button class="chip ${fF==f?'on':''}" data-ff="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}</div>`:'')+`<input type="search" id="fq" placeholder="Search this list" value="${esc(fQ)}">`;
+  if(fTab=='inv')h+=`<div class="grid">`+FEE.inv.filter(x=>has(x,['name','desc'])&&(fF=='all'||(fF=='paid')==(x.amount-x.paid==0))).map(x=>{const bal=x.amount-x.paid;return `<button class="card proj" data-i="${x.id}"><span class="av" style="background:${col}">${initials(x.name)}</span><span style="flex:1;min-width:0"><h2 style="margin:0">${esc(x.name)}</h2><span class="muted">${esc(x.desc)} · ${money(x.amount)}</span><br>${pill2(bal==0?'paid':'owing')}${bal?`<span class="pill">${money(bal)} left</span>`:''}</span><span class="chev">&#8250;</span></button>`}).join('')+`</div>`;
+  if(fTab=='pay')h+=`<button class="btn" id="addp" style="margin:0 0 12px">Record a payment</button><div class="grid">`+FEE.pay.filter(x=>has(x,['name','method','rcpt'])).map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><b>${money(x.amount)}</b></div><div class="muted">${esc(x.method)} · ${x.rcpt} · ${x.date}</div></div>`).join('')+`</div>`;
+  if(fTab=='struct')h+=`<button class="btn" id="addf" style="margin:0 0 12px">Add fee item</button><div class="grid">`+FEE.struct.filter(x=>has(x,['item','cls','term'])).map(x=>`<div class="card"><div class="row"><b>${esc(x.item)}</b><b>${money(x.amount)}</b></div><div class="muted">${x.cls} · ${x.term}</div></div>`).join('')+`</div>`;
   app.innerHTML=h;
-  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{fTab=b.dataset.tab;fees()});
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{fTab=b.dataset.tab;fQ='';fF='all';fees()});
+  app.querySelectorAll('[data-ff]').forEach(b=>b.onclick=()=>{fF=b.dataset.ff;fees()});
+  $('fq').oninput=e=>{fQ=e.target.value;const p=e.target.selectionStart;fees();const el=$('fq');el.focus();el.setSelectionRange(p,p)};
   app.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{
     const x=FEE.inv.find(r=>r.id==+b.dataset.i),bal=x.amount-x.paid;
     const kv=(k,v)=>`<div class="kv"><span>${k}</span><span>${v}</span></div>`;
@@ -478,7 +569,6 @@ function features(){
 }
 
 const SECTIONS={'school-manager':[
- {k:'schools',name:'Schools & Platform',icon:'S',desc:'Schools, status, billing and the link to Digital Students',tables:['schools','platform_settings','ds_config','ds_links','ds_photo_state','admin_audit'],screen:'schools'},
  {k:'students',name:'Students',icon:'St',screen:'students',desc:'Students, admissions, promotions, transfers and corrections',tables:['students','admission_applications','student_promotions','student_transfers','student_correction_requests']},
  {k:'staff',screen:'staff',name:'Staff & Accounts',icon:'Sf',desc:'Staff profiles, contacts, assignments and password recovery',tables:['profiles','staff_contacts','teaching_assignments','password_resets','reset_attempts','staff_find_attempts']},
  {k:'academics',screen:'academics',name:'Classes & Learning',icon:'C',desc:'Classes, subjects, terms, timetable, announcements and learning items',tables:['classes','subjects','class_subjects','terms','timetable_periods','timetable_slots','learning_items','announcements']},
@@ -489,22 +579,21 @@ const SECTIONS={'school-manager':[
 ]};
 function sectionsHTML(p,i){
   const S=SECTIONS[p.slug];if(!S)return '';
-  return `<h3>Sections</h3><div class="grid">`+S.map((x,n)=>`<button class="card proj" data-sec="${n}"><span class="av" style="background:${p.color}">${x.icon}</span><span style="flex:1;min-width:0"><h2 style="margin:0">${esc(x.name)}</h2><span class="muted">${esc(x.desc)}</span><br><span class="pill">${x.tables.length} ${x.tables.length==1?'table':'tables'}</span></span><span class="chev">&#8250;</span></button>`).join('')+`</div>`;
+  return `<h3>Choose a section</h3><div class="grid">`+S.map((x,n)=>`<button class="card proj" data-sec="${n}"><span class="av" style="background:${p.color}">${x.icon}</span><span style="flex:1;min-width:0"><h2 style="margin:0">${esc(x.name)}</h2><span class="muted">${esc(x.desc)}</span></span><span class="chev">&#8250;</span></button>`).join('')+`</div>`;
 }
 function section(i,n){
   const p=DATA[i],x=SECTIONS[p.slug][n];setHead(x.name,true);
   const known=x.tables.filter(t=>p.tables.some(q=>q[0]==t));
   app.innerHTML=`<div class="banner" style="background:${p.color}"><h2>${esc(x.name)}</h2><p>${esc(x.desc)}</p><span class="pill">${esc(p.name)}</span></div>`
-   +(x.screen?`<button class="card feat" id="scr" style="margin-bottom:12px"><span class="av">&#9654;</span><span><h2 style="margin:0;font-size:16px">Open management screen</h2><span class="muted">${['gh_songs','sh_creators','ds_schools','ds_requests','schools','gh_updates','gh_believers','gh_safety','gh_activity','sh_content','sh_community','sh_support','sh_admin'].includes(x.screen)&&LOGIN_ON?'Live data: sign in with your owner account':'Ready (sample data until login)'}</span></span><span class="chev">&#8250;</span></button>`:`<div class="note">Management screen for this section is not built yet. Tell me to build it next.</div>`)
-   +`<h3>Tables in this section</h3><div class="grid">`+known.map(t=>{const j=p.tables.findIndex(q=>q[0]==t);return `<button class="card" data-j="${j}"><div class="row"><b>${esc(t)}</b><span class="muted">${p.tables[j][1].length} cols &#8250;</span></div></button>`}).join('')+`</div>`;
+   +(x.screen?`<button class="card feat" id="scr" style="margin-bottom:12px"><span class="av">&#9654;</span><span><h2 style="margin:0;font-size:16px">Open ${esc(x.name)}</h2><span class="muted">${['gh_songs','sh_creators','ds_schools','ds_requests','schools','gh_updates','gh_believers','gh_safety','gh_activity','gh_connect','sh_content','sh_community','sh_support','sh_admin'].includes(x.screen)&&LOGIN_ON?'Live data: sign in with your owner account':'Ready (sample data until login)'}</span></span><span class="chev">&#8250;</span></button>`:`<div class="note">This section has no management screen yet.</div>`)
+   +`<details class="tech"><summary>Database tables for this section (${known.length})</summary><div class="grid">`+known.map(t=>{const j=p.tables.findIndex(q=>q[0]==t);return `<button class="card" data-j="${j}"><div class="row"><b>${esc(t)}</b><span class="muted">${p.tables[j][1].length} cols &#8250;</span></div></button>`}).join('')+`</div></details>`;
   if($('scr'))$('scr').onclick=()=>nav({t:x.screen});
   app.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>nav({t:'table',p:i,j:+b.dataset.j}));
 }
 
 function project(i){
   const p=DATA[i];setHead(p.name,false);
-  const sens=p.tables.reduce((n,t)=>n+t[1].filter(c=>SENS.test(c)).length,0);
-  app.innerHTML=`<div class="banner" style="background:${p.color}"><h2>${esc(p.name)}</h2><p>${esc(p.desc)}</p>${p.apps.map(a=>`<span class="pill">${esc(a)}</span>`).join('')}${p.inactive?'<span class="pill">Inactive</span>':''}</div><button class="btn ${p.inactive?'':'ghost'}" id="actb" style="margin:0 0 12px">${p.inactive?'Activate project':'Mark project inactive'}</button><div class="mini"><div><b>${p.tables.length}</b><span class="muted">Tables</span></div><div><b>${sens}</b><span class="muted">Sensitive columns</span></div></div><div class="muted" style="margin:8px 4px 0">${esc(p.account)} · ref ${esc(p.ref)}</div>${sectionsHTML(p,i)}<h3>All tables</h3><input type="search" id="q" placeholder="Search tables or columns"><div class="grid" id="list"></div>`;
+  app.innerHTML=`<div class="banner" style="background:${p.color}"><h2>${esc(p.name)}</h2><p>${esc(p.desc)}</p>${p.apps.map(a=>`<span class="pill">${esc(a)}</span>`).join('')}${p.inactive?'<span class="pill">Inactive</span>':''}</div>${sectionsHTML(p,i)||'<div class="note">This app has no management sections yet.</div>'}<details class="tech"><summary>Technical details and database tables</summary><div class="muted" style="margin:0 4px 10px">${esc(p.account)} &middot; ref ${esc(p.ref)} &middot; ${p.tables.length} tables</div><input type="search" id="q" placeholder="Search tables or columns"><div class="grid" id="list"></div><button class="btn ${p.inactive?'':'ghost'}" id="actb" style="margin-top:16px">${p.inactive?'Activate this app':'Mark this app inactive'}</button></details>`;
   const list=$('list');
   const draw=q=>{
     q=q.trim().toLowerCase();
@@ -514,7 +603,7 @@ function project(i){
   };
   $('q').oninput=e=>draw(e.target.value);draw('');
   $('actb').onclick=()=>{if(!ses.a){gate();return}const to=p.inactive?'active':'inactive';api({action:'apps.set_status',slug:p.slug,status:to}).then(()=>{p.inactive=!p.inactive;project(i);toast(p.inactive?'Project marked inactive':'Project is active')}).catch(e=>toast(e.message))};
-  app.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>nav({t:'section',p:i,n:+b.dataset.sec}));
+  app.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{const x=SECTIONS[p.slug][+b.dataset.sec];nav(x.screen?{t:x.screen}:{t:'section',p:i,n:+b.dataset.sec})});
 }
 function table(i,j){
   const p=DATA[i],t=p.tables[j];setHead(t[0],true);
@@ -777,7 +866,7 @@ async function authCall(path,body){
   if(!r.ok)throw new Error(d.error_description||d.msg||d.message||'Sign-in failed');
   return d}
 async function api(body,retried){
-  const r=await fetch(SUPA+'/functions/v1/control-api',{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r=await fetch(SUPA+'/functions/v1/'+(String(body.action).startsWith('hx.')?'hymns-admin':'control-api'),{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status==401&&ses.r&&!retried){
     try{saveSes(await authCall('token?grant_type=refresh_token',{refresh_token:ses.r}))}catch(e){saveSes(null);throw new Error('Please sign in again.')}
     return api(body,true)}
@@ -854,6 +943,11 @@ function ghParse(raw,hint){
 /* ---- Screen ---- */
 const ghS={lang:'alur',langs:null,songs:null,mode:'list',err:'',q:'',form:null,busy:false};
 const ghCap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function ghDownload(){
+  if(!ghS.songs||!ghS.songs.length){toast('No songs to download');return}
+  const t=ghS.songs.map(x=>x.num+'. '+x.title+(x.key?' (Key '+x.key+')':'')+'\n\n'+(x.lyrics||'')).join('\n\n----------\n\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='hymns-'+ghS.lang+'.txt';
+  document.body.appendChild(a);a.click();a.remove();toast('Downloaded '+ghS.songs.length+' hymns')}
 function ghFail(e){if(!ses.a){gate();return}ghS.err=e.message||String(e);ghS.busy=false;ghLive()}
 function ghPrevHTML(out){
   if(!String(out).trim())return '';
@@ -883,12 +977,13 @@ function ghLive(){
   const q=ghS.q.toLowerCase();
   const rows=ghS.songs.filter(s=>!q||(s.num+' '+s.title+' '+(s.snippet||'')).toLowerCase().includes(q));
   app.innerHTML=`<div class="chips" style="display:flex;gap:8px;overflow:auto;margin:0 0 12px">${ghS.langs.map(l=>`<button class="chip ${l.lang_code==ghS.lang?'on':''}" data-l="${l.lang_code}">${ghCap(l.lang_code)} (${l.n})</button>`).join('')}</div>
-  <button class="btn" id="gh_add" style="margin:0 0 12px">+ Add song to ${ghCap(ghS.lang)}</button>
+  <button class="btn" id="gh_add" style="margin:0 0 8px">+ Add song to ${ghCap(ghS.lang)}</button>
+  <button class="btn ghost" id="gh_dl" style="margin:0 0 12px">Download ${ghCap(ghS.lang)} hymns</button>
   <input type="search" id="gh_q" placeholder="Search number, title or first line" value="${esc(ghS.q)}">
   <div class="grid" id="gh_list">${rows.length?rows.map((s,i)=>`<button class="card" data-i="${ghS.songs.indexOf(s)}"><div class="row"><b>${s.num}. ${esc(s.title)}</b><span class="muted">${s.key?'Key '+esc(s.key)+' ':''}&#8250;</span></div><div class="muted">${esc(s.snippet||'')}</div></button>`).join(''):`<div class="empty">${ghS.songs.length?'No match':'No songs in '+ghCap(ghS.lang)+' yet'}</div>`}</div>
   <button class="btn ghost" id="gh_out" style="margin-top:18px">Sign out</button>`;
   app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{ghS.lang=b.dataset.l;ghS.songs=null;ghS.q='';ghLive()});
-  $('gh_add').onclick=()=>{ghS.form={id:null,num:String((L.max_num||0)+1),title:'',key:'',raw:'',out:'',info:''};ghS.mode='form';ghLive()};
+  $('gh_dl').onclick=ghDownload;$('gh_add').onclick=()=>{ghS.form={id:null,num:String((L.max_num||0)+1),title:'',key:'',raw:'',out:'',info:''};ghS.mode='form';ghLive()};
   $('gh_q').oninput=e=>{ghS.q=e.target.value;const p=e.target.selectionStart;ghLive();const n=$('gh_q');n.focus();try{n.setSelectionRange(p,p)}catch(x){}};
   $('gh_out').onclick=()=>{saveSes(null);ghS.langs=null;ghS.songs=null;ghLive()};
   app.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>ghOpen(ghS.songs[+b.dataset.i]))}
@@ -989,7 +1084,7 @@ function shOpen(x){
   if($('sh_a'))$('sh_a').onclick=()=>go('approved');if($('sh_r'))$('sh_r').onclick=()=>go('rejected');if($('sh_p'))$('sh_p').onclick=()=>go('pending')}
 
 /* ---------- My School Manager: schools, billing and blocking ---------- */
-const LSC={f:'all',data:null,q:''};
+const LSC={f:'all',b:'all',data:null,q:''};
 const MODS=[['students','Students'],['admissions','Admissions'],['attendance','Attendance'],['classes','Classes'],['staff','Staff'],['results','Results'],['report_cards','Report cards'],['fees','Fees'],['portal','Parent portal']];
 const BSTAT=['paid','pending','overdue','trial','waived'];
 function schoolsLive(){
@@ -997,12 +1092,14 @@ function schoolsLive(){
   if(!ses.a){liveLogin(schoolsLive);return}
   if(!LSC.data){app.innerHTML='<div class="empty">Loading…</div>';api({action:'schools.list'}).then(d=>{LSC.data=d.schools;schoolsLive()}).catch(e=>liveErr(e,()=>{LSC.data=null;schoolsLive()}));return}
   const n=s=>LSC.data.filter(x=>x.status==s).length,q=LSC.q.toLowerCase();
-  const rows=LSC.data.filter(x=>(LSC.f=='all'||x.status==LSC.f)&&(!q||(x.name+' '+x.school_code+' '+(x.district||'')).toLowerCase().includes(q)));
-  app.innerHTML=`<div class="mini" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"><div><b>${LSC.data.length}</b><br><span class="muted">Schools</span></div><div><b>${n('active')}</b><br><span class="muted">Active</span></div><div><b>${n('suspended')+n('trashed')}</b><br><span class="muted">Blocked</span></div></div>`
-   +chipsH([['all','All'],['active','Active ('+n('active')+')'],['suspended','Suspended ('+n('suspended')+')'],['trashed','Trash ('+n('trashed')+')']],LSC.f,'f')
-   +`<input type="search" id="sc_q" placeholder="Search school name, code or district" value="${esc(LSC.q)}"><div class="grid">`
-   +(rows.length?rows.map(x=>`<button class="card" data-i="${LSC.data.indexOf(x)}"><div class="row"><b>${esc(x.name)}</b>${lvPill(x.status,stK(x.status))}</div><div class="muted">${esc(x.school_code)} · ${x.students} students · ${esc(ghCap(x.billing_plan||'—'))} plan ${lvPill(x.billing_status||'—',stK(x.billing_status))}</div></button>`).join(''):'<div class="empty">No schools</div>')+`</div>`;
+  const rows=LSC.data.filter(x=>(LSC.f=='all'||x.status==LSC.f)&&(LSC.b=='all'||x.billing_status==LSC.b)&&(!q||(x.name+' '+x.school_code+' '+(x.district||'')).toLowerCase().includes(q)));
+  app.innerHTML=`<div class="mini" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"><div><b>${LSC.data.length}</b><br><span class="muted">Schools</span></div><div><b>${n('active')}</b><br><span class="muted">Active</span></div><div><b>${n('suspended')}</b><br><span class="muted">Suspended</span></div></div>`
+   +chipsH([['all','All ('+LSC.data.length+')'],['active','Active ('+n('active')+')'],['suspended','Suspended ('+n('suspended')+')'],['trashed','Trash ('+n('trashed')+')']],LSC.f,'f')
+   +chipsH([['all','Any billing'],['paid','Paid'],['pending','Pending'],['overdue','Overdue'],['trial','Trial']],LSC.b,'b')
+   +`<input type="search" id="sc_q" placeholder="Search name, code or district" value="${esc(LSC.q)}"><div class="grid">`
+   +(rows.length?rows.map(x=>`<button class="card" data-i="${LSC.data.indexOf(x)}"><div class="row"><b>${esc(x.name)}</b>${lvPill(x.status,stK(x.status))}</div><div class="muted">${esc(x.school_code)} · ${x.students} students · ${esc(ghCap(x.billing_plan||'—'))} plan ${lvPill(x.billing_status||'—',stK(x.billing_status))}</div></button>`).join(''):'<div class="empty">No schools match.</div>')+`</div>`;
   app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{LSC.f=b.dataset.f;schoolsLive()});
+  app.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{LSC.b=b.dataset.b;schoolsLive()});
   $('sc_q').oninput=e=>{LSC.q=e.target.value;const p=e.target.selectionStart;schoolsLive();const t=$('sc_q');t.focus();try{t.setSelectionRange(p,p)}catch(x){}};
   app.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>scOpen(LSC.data[+b.dataset.i]))}
 async function scAct(s,op,data,msg,confirmed){
@@ -1109,18 +1206,34 @@ function lvScreen(key,cfg){
 /* ---- Gospel Hymns: Updates ---- */
 function ghUpdForm(x,reload){
   showSheet(x?'Edit update':'New update',lvIn('u_n','Number (leave empty for the next one)',x?x.num:'','number')+lvIn('u_t','Title',x?x.title:'')+`<div class="fl">Text</div>`+lvTa('u_x','Write the update',x?x.text:'')+lvIn('u_i','Picture link (https://…, optional)',x?x.image_url:'')+`<button class="btn" id="u_s">Save update</button>`);
-  $('u_s').onclick=()=>lvAct({action:'hymns.update_save',id:x?x.id:undefined,update:{num:$('u_n').value,title:$('u_t').value,text:$('u_x').value,image_url:$('u_i').value}},'Update saved',reload)}
+  $('u_s').onclick=async()=>{
+    const upd={num:$('u_n').value,title:$('u_t').value,text:$('u_x').value,image_url:$('u_i').value};
+    try{
+      await api({action:'hymns.update_save',id:x?x.id:undefined,update:upd});
+      let told=false;
+      if(!x){
+        try{
+          const L=(await api({action:'hymns.updates'})).updates.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+          const nu=L.find(u=>u.title===upd.title)||L[0];
+          if(nu){await api({action:'hymns.notify_send',text:'New update: '+(upd.title||('#'+nu.num))+' \u27E6u:'+nu.id+'\u27E7'});told=true}
+        }catch(e){}
+      }
+      sheet(false);toast(x?'Update saved':(told?'Update posted and announced in notifications':'Update posted (notification could not be sent)'));reload();
+    }catch(e){toast(e.message)}}}
 const ghUpdates=lvScreen('gh_updates',{title:'Updates',
   load:()=>api({action:'hymns.updates'}).then(d=>d.updates),
-  top:()=>`<button class="btn" id="up_new" style="margin-top:0">Post a new update</button>`,
+  top:(t,all)=>`<div class="stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">${[['Updates',all.length],['Views',all.reduce((n,x)=>n+(+x.views||0),0)],['Likes',all.reduce((n,x)=>n+(+x.likes||0),0)],['Comments',all.reduce((n,x)=>n+(+x.comments||0),0)]].map(([l,v])=>`<div class="card" style="padding:10px;text-align:center"><b style="font-size:18px">${v}</b><div class="muted" style="font-size:12px">${l}</div></div>`).join('')}</div><button class="btn" id="up_new" style="margin-top:0">Post a new update</button>`,
   bind:(t,r)=>{$('up_new').onclick=()=>ghUpdForm(null,r)},
   card:x=>['#'+x.num+' '+(x.title||'Update'),`${x.likes} likes · ${x.views} views · ${x.comments} comments · ${fmtD(x.created_at)}`],
   open:(x,t,r)=>{showSheet('Update #'+x.num,`<div class="ghb">${esc(x.text)}</div>`+kvh([['Likes',x.likes],['Views',x.views],['Comments',x.comments],['Posted',fmtD(x.created_at)]])
     +`<button class="btn" id="u_e">Edit</button><button class="btn ghost" id="u_c">See comments and reply</button><button class="btn danger" id="u_d">Delete update</button>`);
     $('u_e').onclick=()=>ghUpdForm(x,r);
-    $('u_d').onclick=()=>{if(confirm('Delete this update with its comments, likes and views?'))lvAct({action:'hymns.update_delete',id:x.id,confirm:true},'Update deleted',r)};
+    $('u_d').onclick=async()=>{if(!confirm('Delete this update with its comments, likes and views?'))return;
+      try{await api({action:'hymns.update_delete',id:x.id,confirm:true});
+        try{const n=(await api({action:'hymns.notify_list'})).notifications.filter(z=>(z.text||'').includes('\u27E6u:'+x.id+'\u27E7'));for(const z of n)await api({action:'hymns.notify_delete',id:z.id})}catch(e){}
+        sheet(false);toast('Update deleted');r()}catch(e){toast(e.message)}};
     $('u_c').onclick=()=>api({action:'hymns.update_comments',update_id:x.id}).then(d=>{
-      showSheet('Comments',(d.comments.length?d.comments.map((c,i)=>`<div class="ghb"><b>${esc(c.name||'Believer')}</b> · ${fmtD(c.created_at)}<br>${esc(c.text)}${c.admin_reply?`<br><i>Your reply: ${esc(c.admin_reply)}</i>`:''}<br><button class="chip" data-r="${i}">Reply</button> <button class="chip" data-x="${i}">Delete</button></div>`).join(''):'<div class="empty">No comments yet</div>'));
+      showSheet('Comments',`<div class="muted" style="margin-bottom:8px">Your replies are sent to the person as a notification. They do not appear under the update.</div>`+(d.comments.length?d.comments.map((c,i)=>`<div class="ghb"><b>${esc(c.name||'Believer')}</b> · ${fmtD(c.created_at)}<br>${esc(c.text)}${c.admin_reply?`<br><i>Your reply: ${esc(c.admin_reply)}</i>`:''}<br><button class="chip" data-r="${i}">Reply</button> <button class="chip" data-x="${i}">Delete</button></div>`).join(''):'<div class="empty">No comments yet</div>'));
       $('nlist').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const c=d.comments[+b.dataset.r];showSheet('Reply',`<div class="ghb">${esc(c.text)}</div>`+lvTa('c_r','Your reply',c.admin_reply)+`<button class="btn" id="c_s">Send reply</button>`);$('c_s').onclick=()=>lvAct({action:'hymns.comment_reply',id:c.id,reply:$('c_r').value},'Reply saved',r)});
       $('nlist').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{if(confirm('Delete this comment?'))lvAct({action:'hymns.comment_delete',id:d.comments[+b.dataset.x].id,confirm:true},'Comment deleted',r)})}).catch(e=>toast(e.message))}});
 
@@ -1150,23 +1263,95 @@ const ghSafety=lvScreen('gh_safety',{title:'Messages & Reports',
   load:t=>t=='reports'?api({action:'hymns.reports'}).then(d=>d.reports):api({action:'hymns.notify_list'}).then(d=>d.notifications),
   top:t=>t=='notify'?`<div class="card" style="margin-bottom:10px"><b>Send a notification</b>${lvTa('n_t','e.g. New hymns added this week!')}<button class="btn" id="n_s">Send to the app</button><div class="muted" style="margin-top:6px">It shows as a pop-up in the app for people who are online.</div></div>`:'',
   bind:(t,r)=>{if(t=='notify')$('n_s').onclick=()=>{const v=$('n_t').value.trim();if(!v){toast('Write a message first');return}lvAct({action:'hymns.notify_send',text:v},'Notification sent',r)}},
-  card:(x,t)=>t=='reports'?[x.kind=='complaint'?'Complaint from '+(x.from_user||'app user'):(x.reported_by||'Someone')+' reported a post',`${x.reason||''} · ${fmtD(x.ts)}`,x.status,x.status=='open'?'warn':'ok']:[(x.text||'').slice(0,60),fmtD(x.ts)],
+  card:(x,t)=>t=='reports'?[x.kind=='complaint'?'Complaint from '+(x.from_user||'app user'):(x.reported_by||'Someone')+' reported a post',`${x.reason||''} · ${fmtD(x.ts)}`,x.status,x.status=='open'?'warn':'ok']:[(x.text||'').replace(/\s*\u27E6u:[^\u27E7]+\u27E7/,'').slice(0,60),fmtD(x.ts)],
   open:(x,t,r)=>{
-    if(t=='notify'){showSheet('Notification',`<div class="ghb">${esc(x.text)}</div><button class="btn danger" id="n_d">Delete</button>`);$('n_d').onclick=()=>lvAct({action:'hymns.notify_delete',id:x.id},'Deleted',r);return}
-    showSheet('Report',`<div class="ghb">${esc(x.post_text||'')}</div>`+kvh([['Kind',esc(x.kind)],['Reason',esc(x.reason)],['By',esc(x.reported_by||x.from_user)],['When',fmtD(x.ts)],['Status',esc(x.status)]])+(x.status=='open'?`<button class="btn" id="r_r">Mark reviewed</button>`:'')+`<button class="btn danger" id="r_d">Delete report</button>`);
-    if($('r_r'))$('r_r').onclick=()=>lvAct({action:'hymns.report_status',id:x.id,status:'reviewed'},'Marked reviewed',r);
+    if(t=='notify'){showSheet('Notification',`<div class="ghb">${esc((x.text||'').replace(/\s*\u27E6u:[^\u27E7]+\u27E7/,''))}</div><button class="btn danger" id="n_d">Delete</button>`);$('n_d').onclick=()=>lvAct({action:'hymns.notify_delete',id:x.id},'Deleted',r);return}
+    showSheet('Report',`<div class="ghb">${esc(x.post_text||'')}</div>`+kvh([['Kind',esc(x.kind)],['Reason',esc(x.reason)],['By',esc(x.reported_by||x.from_user)],['When',fmtD(x.ts)],['Status',esc(x.status)]])+(x.post_text?`<button class="btn ghost" id="r_f">Find the reported post or comment</button>`:'')+(x.status=='open'?`<button class="btn" id="r_r">Mark reviewed</button>`:'')+`<button class="btn danger" id="r_d">Delete report</button>`);
+    if($('r_f'))$('r_f').onclick=()=>hyFindReported(x,r);if($('r_r'))$('r_r').onclick=()=>lvAct({action:'hymns.report_status',id:x.id,status:'reviewed'},'Marked reviewed',r);
     $('r_d').onclick=()=>{if(confirm('Delete this report?'))lvAct({action:'hymns.report_delete',id:x.id,confirm:true},'Deleted',r)}}});
 
-/* ---- Gospel Hymns: Usage ---- */
+/* ---- Gospel Hymns: Connect Community (owner-checked, through hymns-admin) ---- */
+const hyWho=x=>x.name?x.name+(x.username?' (@'+x.username+')':''):'Unknown member';
+async function hyFindReported(rep,reload){
+  try{
+    const d=await api({action:'hx.find_reported',text:rep.post_text||''});
+    if(!d.matches.length){toast('Not found. It may already be deleted.');return}
+    showSheet('Reported content',d.matches.map(x=>`<div class="ghb"><b>${x.kind=='post'?'Post':'Comment'}</b><br>${esc(x.text)}<br><button class="chip" data-k="${x.kind}" data-id="${x.id}">Delete this ${x.kind}</button></div>`).join(''));
+    $('nlist').querySelectorAll('[data-id]').forEach(b=>b.onclick=async()=>{
+      if(!confirm('Delete this '+b.dataset.k+'?'))return;
+      try{await api({action:b.dataset.k=='post'?'hx.post_delete':'hx.comment_remove',id:b.dataset.id,confirm:true});
+        try{await api({action:'hymns.report_status',id:rep.id,status:'reviewed'})}catch(e){}
+        sheet(false);toast('Deleted and report marked reviewed');reload()}catch(e){toast(e.message)}})
+  }catch(e){toast(e.message)}}
+const ghConnect=lvScreen('gh_connect',{title:'Connect Community',
+  tabs:[['members','Members'],['posts','Posts'],['comments','Comments'],['stats','Numbers']],
+  load:async t=>{
+    if(t=='members')return (await api({action:'hx.connect_members'})).members;
+    if(t=='posts')return (await api({action:'hx.connect_posts'})).posts;
+    if(t=='comments')return (await api({action:'hx.connect_comments'})).comments;
+    const z=(await api({action:'hx.connect_stats'})).stats;
+    return [['Members',z.members],['Posts',z.posts],['Comments',z.comments],['Follows',z.follows],['Post likes',z.post_likes],['Comment likes',z.comment_likes],['Messages sent',z.messages],['Messages today',z.messages_today],['Voice messages',z.voice],['Unread messages',z.unread]].map(([t,n])=>({t,n}))},
+  card:(x,t)=>t=='members'?[x.name||'Member',`@${x.username||'—'} · ${x.posts} posts · ${x.followers} followers`,x.verified?'Verified':'',x.verified?'ok':'']
+    :t=='posts'?[hyWho(x),`${(x.text||'').slice(0,80)} · ${x.likes} likes · ${x.comments} comments`]
+    :t=='comments'?[hyWho(x),`${(x.text||'').slice(0,80)} · on: ${(x.on_post||'').slice(0,40)}`]
+    :[x.t,x.n+' in total'],
+  open:(x,t,r)=>{
+    if(t=='stats'){showSheet(x.t,kvh([['Total',x.n],['Note','Message content is private and never shown here.']]));return}
+    if(t=='members'){
+      showSheet(x.name||'Member',kvh([['Username',x.username?'@'+esc(x.username):'—'],['Church',esc(x.church)],['Posts',x.posts],['Comments',x.comments],['Followers',x.followers],['Verified',x.verified?'Yes':'No'],['Badge colour',esc(x.badge_color)],['Joined',fmtD(x.created_at)],['Last seen',x.last_seen?new Date(x.last_seen).toLocaleString():'—']])
+        +`<button class="btn ghost" id="m_v">${x.verified?'Remove verified mark':'Give verified mark'}</button><div class="fl">Badge colour</div><div style="display:flex;gap:6px;flex-wrap:wrap">${BADGE_C.map(c=>`<button class="chip ${x.badge_color==c?'on':''}" data-c="${c}">${c}</button>`).join('')}</div>`);
+      $('m_v').onclick=()=>lvAct({action:'hymns.verify',profile_id:x.id,verified:!x.verified},'Saved',r);
+      $('nlist').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>lvAct({action:'hymns.badge',profile_id:x.id,color:b.dataset.c},'Badge colour saved',r));return}
+    if(t=='posts'){
+      showSheet('Post',`<div class="ghb">${esc(x.text)}</div>`+kvh([['By',esc(hyWho(x))],['Verse',esc(x.verse)],['Likes',x.likes],['Comments',x.comments],['Posted',fmtD(x.created_at)],['Picture',x.image_url?`<a href="${esc(x.image_url)}" target="_blank" rel="noopener">Open</a>`:'—']])+`<button class="btn danger" id="p_d">Delete post</button>`);
+      $('p_d').onclick=()=>{if(confirm('Delete this post with its comments and likes?'))lvAct({action:'hx.post_delete',id:x.id,confirm:true},'Post deleted',r)};return}
+    showSheet('Comment',`<div class="ghb">${esc(x.text)}</div>`+kvh([['By',esc(hyWho(x))],['On post',esc(x.on_post)],['Posted',fmtD(x.created_at)]])+`<button class="btn danger" id="c_d">Delete comment</button>`);
+    $('c_d').onclick=()=>{if(confirm('Delete this comment?'))lvAct({action:'hx.comment_remove',id:x.id,confirm:true},'Comment deleted',r)}}});
+
+
+/* ---- Instructions for Claude (same text is stored in the TFG database table public.claude_handoff) ---- */
+const CLAUDE_HELP="INSTRUCTIONS FOR EVERY CLAUDE WORKING ON TFG APPS (read this first)\n\nTHE RULE\nNever ask Jason to paste, run or deploy SQL, edge-function code or any backend change himself. The TFG Admin was built so Claude can do it. Do the work yourself through the TFG Supabase project (ref rigctcvknfxbkdmfcknh) using the connected Supabase tools, then tell Jason what you did. Only ask him for something when it is truly impossible for you (see \"What only Jason can do\").\n\nHOW THE CONNECTION WORKS\n1. The TFG project has a table public.connected_apps (slug, name, project_ref, supabase_account, status). It lists every app project the admin controls.\n2. The TFG project's Edge Function secrets hold one Supabase personal access token per Supabase account, named PAT_<ACCOUNT> (for example PAT_ACCOUNT_2). They never go to the browser and must never be printed or written into files, chats or code.\n3. Two Edge Functions in the TFG project do the work. Both check that the signed-in email is in public.owner_admins, so only the owner can use them:\n   - control-api: actions songs.*, hymns.*, shalom.*, schools.*, ds.*, ph.*, feed.*, apps.*. Its helper runSql(appSlug, sql) calls the Supabase Management API (/v1/projects/<ref>/database/query) with the stored token of the account that owns that app.\n   - hymns-admin: actions hx.* for Only Believe Gospel Hymns (longer usage statistics, Connect Community members, posts, comments, deleting posts and comments, finding reported content).\n4. The admin app (index.html) calls them with fetch to <TFG url>/functions/v1/<function> using the owner's access token. Actions starting hx. go to hymns-admin; everything else goes to control-api.\n5. migration-runner is another function in the TFG project. Read its source with get_edge_function before using it.\n\nHOW TO ADD A NEW BACKEND CAPABILITY FOR ANY APP (do this yourself)\n1. Read the current function source with get_edge_function (project rigctcvknfxbkdmfcknh).\n2. Add a new action that calls runSql('<app slug>', '<sql>'). It inherits the owner check. Use confirm:true for destructive actions and write to audit_log like the other actions.\n3. Deploy with deploy_edge_function to project rigctcvknfxbkdmfcknh with verify_jwt true. control-api is long and a deploy replaces the whole file, so either re-send the complete file with your addition, or put new work in a companion function like hymns-admin.\n4. Update the admin app so it calls the new action with api({action:'...'}).\n5. Test what you can, then report what you changed.\nDo not use an app's public (publishable) key for moderation or admin work: anyone can use that key.\n\nCONNECTED APPS (slug, project ref, account, status)\n- digital-students: mwjmqodwrcxrohidonmj, ACCOUNT_1, active\n- school-manager (My School Manager): huczdzvnzgwunktxcdcj, ACCOUNT_1, active\n- gospel-hymns (Only Believe Gospel Hymns): xdlbeepqqbstchjcepgw, ACCOUNT_2, active\n- shalom-stream: ixmyndnerktftrgqopry, ACCOUNT_2, active\n- excel-exam: vylcldfjzmqusdszhode, ACCOUNT_3, active\n- nova-school-manager: pjdtlpnlvumpefxjmjpv, ACCOUNT_3, inactive\n- excel-exam-primary: ggubkuxgrmsqjccgireu, ACCOUNT_4, active\n- parent-hub: kxsxwefzqyqyxnpwfowd, ACCOUNT_5, active\nThe connected Supabase tools in a chat may be refused for other accounts' projects (the Hymns project is refused). That is expected. Reach those projects through control-api or hymns-admin, which use the stored tokens.\n\nADDING A SUPABASE ACCOUNT OR APP THAT IS NOT CONNECTED YET\nInsert a row in public.connected_apps for the app. If its Supabase account has no stored token yet, a new PAT_<ACCOUNT> secret is needed. Claude's tools cannot create Edge Function secrets, so this is the one thing to ask Jason for, once: the token, added as a secret. After that, do everything else yourself.\n\nWHAT ONLY JASON CAN DO\nCreating Edge Function secrets and the owner sign-in. Everything else (functions, SQL, migrations, admin screens) is Claude's job.\n\nONLY BELIEVE GOSPEL HYMNS NOTES\n- The Hymns app is Hymns.html, the admin is index.html (TFG Admin).\n- New updates are announced by a notification whose text ends with a hidden marker of the form (open bracket U+27E6)u:<update id>(close bracket U+27E7). The app turns it into an \"update\" notification that opens that update.\n- Admin replies to update comments are delivered only as notifications, not shown under the update.\n- Private message content is never shown in the admin, only counts.\n- Hymns app languages: acholi, alur, english, french, luganda, swahili.\n";
+function claudeHelp(){
+  setHead('Instructions for Claude',hist.length>0);
+  app.innerHTML=`<div class="note">Copy this and give it to any Claude that works on your apps. The same text is saved in the TFG database (table claude_handoff). It contains no passwords or tokens.</div><button class="btn" id="ch_c">Copy instructions</button><div class="card" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;margin-top:10px">${esc(CLAUDE_HELP)}</div>`;
+  $('ch_c').onclick=()=>{try{navigator.clipboard.writeText(CLAUDE_HELP).then(()=>toast('Copied'),()=>toast('Could not copy'))}catch(e){toast('Could not copy')}}}
+
+/* ---- Gospel Hymns: Usage (line graphs) ---- */
+const GU={range:30,days:{}};
+function ghLine(pts,color,id){
+  if(!pts.length)return '<div class="muted">No data yet</div>';
+  const W=Math.max(320,pts.length*46+50),H=210,L=38,R=14,T=22,B=34,mx=Math.max(1,...pts.map(p=>p.v));
+  const nice=Math.max(4,Math.ceil(mx/4)*4),X=i=>L+(pts.length==1?(W-L-R)/2:i*(W-L-R)/(pts.length-1)),Y=v=>T+(H-T-B)*(1-v/nice);
+  let g='';for(let k=0;k<=4;k++){const v=nice*k/4,y=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" font-size="11" text-anchor="end" fill="var(--mute)">${Math.round(v)}</text>`}
+  const path=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
+  const area=path+` L${X(pts.length-1).toFixed(1)} ${Y(0)} L${X(0).toFixed(1)} ${Y(0)} Z`;
+  const lab=pts.map((p,i)=>`<text x="${X(i)}" y="${H-12}" font-size="10" text-anchor="middle" fill="var(--mute)">${esc(p.l)}</text>`).join('');
+  const dots=pts.map((p,i)=>`<circle cx="${X(i)}" cy="${Y(p.v)}" r="${pts.length>20?3:4}" fill="${color}"/>${pts.length<=14?`<text x="${X(i)}" y="${Y(p.v)-9}" font-size="11" font-weight="700" text-anchor="middle" fill="var(--ink)">${p.v}</text>`:''}<circle class="gp" data-c="${id}" data-i="${i}" cx="${X(i)}" cy="${Y(p.v)}" r="16" fill="transparent"/>`).join('');
+  return `<div id="ro_${id}" class="muted" style="margin-bottom:4px">Tap a point to see the number</div><div class="gscroll" data-sc="1" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block">${g}<path d="${area}" fill="${color}" opacity=".12"/><path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}${lab}</svg></div>`}
 function ghActivity(){
   setHead('Usage & Activity',hist.length>0);
   if(!ses.a){gate();return}
   app.innerHTML='<div class="empty">Loading…</div>';
-  api({action:'hymns.usage'}).then(d=>{
+  api({action:'hx.usage',days:Math.max(GU.range,30)}).then(d=>{
     const s=d.summary,m=n=>{n=+n||0;return n>=3600?(n/3600).toFixed(1)+' h':Math.round(n/60)+' min'};
-    app.innerHTML=`<div class="stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">`+[['Using it now',s.active_now],['Used today',s.used_today],['Installs',s.installs],['Time today',m(s.seconds_today)]].map(([l,v])=>`<div class="card"><b style="font-size:22px">${v}</b><div class="muted">${l}</div></div>`).join('')+`</div>`
-     +`<h3>Today by screen</h3><div class="card">`+(d.features.length?d.features.map(f=>`<div class="kv"><span>${esc(ghCap(String(f.feature).replace(/_/g,' ')))}</span><span>${m(f.seconds)}</span></div>`).join(''):'<div class="muted">No activity yet today</div>')+`</div>`
-     +`<h3>Last 30 days</h3><div class="card">`+(d.days.length?d.days.map(f=>`<div class="kv"><span>${fmtD(f.day)}</span><span>${f.used} used · ${f.installed} installed</span></div>`).join(''):'<div class="muted">No data</div>')+`</div>`
+    const all=(d.days||[]).slice().sort((a,b)=>new Date(a.day)-new Date(b.day));
+    const ranges=[7,30,90,365];
+    const days=all.slice(-GU.range),sumWin=days.reduce((n,x)=>n+(+x.installed||0),0);
+    let run=Math.max(0,(+s.installs||0)-sumWin);
+    const dl=x=>new Date(x.day).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+    const users=days.map(x=>({l:dl(x),v:+x.used||0,d:x.day})),perDay=days.map(x=>({l:dl(x),v:+x.installed||0,d:x.day})),total=days.map(x=>{run+=(+x.installed||0);return{l:dl(x),v:run,d:x.day}});
+    const feats=(d.features_range||d.features||[]).slice().sort((a,b)=>b.seconds-a.seconds),tot=feats.reduce((n,f)=>n+(+f.seconds||0),0)||1;
+    const card=(t,sub,html)=>`<h3>${t}</h3><div class="card"><div class="muted" style="margin-bottom:6px">${sub}</div>${html}</div>`;
+    app.innerHTML=`<div class="stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">`+[['Using it now',s.active_now],['Used today',s.used_today],['Total installs',s.installs],['Time today',m(s.seconds_today)]].map(([l,v])=>`<div class="card"><b style="font-size:22px">${v}</b><div class="muted">${l}</div></div>`).join('')+`</div>`
+     +chipsH(ranges.map(n=>[n,'Last '+n+' days']),GU.range,'rg').replace('margin:0 0 12px','margin:12px 0 0')
+     +card('Users','People who used the app, per day. Scroll sideways for earlier dates.',ghLine(users,'#1f5eff','u'))
+     +card('Installs','Total installs over time.',ghLine(total,'#067647','t'))
+     +card('Installs per day','How many installed the app on each day.',ghLine(perDay,'#b54708','p'))
+     +`<h3>Where time is spent (last ${GU.range} days)</h3><div class="card">`+(feats.length?feats.map(f=>{const pc=Math.round(100*f.seconds/tot);return `<div style="margin-bottom:10px"><div class="kv" style="border:0;padding:0"><span>${esc(ghCap(String(f.feature).replace(/_/g,' ')))}</span><span>${m(f.seconds)} · ${pc}%</span></div><div style="height:8px;border-radius:6px;background:var(--soft);overflow:hidden"><div style="height:100%;width:${pc}%;background:var(--brand)"></div></div></div>`}).join(''):'<div class="muted">No activity in this period</div>')+`</div>`;
+    const series={u:users,t:total,p:perDay};
+    app.querySelectorAll('[data-rg]').forEach(b=>b.onclick=()=>{GU.range=+b.dataset.rg;ghActivity()});
+    app.querySelectorAll('.gp').forEach(c=>c.onclick=()=>{const p=series[c.dataset.c][+c.dataset.i];$('ro_'+c.dataset.c).innerHTML='<b>'+fmtD(p.d)+'</b>: '+p.v});
+    app.querySelectorAll('[data-sc]').forEach(e=>{e.scrollLeft=e.scrollWidth});
   }).catch(e=>liveErr(e,ghActivity))}
 
 /* ---- Shalom Stream: content, community, support, accounts and churches ---- */
@@ -1239,9 +1424,52 @@ async function phScreen(){
   const go=async(id,ok)=>{const n=prompt(ok?'Note for the parent (optional):':'Reason for rejecting:');if(n===null)return;try{const r=await api({action:'ph.resolve',id,approve:ok,note:n});if(r.message)alert(r.message);phScreen()}catch(e){alert(e.message)}};
   app.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>go(b.dataset.ap,true));app.querySelectorAll('[data-rj]').forEach(b=>b.onclick=()=>go(b.dataset.rj,false));
 }
-const LIVE={parenthub:phScreen,gh_songs:ghLive,sh_creators:shCreators,schools:schoolsLive,ds_schools:dsSchools,ds_requests:dsRequests,gh_updates:ghUpdates,gh_believers:ghBelievers,gh_safety:ghSafety,gh_activity:ghActivity,sh_content:shContent,sh_community:shCommunity,sh_support:shSupport,sh_admin:shAdmin};
+const LIVE={parenthub:phScreen,gh_songs:ghLive,sh_creators:shCreators,schools:schoolsLive,ds_schools:dsSchools,ds_requests:dsRequests,gh_updates:ghUpdates,gh_believers:ghBelievers,gh_safety:ghSafety,gh_activity:ghActivity,gh_connect:ghConnect,sh_content:shContent,sh_community:shCommunity,sh_support:shSupport,sh_admin:shAdmin};
 
 render();loadFeed();
+</script>
+<div id="actscrim"></div><div id="actpop"><div class="ah"><b id="acttitle"></b><button id="actx" aria-label="Close">&#10005;</button></div><div id="actbtns"></div></div>
+<script>
+(function(){
+let layers=[],skip=0,navN=0,afterPop=null;
+const has=k=>layers.some(l=>l.key==k);
+function push(key,close){const l=layers.find(x=>x.key==key);if(l){l.close=close;return}layers.push({key,close});history.pushState({l:1},'')}
+function drop(key){const i=layers.findIndex(l=>l.key==key);if(i<0)return;const rm=layers.splice(i);rm.reverse().forEach(l=>l.close());skip++;history.go(-rm.length)}
+function closeAll(then){const n=layers.length;if(!n){then();return}layers.splice(0).reverse().forEach(l=>l.close());skip++;afterPop=then;history.go(-n)}
+addEventListener('popstate',()=>{
+  if(skip>0){skip--;if(!skip&&afterPop){const f=afterPop;afterPop=null;f()}return}
+  if(layers.length){layers.pop().close();return}
+  if(navN>0&&hist.length){navN--;view=hist.pop();render();window.scrollTo(0,0)}
+});
+window.nav=function(v){closeAll(()=>{hist.push(view);view=v;navN++;history.pushState({n:1},'');render();window.scrollTo(0,0)})};
+window.jump=function(v){const n=navN+layers.length;layers.splice(0).reverse().forEach(l=>l.close());hist=[];view=v;navN=0;
+  const fin=()=>{render();window.scrollTo(0,0)};
+  const t=n+0;if(t>0){skip++;afterPop=fin;history.go(-(t+(0)))}else fin()};
+window.setHead=function(t){title.textContent=t;back.hidden=true;$('menu').hidden=false};
+const hideDrawer=()=>{drawer.classList.remove('on');scrim.classList.remove('on')};
+window.openMenu=function(o){if(o){drawer.classList.add('on');scrim.classList.add('on');push('menu',hideDrawer)}else if(has('menu'))drop('menu');else hideDrawer()};
+const pop=$('actpop'),ps=$('actscrim'),pb=$('actbtns'),nl=$('nlist');
+const hideAct=()=>{pop.classList.remove('on');ps.classList.remove('on')};
+function clearActs(){if(has('act'))drop('act');else hideAct();pb.innerHTML=''}
+const hideSheet=()=>{$('sheet').classList.remove('on');$('sheetscrim').classList.remove('on');hideAct();pb.innerHTML=''};
+const origSheet=window.sheet,origShow=window.showSheet;
+window.sheet=function(o){if(o){origSheet(true);push('sheet',hideSheet);setup()}else if(has('sheet'))drop('sheet');else hideSheet()};
+window.showSheet=function(t,h){clearActs();origShow(t,h);push('sheet',hideSheet);setup()};
+function setup(){
+  if(nl.querySelector('input,textarea,select'))return;
+  const b=[...nl.querySelectorAll('.btn')];if(!b.length)return;
+  b.forEach(x=>pb.appendChild(x));
+  const d=document.createElement('div');d.className='hint';d.textContent='Press and hold for actions';nl.appendChild(d);
+}
+function showActs(){if(!pb.children.length||has('act'))return;$('acttitle').textContent=$('sheetTitle').textContent;pop.classList.add('on');ps.classList.add('on');push('act',hideAct);if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}}
+pb.addEventListener('click',()=>{if(has('act'))drop('act')});
+$('actx').onclick=()=>drop('act');ps.onclick=()=>drop('act');
+let tm,sx,sy;
+nl.addEventListener('pointerdown',e=>{if(!pb.children.length)return;sx=e.clientX;sy=e.clientY;clearTimeout(tm);tm=setTimeout(showActs,450)});
+['pointerup','pointercancel','pointerleave'].forEach(t=>nl.addEventListener(t,()=>clearTimeout(tm)));
+nl.addEventListener('pointermove',e=>{if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)clearTimeout(tm)});
+nl.addEventListener('contextmenu',e=>{e.preventDefault();if(pb.children.length){clearTimeout(tm);showActs()}});
+})();
 </script>
 </body>
 </html>
