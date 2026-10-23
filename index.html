@@ -151,6 +151,24 @@ input::selection,textarea::selection{background:var(--soft)}
 #actbtns{display:flex;flex-wrap:wrap;gap:8px}
 #actbtns .btn{flex:1 1 calc(50% - 4px);margin:0;padding:11px 8px;font-size:14px;border-radius:12px;white-space:nowrap}
 </style>
+<style id="ux2">
+#menu,#drawer,#scrim{display:none!important}
+header{border-radius:0;padding-bottom:10px}
+header h1{font-size:18px}
+main{padding-bottom:110px}
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+#tabs button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:12px;font-weight:600;color:var(--mute);border-radius:12px}
+#tabs button b{font-size:20px;line-height:1}
+#tabs button.on{color:var(--brand);background:var(--soft)}
+.crumb{font-size:13px;color:var(--mute);margin:0 4px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumb a{color:var(--brand);font-weight:700;cursor:pointer}
+.sec{display:flex;gap:12px;align-items:center}
+.sec .n{flex:0 0 28px;height:28px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:13px}
+.how{background:var(--soft);border-radius:16px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+.how b{display:block;margin-bottom:2px}
+.srch{margin-bottom:12px}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--mute);margin-left:6px}
+</style>
 </head>
 <body>
 <header>
@@ -866,7 +884,7 @@ async function authCall(path,body){
   if(!r.ok)throw new Error(d.error_description||d.msg||d.message||'Sign-in failed');
   return d}
 async function api(body,retried){
-  const r=await fetch(SUPA+'/functions/v1/'+(String(body.action).startsWith('hx.')?'hymns-admin':'control-api'),{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r=await fetch(SUPA+'/functions/v1/'+(String(body.action).startsWith('hx.')?'hymns-admin':String(body.action).startsWith('sp.')?'school-plan':'control-api'),{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status==401&&ses.r&&!retried){
     try{saveSes(await authCall('token?grant_type=refresh_token',{refresh_token:ses.r}))}catch(e){saveSes(null);throw new Error('Please sign in again.')}
     return api(body,true)}
@@ -1085,7 +1103,7 @@ function shOpen(x){
 
 /* ---------- My School Manager: schools, billing and blocking ---------- */
 const LSC={f:'all',b:'all',data:null,q:''};
-const MODS=[['students','Students'],['admissions','Admissions'],['attendance','Attendance'],['classes','Classes'],['staff','Staff'],['results','Results'],['report_cards','Report cards'],['fees','Fees'],['portal','Parent portal']];
+const MODS=[['students','Students'],['admissions','Admissions'],['attendance','Attendance'],['classes','Classes'],['staff','Staff'],['results','Results'],['report_cards','Report cards'],['fees','Fees'],['portal','Parent portal'],['analytics','Analytics'],['boarding','Boarding (hostel)'],['library','Library'],['visitors','Visitors book'],['preps','Preps and extra lessons'],['print_center','Print center'],['activity_room','Activity room']];
 const BSTAT=['paid','pending','overdue','trial','waived'];
 function schoolsLive(){
   setHead('Schools',hist.length>0);
@@ -1107,11 +1125,11 @@ async function scAct(s,op,data,msg,confirmed){
 function scOpen(s){
   const mods=s.modules?Object.entries(s.modules).filter(([k,v])=>v!='full').map(([k,v])=>k.replace('_',' ')+': '+v).join(', '):'';
   showSheet(s.name,kvh([['School code',esc(s.school_code)],['Status',lvPill(s.status,stK(s.status))+(s.status_reason?'<br><span class="muted">'+esc(s.status_reason)+'</span>':'')],['District',esc(s.district)],['Level',esc(ghCap(s.level||''))],['Students',s.students],['Staff',s.staff],['Plan',esc(ghCap(s.billing_plan||''))],['Billing status',lvPill(s.billing_status||'—',stK(s.billing_status))],['Amount',s.billing_amount!=null?money(+s.billing_amount):''],['Due',fmtD(s.billing_due)],['Billing note',esc(s.billing_note)],['Limited modules',esc(mods||'None (all full)')],['Registered',fmtD(s.created_at)]])
-   +`<button class="btn" id="sc_b">Billing</button><button class="btn ghost" id="sc_m">Modules</button>`
+   +`<button class="btn" id="sc_sub">Subscription, billing &amp; modules</button>`
    +(s.status=='active'?`<button class="btn danger" id="sc_s">Suspend school…</button>`:'')
    +(s.status=='suspended'?`<button class="btn" id="sc_u">Unsuspend school</button>`:'')
    +(s.status!='trashed'?`<button class="btn danger" id="sc_t">Move to trash</button>`:`<button class="btn" id="sc_r">Restore school</button>`));
-  $('sc_b').onclick=()=>scBilling(s);$('sc_m').onclick=()=>scModules(s);
+  $('sc_sub').onclick=()=>scSub(s);
   if($('sc_s'))$('sc_s').onclick=()=>scSuspend(s);
   if($('sc_u'))$('sc_u').onclick=()=>scAct(s,'unsuspend',{},'School unsuspended');
   if($('sc_t'))$('sc_t').onclick=()=>{if(confirm('Move "'+s.name+'" to the trash? Its users will lose access until you restore it.'))scAct(s,'trash',{},'Moved to trash',true)};
@@ -1127,6 +1145,80 @@ function scBilling(s){
   <button class="btn" id="bl_save">Save billing</button><button class="btn ghost" id="bl_reset">Change plan and reset modules to that plan</button>`);
   $('bl_save').onclick=()=>scAct(s,'billing',{plan:$('bl_p').value,status:$('bl_s').value,amount:$('bl_a').value,due:$('bl_d').value,note:$('bl_n').value},'Billing saved');
   $('bl_reset').onclick=()=>{const p=$('bl_p').value;if(confirm('Set plan to '+p+' and reset ALL modules to the '+p+' plan?'))scAct(s,'plan',{plan:p},'Plan changed')}}
+
+/* ---------- Subscription control: assign plan, activate for the term, revoke. Every action needs a press and hold. ---------- */
+const SPC={data:null,grace:14};
+const SP_NAMES={starter:'Starter',standard:'Standard',premium:'Premium'};
+function holdBind(el,ms,fn){
+  if(!el)return;let t=null,done=false;
+  el.style.position='relative';el.style.overflow='hidden';el.style.userSelect='none';el.style.webkitUserSelect='none';el.style.touchAction='manipulation';
+  const bar=document.createElement('span');bar.style.cssText='position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.35);pointer-events:none;transition:none';
+  el.appendChild(bar);
+  const start=e=>{if(el.disabled||t)return;done=false;bar.style.transition='width '+ms+'ms linear';bar.style.width='100%';
+    t=setTimeout(()=>{t=null;done=true;bar.style.transition='none';bar.style.width='0';try{navigator.vibrate&&navigator.vibrate(30)}catch(x){}fn()},ms)};
+  const stop=()=>{if(t){clearTimeout(t);t=null;bar.style.transition='width .15s';bar.style.width='0';toast('Press and hold to confirm')}};
+  el.addEventListener('pointerdown',start);
+  ['pointerup','pointerleave','pointercancel'].forEach(k=>el.addEventListener(k,stop));
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+  el.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.repeat)start()});
+  el.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' ')stop()});
+  el.addEventListener('click',e=>e.preventDefault());
+}
+async function spLoad(force){
+  if(SPC.data&&!force)return SPC.data;
+  const d=await api({action:'sp.list'});SPC.data=d.schools;SPC.grace=d.grace_days||14;return SPC.data}
+function spInfo(r){
+  const today=new Date().toISOString().slice(0,10);
+  if(!r.plan)return{k:'bad',t:'No plan assigned. Read-only, Starter modules only.'};
+  if(!r.subscription_until)return{k:'bad',t:'Not activated. Read-only until you activate it.'};
+  if(String(r.subscription_until).slice(0,10)<today)return{k:'bad',t:'Expired on '+fmtD(r.subscription_until)+'. Read-only.'};
+  return{k:'ok',t:'Active until '+fmtD(r.subscription_until)}}
+
+/* ---------- Unified manual subscription: plan, expiry date, modules (tick), billing, activate ---------- */
+const PLAN_MODS={starter:['students','admissions','attendance','classes','fees','print_center'],standard:['students','admissions','attendance','classes','fees','print_center','results','report_cards','portal','staff','library','analytics'],premium:MODS.map(m=>m[0])};
+async function scSub(s){
+  showSheet('Subscription · '+s.name,'<div class="empty">Loading…</div>');
+  let rows;try{rows=await spLoad(true)}catch(e){toast(e.message);return}
+  const r=rows.find(x=>x.id==s.id);if(!r){toast('School not found');return}
+  const inf=spInfo(r),cur=r.plan||'',m=s.modules||{},cur_until=r.subscription_until?String(r.subscription_until).slice(0,10):'';
+  const iso=d=>d.toISOString().slice(0,10),add=(days)=>{const d=new Date();d.setUTCDate(d.getUTCDate()+days);return iso(d)};
+  const st=BSTAT.includes(s.billing_status)||!s.billing_status?BSTAT:[...BSTAT,s.billing_status];
+  const mset=PLAN_MODS[cur]||[];
+  showSheet('Subscription · '+s.name,
+   `<div class="note ${inf.k=='ok'?'':'warn'}"><b>${inf.k=='ok'?'Active':'Not active'}</b><br>${esc(inf.t)}</div>
+   <h3>1. Plan</h3><div class="fl">Pick a plan (ticks the modules for it, you can still change them)</div>
+   <select class="sel" id="sp_p"><option value="">No plan</option>${['starter','standard','premium'].map(p=>`<option value="${p}" ${p==cur?'selected':''}>${SP_NAMES[p]}</option>`).join('')}</select>
+   <h3>2. Expiry date</h3><input class="fi" id="sp_d" type="date" value="${cur_until}">
+   <div class="row" style="flex-wrap:wrap;justify-content:flex-start;margin-top:8px;gap:6px">${[['+30 days',30],['+90 days',90],['+1 year',365]].map(x=>`<button class="chip" data-add="${add(x[1])}">${x[0]}</button>`).join('')}${r.term_end?`<button class="chip" data-add="${iso(new Date(new Date(String(r.term_end).slice(0,10)+'T00:00:00Z').getTime()+SPC.grace*86400000))}">Term end + ${SPC.grace} days</button>`:''}</div>
+   <h3>3. Modules <button class="chip" id="md_all" style="float:right;margin-top:-6px">Tick all</button></h3>
+   <div class="grid" style="gap:6px">${MODS.map(([k,l])=>{const on=m[k]?m[k]!='off':mset.includes(k)||(!cur&&false);return `<label class="card row" style="padding:12px;cursor:pointer"><span><b>${l}</b>${m[k]=='view'?'<span class="tag">view only</span>':''}</span><input type="checkbox" data-mod="${k}" ${on?'checked':''} style="width:24px;height:24px"></label>`}).join('')}</div>
+   <h3>4. Billing</h3><div class="fl">Billing status</div><select class="sel" id="bl_s">${st.map(v=>`<option value="${esc(v)}" ${v==s.billing_status?'selected':''}>${esc(ghCap(v))}</option>`).join('')}</select>
+   <div class="fl" style="margin-top:8px">Amount (UGX)</div><input class="fi" id="bl_a" type="number" min="0" inputmode="numeric" value="${s.billing_amount!=null?esc(s.billing_amount):''}">
+   <div class="fl">Note</div><input class="fi" id="bl_n" maxlength="300" value="${esc(s.billing_note||'')}">
+   <button class="btn" id="sp_save" style="margin-top:14px">Save plan, modules &amp; billing</button>
+   <button class="btn" id="sp_t" style="background:#067647">Hold to activate until the date above</button>
+   <button class="btn danger" id="sp_r">Hold to revoke</button>
+   <div class="muted" style="margin-top:6px">Activating needs a press and hold. Save does not activate by itself.</div>`);
+  const $$=q=>[...document.querySelectorAll(q)];
+  $('sp_p').onchange=e=>{const p=e.target.value;if(p)$$('[data-mod]').forEach(c=>c.checked=PLAN_MODS[p].includes(c.dataset.mod))};
+  $('md_all').onclick=()=>$$('[data-mod]').forEach(c=>c.checked=true);
+  $$('[data-add]').forEach(b=>b.onclick=()=>{$('sp_d').value=b.dataset.add});
+  const done=async(fn,msg)=>{try{await fn();SPC.data=null;LSC.data=null;toast(msg);scSub(s)}catch(e){toast(e.message)}};
+  const saveAll=async()=>{
+    const p=$('sp_p').value;if(p&&p!=cur)await api({action:'sp.assign',id:s.id,plan:p});
+    const mo={};$$('[data-mod]').forEach(c=>mo[c.dataset.mod]=c.checked?(m[c.dataset.mod]=='view'?'view':'full'):'off');
+    await api({action:'sp.modules',id:s.id,modules:mo});
+    await api({action:'schools.act',id:s.id,op:'billing',data:{status:$('bl_s').value,amount:$('bl_a').value,due:$('sp_d').value,note:$('bl_n').value}})};
+  const verify=async(d)=>{const rr=(await spLoad(true)).find(x=>x.id==s.id),want=$('sp_p').value;
+    if(want&&rr.plan!=want)throw new Error('The server did NOT save the plan (it still says '+(rr.plan||'none')+'). The server needs fixing.');
+    if(d&&String(rr.subscription_until||'').slice(0,10)!=d)throw new Error('The server did NOT use your date (it says '+(rr.subscription_until?fmtD(rr.subscription_until):'not activated')+'). The server must be updated to accept the chosen date.');
+    const l=await api({action:'schools.list'});const ss=l.schools.find(x=>x.id==s.id);
+    $$('[data-mod]').forEach(c=>{const v=(ss.modules||{})[c.dataset.mod]||'full';if(c.checked==(v=='off'))throw new Error('The server did NOT save the module "'+c.dataset.mod+'".')})};
+  $('sp_save').onclick=()=>done(async()=>{await saveAll();await verify('')},'Saved and confirmed by the server');
+  holdBind($('sp_t'),1500,()=>{const d=$('sp_d').value;if(!$('sp_p').value&&!cur){toast('Choose a plan first');return}if(!d){toast('Pick the expiry date first');return}
+    done(async()=>{await saveAll();await api({action:'sp.activate',id:s.id,until:d});await verify(d)},'Activated until '+fmtD(d))});
+  holdBind($('sp_r'),2000,()=>done(()=>api({action:'sp.revoke',id:s.id,confirm:true}),'Subscription revoked. The school is now read-only'));
+}
 const PLAN_OPTS=cur=>['basic','standard','premium'].map(p=>`<option value="${p}" ${p==cur?'selected':''}>${ghCap(p)}</option>`).join('');
 function scModules(s){
   const m=s.modules||{};
@@ -1469,6 +1561,51 @@ nl.addEventListener('pointerdown',e=>{if(!pb.children.length)return;sx=e.clientX
 ['pointerup','pointercancel','pointerleave'].forEach(t=>nl.addEventListener(t,()=>clearTimeout(tm)));
 nl.addEventListener('pointermove',e=>{if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)clearTimeout(tm)});
 nl.addEventListener('contextmenu',e=>{e.preventDefault();if(pb.children.length){clearTimeout(tm);showActs()}});
+})();
+</script>
+
+<nav id="tabs"></nav>
+<script>
+(function(){
+const TOOLS=[
+ ['schools','S','#067647','Schools','See every school, bill it, or block it'],
+ ['parenthub','P','#7a4bd1','Parent Hub','Parents and their correction requests'],
+ ['claude','C','#b54708','Instructions for Claude','Text to give Claude before backend work']];
+const tab=()=>view.t=='home'?'home':view.t=='apps'?'apps':(view.t=='tools'||TOOLS.some(t=>t[0]==view.t))?'tools':(view.p!==undefined||view.t=='project'||view.t=='section'||view.t=='table')?'apps':'home';
+function tabs(){const c=tab();$('tabs').innerHTML=[['home','&#8962;','Home'],['apps','&#9638;','Apps'],['tools','&#9881;','Tools']].map(x=>`<button data-k="${x[0]}" class="${c==x[0]?'on':''}"><b>${x[1]}</b>${x[2]}</button>`).join('');
+ $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>jump({t:b.dataset.k}))}
+const row=(attr,val,col,ic,name,desc,extra)=>`<button class="card proj" ${attr}="${val}"><span class="av" style="background:${col}">${esc(ic)}</span><span style="flex:1;min-width:0"><h2>${esc(name)}</h2><span class="muted">${esc(desc)}</span>${extra||''}</span><span class="chev">&#8250;</span></button>`;
+const appRow=i=>{const p=DATA[i];return row('data-p',i,p.color,ini(p.name)||p.name[0],p.name,p.desc,p.inactive?'<span class="tag">Inactive</span>':'')};
+const toolRow=t=>row('data-go',t[0],t[2],t[1],t[3],t[4]);
+function wire(){app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>nav({t:'project',p:+b.dataset.p}));app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>nav({t:b.dataset.go}))}
+function hp(){setHead('TFG Admin');
+ app.innerHTML=`<div class="hero"><h2>Welcome</h2><p>Everything you manage, in two places.</p><div class="stats"><div class="stat"><b>${DATA.length}</b><span>Apps</span></div><div class="stat"><b>${DATA.filter(p=>!p.inactive).length}</b><span>Active</span></div><div class="stat"><b>${TOOLS.length}</b><span>Tools</span></div></div></div>
+ <div class="how"><b>How this works</b>Use <b style="display:inline">Apps</b> to manage one app. Use <b style="display:inline">Tools</b> for things that cover all apps, like schools.</div>
+ <h3>Quick access</h3><div class="grid">${TOOLS.slice(0,2).map(toolRow).join('')}</div>
+ <h3>Your apps</h3><div class="grid">${DATA.filter(p=>!p.inactive).map(p=>appRow(DATA.indexOf(p))).join('')}</div>`;wire()}
+function ap(){setHead('Apps');let h=`<input type="search" class="srch" id="aq" placeholder="Search apps"><div id="al"></div>`;app.innerHTML=h;
+ const draw=q=>{q=(q||'').toLowerCase();$('al').innerHTML=groupedProjects().map(g=>{const it=g.items.filter(i=>!q||(DATA[i].name+DATA[i].desc).toLowerCase().includes(q));return it.length?`<h3>${esc(g.label)}</h3><div class="grid">${it.map(appRow).join('')}</div>`:''}).join('')||'<div class="empty">No app found</div>';wire()};
+ $('aq').oninput=e=>draw(e.target.value);draw()}
+function tl(){setHead('Tools');app.innerHTML=`<div class="how"><b>Tools work across all your apps</b>To manage a single app, go to the Apps tab.</div><div class="grid">${TOOLS.map(toolRow).join('')}</div><h3>Work for Claude</h3><button class=\"btn ghost\" id=\"insp\" style=\"width:100%\">Let Claude read My School rules (read-only)</button><h3>Account</h3><button class="btn danger" id="so2" style="width:100%">Sign out</button>`;wire();$('insp').onclick=async()=>{try{toast('Reading…');const r=await api({action:'sp.inspect'});toast('Saved for Claude: '+r.functions+' functions, '+r.policies+' rules')}catch(e){toast(e.message)}};
+ $('so2').onclick=()=>{saveSes(null);hist=[];view={t:'home'};ghS.langs=null;ghS.songs=null;SH.data=null;SH.churches=null;Object.keys(LV).forEach(k=>delete LV[k]);NOTIFS.length=0;render()}}
+function pj(i){const p=DATA[i];setHead(p.name);
+ const S=SECTIONS[p.slug]||[];
+ app.innerHTML=`<div class="crumb"><a data-h="apps">Apps</a> &#8250; <span>${esc(p.name)}</span></div>
+ <div class="banner" style="background:${p.color}"><h2>${esc(p.name)}</h2><p>${esc(p.desc)}</p>${p.inactive?'<span class="pill">Inactive</span>':''}</div>
+ ${S.length?`<h3>What do you want to manage?</h3><div class="grid">${S.map((x,n)=>`<button class="card sec" data-sec="${n}"><span class="n">${n+1}</span><span style="flex:1;min-width:0"><h2 style="margin:0;font-size:16px">${esc(x.name)}</h2><span class="muted">${esc(x.desc)}</span></span><span class="chev">&#8250;</span></button>`).join('')}</div>`:'<div class="note">Nothing to manage here yet. You can still view its data tables below.</div>'}
+ <details class="tech"><summary>Advanced: status and database tables</summary><div class="muted" style="margin:0 4px 10px">${esc(p.account)} &middot; ${p.tables.length} tables</div><button class="btn ${p.inactive?'':'ghost'}" id="actb" style="width:100%;margin-bottom:12px">${p.inactive?'Mark app as active':'Mark app as inactive'}</button><input type="search" id="q" placeholder="Search tables or columns"><div class="grid" id="list"></div></details>`;
+ const list=$('list'),draw=q=>{q=q.trim().toLowerCase();list.innerHTML=p.tables.map((t,j)=>[t,j]).filter(([t])=>!q||t[0].includes(q)||t[1].some(c=>c.toLowerCase().includes(q))).map(([t,j])=>`<button class="card" data-t="${j}"><div class="row"><b>${esc(t[0])}</b><span class="muted">${t[1].length} columns &#8250;</span></div></button>`).join('')||'<div class="muted">No match</div>';list.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>nav({t:'table',p:i,j:+b.dataset.t}))};
+ $('q').oninput=e=>draw(e.target.value);draw('');
+ $('actb').onclick=()=>{if(!ses.a){gate();return}const to=p.inactive?'active':'inactive';api({action:'apps.set_status',slug:p.slug,status:to}).then(()=>{p.inactive=!p.inactive;pj(i);toast(p.inactive?'App marked inactive':'App is active')}).catch(e=>toast(e.message))};
+ app.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{const x=S[+b.dataset.sec];nav(x.screen?{t:x.screen,p:i}:{t:'section',p:i,n:+b.dataset.sec})});
+ app.querySelectorAll('[data-h]').forEach(a=>a.onclick=()=>jump({t:a.dataset.h}))}
+window.home=hp;window.project=pj;
+const oldRender=render;
+LIVE.apps=ap;LIVE.tools=tl;LIVE.home=null;
+window.render=function(){oldRender();tabs();const b=app.firstElementChild;
+ if(view.p!==undefined&&view.t!='project'&&view.t!='table'&&view.t!='section'&&b&&!app.querySelector('.crumb')){const p=DATA[view.p];if(p){const c=document.createElement('div');c.className='crumb';c.innerHTML=`<a id="cb1">Apps</a> &#8250; <a id="cb2">${esc(p.name)}</a>`;app.insertBefore(c,b);$('cb1').onclick=()=>jump({t:'apps'});$('cb2').onclick=()=>jump({t:'project',p:view.p})}}};
+drawerHTML=function(){};
+render();
 })();
 </script>
 </body>
