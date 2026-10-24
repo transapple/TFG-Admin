@@ -150,6 +150,16 @@ input::selection,textarea::selection{background:var(--soft)}
 #actx{border:0;background:var(--soft);color:var(--brand);width:30px;height:30px;border-radius:50%;font-size:14px;flex:0 0 30px}
 #actbtns{display:flex;flex-wrap:wrap;gap:8px}
 #actbtns .btn{flex:1 1 calc(50% - 4px);margin:0;padding:11px 8px;font-size:14px;border-radius:12px;white-space:nowrap}
+#ptabs{position:sticky;top:calc(60px + env(safe-area-inset-top));z-index:15;background:var(--card);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+#ptabs[hidden]{display:none}
+.pt-h{display:flex;align-items:center;gap:8px;padding:10px 16px 4px;max-width:780px;margin:0 auto}
+.pt-dot{width:12px;height:12px;border-radius:50%;flex:none}
+.pt-h b{font-size:16px}.pt-sub{color:var(--mute);font-size:13px;margin-left:auto;white-space:nowrap}
+.pt-sub:before{content:'\203A  '}
+.pt-t{display:flex;gap:6px;overflow-x:auto;padding:4px 12px 0;max-width:780px;margin:0 auto;scrollbar-width:none}
+.pt-t::-webkit-scrollbar{display:none}
+.pt-t button{flex:none;border:0;background:none;padding:10px 12px;font-size:14px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;white-space:nowrap}
+.pt-t button.on{color:var(--ink);border-bottom-color:var(--c,var(--brand))}
 </style>
 <style id="ux2">
 #menu,#drawer,#scrim{display:none!important}
@@ -168,6 +178,36 @@ main{padding-bottom:110px}
 .how b{display:block;margin-bottom:2px}
 .srch{margin-bottom:12px}
 .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--mute);margin-left:6px}
+/* ===== Native-app polish layer ===== */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,system-ui,sans-serif;letter-spacing:-.01em}
+input,textarea{-webkit-user-select:text;user-select:text}
+header{background:rgba(11,27,77,.82);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+header h1{font-size:17px;text-align:center;letter-spacing:-.02em}
+.ib{background:rgba(255,255,255,.14);transition:transform .12s,background .15s}.ib:active{transform:scale(.88);background:rgba(255,255,255,.28)}
+#ptabs{background:color-mix(in srgb,var(--card) 86%,transparent);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);box-shadow:none}
+.pt-h b{font-size:20px;font-weight:800;letter-spacing:-.03em}
+.pt-t button{border-radius:0;transition:color .15s,border-color .15s}.pt-t button:active{opacity:.55}
+#tabs{background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-top:.5px solid var(--line);padding-top:8px}
+#tabs button{background:none!important;position:relative;font-size:11px;gap:3px;transition:transform .12s,color .15s}
+#tabs button b{font-size:23px;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
+#tabs button.on b{transform:translateY(-1px) scale(1.14)}
+#tabs button:active{transform:scale(.9)}
+.card{border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 6px 20px rgba(16,24,40,.05);transition:transform .14s,box-shadow .14s,opacity .14s}
+button.card:active,.ni:active,.btn:active,.chip:active{transform:scale(.97);opacity:.9}
+.grid{gap:10px}
+.kv{padding:12px 0}
+#sheet{border-radius:26px 26px 0 0;padding-top:26px;transition:transform .32s cubic-bezier(.2,.9,.25,1)}
+#sheet:before{content:'';position:absolute;top:9px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:var(--line)}
+#sheetscrim{-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#toast{bottom:calc(92px + env(safe-area-inset-bottom));border-radius:999px;padding:12px 20px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+main.pg-in{animation:pgin .28s cubic-bezier(.2,.9,.25,1)}
+main.pg-back{animation:pgback .28s cubic-bezier(.2,.9,.25,1)}
+@keyframes pgin{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes pgback{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.empty,.muted{-webkit-font-smoothing:antialiased}
+.pill{font-size:11px;font-weight:700;padding:3px 10px}
+@media (prefers-reduced-motion:reduce){main.pg-in,main.pg-back{animation:none}}
 </style>
 </head>
 <body>
@@ -181,6 +221,7 @@ main{padding-bottom:110px}
 <section id="sheet"><div class="row" style="margin-bottom:8px"><b id="sheetTitle" style="font-size:17px">Notifications</b><button class="ib" id="closeSheet" style="background:var(--soft);color:var(--brand);width:36px;height:36px">&#10005;</button></div><div id="nlist"></div></section>
 <div id="scrim"></div>
 <nav id="drawer"></nav>
+<div id="ptabs" hidden></div>
 <main id="app"></main>
 <div id="toast"></div>
 <script>
@@ -603,7 +644,7 @@ function section(i,n){
   const p=DATA[i],x=SECTIONS[p.slug][n];setHead(x.name,true);
   const known=x.tables.filter(t=>p.tables.some(q=>q[0]==t));
   app.innerHTML=`<div class="banner" style="background:${p.color}"><h2>${esc(x.name)}</h2><p>${esc(x.desc)}</p><span class="pill">${esc(p.name)}</span></div>`
-   +(x.screen?`<button class="card feat" id="scr" style="margin-bottom:12px"><span class="av">&#9654;</span><span><h2 style="margin:0;font-size:16px">Open ${esc(x.name)}</h2><span class="muted">${['gh_songs','sh_creators','ds_schools','ds_requests','schools','gh_updates','gh_believers','gh_safety','gh_activity','gh_connect','sh_content','sh_community','sh_support','sh_admin'].includes(x.screen)&&LOGIN_ON?'Live data: sign in with your owner account':'Ready (sample data until login)'}</span></span><span class="chev">&#8250;</span></button>`:`<div class="note">This section has no management screen yet.</div>`)
+   +(x.screen?`<button class="card feat" id="scr" style="margin-bottom:12px"><span class="av">&#9654;</span><span><h2 style="margin:0;font-size:16px">Open ${esc(x.name)}</h2><span class="muted">${(typeof LIVE!='undefined'&&LIVE[x.screen])&&LOGIN_ON?'Live data: sign in with your owner account':'Ready (sample data until login)'}</span></span><span class="chev">&#8250;</span></button>`:`<div class="note">This section has no management screen yet.</div>`)
    +`<details class="tech"><summary>Database tables for this section (${known.length})</summary><div class="grid">`+known.map(t=>{const j=p.tables.findIndex(q=>q[0]==t);return `<button class="card" data-j="${j}"><div class="row"><b>${esc(t)}</b><span class="muted">${p.tables[j][1].length} cols &#8250;</span></div></button>`}).join('')+`</div></details>`;
   if($('scr'))$('scr').onclick=()=>nav({t:x.screen});
   app.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>nav({t:'table',p:i,j:+b.dataset.j}));
@@ -884,7 +925,7 @@ async function authCall(path,body){
   if(!r.ok)throw new Error(d.error_description||d.msg||d.message||'Sign-in failed');
   return d}
 async function api(body,retried){
-  const r=await fetch(SUPA+'/functions/v1/'+(String(body.action).startsWith('hx.')?'hymns-admin':String(body.action).startsWith('sp.')?'school-plan':'control-api'),{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r=await fetch(SUPA+'/functions/v1/'+(String(body.action).startsWith('hx.')?'hymns-admin':String(body.action).startsWith('sp.')?'school-plan':String(body.action).startsWith('d.')?'data-api':'control-api'),{method:'POST',headers:{Authorization:'Bearer '+ses.a,apikey:PUBKEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status==401&&ses.r&&!retried){
     try{saveSes(await authCall('token?grant_type=refresh_token',{refresh_token:ses.r}))}catch(e){saveSes(null);throw new Error('Please sign in again.')}
     return api(body,true)}
@@ -1405,7 +1446,7 @@ const ghConnect=lvScreen('gh_connect',{title:'Connect Community',
 
 
 /* ---- Instructions for Claude (same text is stored in the TFG database table public.claude_handoff) ---- */
-const CLAUDE_HELP="INSTRUCTIONS FOR EVERY CLAUDE WORKING ON TFG APPS (read this first)\n\nTHE RULE\nNever ask Jason to paste, run or deploy SQL, edge-function code or any backend change himself. The TFG Admin was built so Claude can do it. Do the work yourself through the TFG Supabase project (ref rigctcvknfxbkdmfcknh) using the connected Supabase tools, then tell Jason what you did. Only ask him for something when it is truly impossible for you (see \"What only Jason can do\").\n\nHOW THE CONNECTION WORKS\n1. The TFG project has a table public.connected_apps (slug, name, project_ref, supabase_account, status). It lists every app project the admin controls.\n2. The TFG project's Edge Function secrets hold one Supabase personal access token per Supabase account, named PAT_<ACCOUNT> (for example PAT_ACCOUNT_2). They never go to the browser and must never be printed or written into files, chats or code.\n3. Two Edge Functions in the TFG project do the work. Both check that the signed-in email is in public.owner_admins, so only the owner can use them:\n   - control-api: actions songs.*, hymns.*, shalom.*, schools.*, ds.*, ph.*, feed.*, apps.*. Its helper runSql(appSlug, sql) calls the Supabase Management API (/v1/projects/<ref>/database/query) with the stored token of the account that owns that app.\n   - hymns-admin: actions hx.* for Only Believe Gospel Hymns (longer usage statistics, Connect Community members, posts, comments, deleting posts and comments, finding reported content).\n4. The admin app (index.html) calls them with fetch to <TFG url>/functions/v1/<function> using the owner's access token. Actions starting hx. go to hymns-admin; everything else goes to control-api.\n5. migration-runner is another function in the TFG project. Read its source with get_edge_function before using it.\n\nHOW TO ADD A NEW BACKEND CAPABILITY FOR ANY APP (do this yourself)\n1. Read the current function source with get_edge_function (project rigctcvknfxbkdmfcknh).\n2. Add a new action that calls runSql('<app slug>', '<sql>'). It inherits the owner check. Use confirm:true for destructive actions and write to audit_log like the other actions.\n3. Deploy with deploy_edge_function to project rigctcvknfxbkdmfcknh with verify_jwt true. control-api is long and a deploy replaces the whole file, so either re-send the complete file with your addition, or put new work in a companion function like hymns-admin.\n4. Update the admin app so it calls the new action with api({action:'...'}).\n5. Test what you can, then report what you changed.\nDo not use an app's public (publishable) key for moderation or admin work: anyone can use that key.\n\nCONNECTED APPS (slug, project ref, account, status)\n- digital-students: mwjmqodwrcxrohidonmj, ACCOUNT_1, active\n- school-manager (My School Manager): huczdzvnzgwunktxcdcj, ACCOUNT_1, active\n- gospel-hymns (Only Believe Gospel Hymns): xdlbeepqqbstchjcepgw, ACCOUNT_2, active\n- shalom-stream: ixmyndnerktftrgqopry, ACCOUNT_2, active\n- excel-exam: vylcldfjzmqusdszhode, ACCOUNT_3, active\n- nova-school-manager: pjdtlpnlvumpefxjmjpv, ACCOUNT_3, inactive\n- excel-exam-primary: ggubkuxgrmsqjccgireu, ACCOUNT_4, active\n- parent-hub: kxsxwefzqyqyxnpwfowd, ACCOUNT_5, active\nThe connected Supabase tools in a chat may be refused for other accounts' projects (the Hymns project is refused). That is expected. Reach those projects through control-api or hymns-admin, which use the stored tokens.\n\nADDING A SUPABASE ACCOUNT OR APP THAT IS NOT CONNECTED YET\nInsert a row in public.connected_apps for the app. If its Supabase account has no stored token yet, a new PAT_<ACCOUNT> secret is needed. Claude's tools cannot create Edge Function secrets, so this is the one thing to ask Jason for, once: the token, added as a secret. After that, do everything else yourself.\n\nWHAT ONLY JASON CAN DO\nCreating Edge Function secrets and the owner sign-in. Everything else (functions, SQL, migrations, admin screens) is Claude's job.\n\nONLY BELIEVE GOSPEL HYMNS NOTES\n- The Hymns app is Hymns.html, the admin is index.html (TFG Admin).\n- New updates are announced by a notification whose text ends with a hidden marker of the form (open bracket U+27E6)u:<update id>(close bracket U+27E7). The app turns it into an \"update\" notification that opens that update.\n- Admin replies to update comments are delivered only as notifications, not shown under the update.\n- Private message content is never shown in the admin, only counts.\n- Hymns app languages: acholi, alur, english, french, luganda, swahili.\n";
+const CLAUDE_HELP="INSTRUCTIONS FOR EVERY CLAUDE WORKING ON TFG APPS (read this first)\n\nTHE RULE\nNever ask Jason to paste, run or deploy SQL, edge-function code or any backend change himself. The TFG Admin was built so Claude can do it. Do the work yourself through the TFG Supabase project (ref rigctcvknfxbkdmfcknh) using the connected Supabase tools, then tell Jason what you did. Only ask him for something when it is truly impossible for you (see \"What only Jason can do\").\n\nHOW THE CONNECTION WORKS\n1. The TFG project has a table public.connected_apps (slug, name, project_ref, supabase_account, status). It lists every app project the admin controls.\n2. The TFG project's Edge Function secrets hold one Supabase personal access token per Supabase account, named PAT_<ACCOUNT> (for example PAT_ACCOUNT_2). They never go to the browser and must never be printed or written into files, chats or code.\n3. Two Edge Functions in the TFG project do the work. Both check that the signed-in email is in public.owner_admins, so only the owner can use them:\n   - control-api: actions songs.*, hymns.*, shalom.*, schools.*, ds.*, ph.*, feed.*, apps.*. Its helper runSql(appSlug, sql) calls the Supabase Management API (/v1/projects/<ref>/database/query) with the stored token of the account that owns that app.\n   - hymns-admin: actions hx.* for Only Believe Gospel Hymns (longer usage statistics, Connect Community members, posts, comments, deleting posts and comments, finding reported content).\n4. The admin app (index.html) calls them with fetch to <TFG url>/functions/v1/<function> using the owner's access token. Actions starting hx. go to hymns-admin; everything else goes to control-api.\n5. data-api (actions d.rows, d.set) gives live read access to every table of every active app, with sensitive columns removed, and a short allowlist of edits (WRITES). Add new edits there. migration-runner is another function in the TFG project. Read its source with get_edge_function before using it.\n\nHOW TO ADD A NEW BACKEND CAPABILITY FOR ANY APP (do this yourself)\n1. Read the current function source with get_edge_function (project rigctcvknfxbkdmfcknh).\n2. Add a new action that calls runSql('<app slug>', '<sql>'). It inherits the owner check. Use confirm:true for destructive actions and write to audit_log like the other actions.\n3. Deploy with deploy_edge_function to project rigctcvknfxbkdmfcknh with verify_jwt true. control-api is long and a deploy replaces the whole file, so either re-send the complete file with your addition, or put new work in a companion function like hymns-admin.\n4. Update the admin app so it calls the new action with api({action:'...'}).\n5. Test what you can, then report what you changed.\nDo not use an app's public (publishable) key for moderation or admin work: anyone can use that key.\n\nCONNECTED APPS (slug, project ref, account, status)\n- digital-students: mwjmqodwrcxrohidonmj, ACCOUNT_1, active\n- school-manager (My School Manager): huczdzvnzgwunktxcdcj, ACCOUNT_1, active\n- gospel-hymns (Only Believe Gospel Hymns): xdlbeepqqbstchjcepgw, ACCOUNT_2, active\n- shalom-stream: ixmyndnerktftrgqopry, ACCOUNT_2, active\n- excel-exam: vylcldfjzmqusdszhode, ACCOUNT_3, active\n- nova-school-manager: pjdtlpnlvumpefxjmjpv, ACCOUNT_3, inactive\n- excel-exam-primary: ggubkuxgrmsqjccgireu, ACCOUNT_4, active\n- parent-hub: kxsxwefzqyqyxnpwfowd, ACCOUNT_5, active\nThe connected Supabase tools in a chat may be refused for other accounts' projects (the Hymns project is refused). That is expected. Reach those projects through control-api or hymns-admin, which use the stored tokens.\n\nADDING A SUPABASE ACCOUNT OR APP THAT IS NOT CONNECTED YET\nInsert a row in public.connected_apps for the app. If its Supabase account has no stored token yet, a new PAT_<ACCOUNT> secret is needed. Claude's tools cannot create Edge Function secrets, so this is the one thing to ask Jason for, once: the token, added as a secret. After that, do everything else yourself.\n\nWHAT ONLY JASON CAN DO\nCreating Edge Function secrets and the owner sign-in. Everything else (functions, SQL, migrations, admin screens) is Claude's job.\n\nONLY BELIEVE GOSPEL HYMNS NOTES\n- The Hymns app is Hymns.html, the admin is index.html (TFG Admin).\n- New updates are announced by a notification whose text ends with a hidden marker of the form (open bracket U+27E6)u:<update id>(close bracket U+27E7). The app turns it into an \"update\" notification that opens that update.\n- Admin replies to update comments are delivered only as notifications, not shown under the update.\n- Private message content is never shown in the admin, only counts.\n- Hymns app languages: acholi, alur, english, french, luganda, swahili.\n";
 function claudeHelp(){
   setHead('Instructions for Claude',hist.length>0);
   app.innerHTML=`<div class="note">Copy this and give it to any Claude that works on your apps. The same text is saved in the TFG database (table claude_handoff). It contains no passwords or tokens.</div><button class="btn" id="ch_c">Copy instructions</button><div class="card" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;margin-top:10px">${esc(CLAUDE_HELP)}</div>`;
@@ -1521,6 +1562,59 @@ async function phScreen(){
 }
 const LIVE={parenthub:phScreen,gh_songs:ghLive,sh_creators:shCreators,schools:schoolsLive,ds_schools:dsSchools,ds_requests:dsRequests,gh_updates:ghUpdates,gh_believers:ghBelievers,gh_safety:ghSafety,gh_activity:ghActivity,gh_connect:ghConnect,sh_content:shContent,sh_community:shCommunity,sh_support:shSupport,sh_admin:shAdmin};
 
+/* ===== Live layer for every remaining screen (data-api reads the real tables; sensitive columns never leave the server) ===== */
+const TBW={
+ 'school-manager.students':x=>x.status=='active'?[{l:'Suspend student',f:'status',v:'suspended'}]:x.status=='suspended'?[{l:'Reactivate student',f:'status',v:'active'}]:[],
+ 'school-manager.platform_settings':x=>[{l:'Change value',f:'value',ask:'New value',id:x.key}],
+ 'excel-exam.messages':x=>x.reply?[]:[{l:'Send reply',f:'reply',ask:'Write your reply'}],
+ 'excel-exam-primary.catalog':x=>[{l:x.isFeatured?'Remove from featured':'Make featured',f:'isFeatured',v:!x.isFeatured}],
+ 'excel-exam-primary.app_settings':x=>[{l:'Change motto',f:'motto',ask:'New motto'}]};
+const TNAME=['name','full_name','title','school_name','student_name','username','key','action','event_type','ref','subject','kind','label','code','message'];
+function tCard(x){
+  const k=Object.keys(x);let t=TNAME.map(n=>x[n]).find(v=>v!=null&&v!=='');
+  if(t==null){const f=[x.first_name,x.last_name].filter(Boolean).join(' ');t=f||String(x[k.find(c=>typeof x[c]=='string')]||x.id||'Record')}
+  const sub=k.filter(c=>c!='id'&&x[c]!=null&&x[c]!==''&&typeof x[c]!='object'&&String(x[c]).length<40&&String(x[c])!=String(t)&&!/_id$/.test(c)).slice(0,3).map(c=>/_at$|date$|^ts$|^at$/.test(c)?fmtD(x[c]):x[c]).join(' · ');
+  const st=x.status!=null?String(x.status):null;
+  return [String(t).slice(0,80),sub,st,st?(OKW.includes(st)?'ok':BADW.includes(st)?'bad':'warn'):'']}
+function tblScreen(slug,title,tables){
+  return lvScreen('t_'+slug+'_'+title,{title,tabs:tables.map(t=>[t,t.replace(/_/g,' ')]),
+    load:t=>api({action:'d.rows',app:slug,table:t}).then(r=>r.rows),
+    card:x=>tCard(x),
+    open:(x,t,reload)=>{
+      const acts=(TBW[slug+'.'+t]||(()=>[]))(x);
+      showSheet(tCard(x)[0],kvh(Object.entries(x).map(([c,v])=>[esc(c),esc(typeof v=='boolean'?(v?'Yes':'No'):v==null?'':String(v))]))
+        +'<div class=\"muted\" style=\"margin:8px 0\">Passwords, keys and tokens are never shown.</div>'
+        +(acts.some(a=>a.ask)?lvTa('t_note',acts.find(a=>a.ask).ask):'')
+        +acts.map((a,i)=>`<button class=\"btn\" data-ta=\"${i}\">${esc(a.l)}</button>`).join(''));
+      document.querySelectorAll('#nlist [data-ta]').forEach(b=>b.onclick=()=>{
+        const a=acts[+b.dataset.ta],v=a.ask?($('t_note').value||'').trim():a.v;
+        if(a.ask&&!v){toast('Please write something first');return}
+        lvAct({action:'d.set',app:slug,table:t,id:a.id||x.id,field:a.f,value:v},'Saved',reload)})}})}
+Object.keys(SECTIONS).forEach(slug=>SECTIONS[slug].forEach(sc=>{if(sc.screen&&!LIVE[sc.screen])LIVE[sc.screen]=tblScreen(slug,sc.name,sc.tables)}));
+
+/* ===== Project workspace: opening a project shows all its sections as tabs on one page ===== */
+function slugOf(t){for(const k in SECTIONS)if(SECTIONS[k].some(x=>x.screen==t))return k;return null}
+function drawPT(){
+  const el=$('ptabs'),sl=ses.a?slugOf(view.t):null;
+  if(!sl){el.hidden=true;return}
+  const p=appBy(sl),S=SECTIONS[sl];el.hidden=false;
+  el.innerHTML=`<div class="pt-h"><span class="pt-dot" style="background:${p.color}"></span><b>${esc(p.name)}</b><span class="pt-sub">${esc(S.find(x=>x.screen==view.t).name)}</span></div><div class="pt-t">`+S.map(x=>`<button class="${x.screen==view.t?'on':''}" data-pt="${x.screen}" style="--c:${p.color}">${esc(x.name)}</button>`).join('')+`</div>`;
+  el.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{view={t:b.dataset.pt};render();window.scrollTo(0,0)});
+  const on=el.querySelector('.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
+  title.textContent=p.name}
+const _render0=render;
+render=function(){
+  if(view.t=='project'||view.t=='section'){const S=SECTIONS[DATA[view.p].slug];if(S&&S[0]&&S[0].screen)view={t:S[0].screen}}
+  _render0();drawPT()};
+
+/* ===== Native feel: page slide, tap feedback ===== */
+(function(){
+  const r0=render,m=document.querySelector('main');let last=0;
+  render=function(){const back=window.__goBack;window.__goBack=false;r0();m.classList.remove('pg-in','pg-back');void m.offsetWidth;m.classList.add(back?'pg-back':'pg-in')};
+  const b=document.getElementById('back');const o=b.onclick;b.onclick=function(e){window.__goBack=true;o.call(this,e)};
+  document.addEventListener('click',e=>{if(e.target.closest('button,.card,.chip')&&navigator.vibrate)navigator.vibrate(8)},true);
+  document.addEventListener('contextmenu',e=>{if(!e.target.closest('input,textarea'))e.preventDefault()});
+})();
 render();loadFeed();
 </script>
 <div id="actscrim"></div><div id="actpop"><div class="ah"><b id="acttitle"></b><button id="actx" aria-label="Close">&#10005;</button></div><div id="actbtns"></div></div>
