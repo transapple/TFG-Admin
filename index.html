@@ -1103,7 +1103,7 @@ function shOpen(x){
 
 /* ---------- My School Manager: schools, billing and blocking ---------- */
 const LSC={f:'all',b:'all',data:null,q:''};
-const MODS=[['students','Students'],['admissions','Admissions'],['attendance','Attendance'],['classes','Classes'],['staff','Staff'],['results','Results'],['report_cards','Report cards'],['fees','Fees'],['portal','Parent portal'],['analytics','Analytics'],['boarding','Boarding (hostel)'],['library','Library'],['visitors','Visitors book'],['preps','Preps and extra lessons'],['print_center','Print center'],['activity_room','Activity room']];
+const MODS=[['students','Students'],['attendance','Attendance'],['classes','Classes'],['staff','Staff'],['results','Results'],['report_cards','Report cards'],['fees','Fees'],['portal','Parent portal'],['analytics','Analytics'],['boarding','Boarding (hostel)'],['library','Library'],['visitors','Visitors book'],['preps','Preps and extra lessons'],['print_center','Print center'],['activity_room','Activity room']];
 const BSTAT=['paid','pending','overdue','trial','waived'];
 function schoolsLive(){
   setHead('Schools',hist.length>0);
@@ -1175,7 +1175,7 @@ function spInfo(r){
   return{k:'ok',t:'Active until '+fmtD(r.subscription_until)}}
 
 /* ---------- Unified manual subscription: plan, expiry date, modules (tick), billing, activate ---------- */
-const PLAN_MODS={starter:['students','admissions','attendance','classes','fees','print_center'],standard:['students','admissions','attendance','classes','fees','print_center','results','report_cards','portal','staff','library','analytics'],premium:MODS.map(m=>m[0])};
+const PLAN_MODS={starter:['students','attendance','classes','fees','print_center'],standard:['students','attendance','classes','fees','print_center','results','report_cards','portal','staff','library','analytics'],premium:MODS.map(m=>m[0])};
 async function scSub(s){
   showSheet('Subscription · '+s.name,'<div class="empty">Loading…</div>');
   let rows;try{rows=await spLoad(true)}catch(e){toast(e.message);return}
@@ -1186,12 +1186,13 @@ async function scSub(s){
   const mset=PLAN_MODS[cur]||[];
   showSheet('Subscription · '+s.name,
    `<div class="note ${inf.k=='ok'?'':'warn'}"><b>${inf.k=='ok'?'Active':'Not active'}</b><br>${esc(inf.t)}</div>
-   <h3>1. Plan</h3><div class="fl">Pick a plan (ticks the modules for it, you can still change them)</div>
+   <h3>1. Plan</h3><div class="fl">Tap a plan to tick only its modules. You can still tick or untick any module after that.</div>
+   <div class="row" style="flex-wrap:wrap;justify-content:flex-start;gap:6px;margin-bottom:8px">${['starter','standard','premium'].map(p=>`<button class="chip ${p==cur?'on':''}" data-plan="${p}">${SP_NAMES[p]}</button>`).join('')}</div>
    <select class="sel" id="sp_p"><option value="">No plan</option>${['starter','standard','premium'].map(p=>`<option value="${p}" ${p==cur?'selected':''}>${SP_NAMES[p]}</option>`).join('')}</select>
    <h3>2. Expiry date</h3><input class="fi" id="sp_d" type="date" value="${cur_until}">
    <div class="row" style="flex-wrap:wrap;justify-content:flex-start;margin-top:8px;gap:6px">${[['+30 days',30],['+90 days',90],['+1 year',365]].map(x=>`<button class="chip" data-add="${add(x[1])}">${x[0]}</button>`).join('')}${r.term_end?`<button class="chip" data-add="${iso(new Date(new Date(String(r.term_end).slice(0,10)+'T00:00:00Z').getTime()+SPC.grace*86400000))}">Term end + ${SPC.grace} days</button>`:''}</div>
    <h3>3. Modules <button class="chip" id="md_all" style="float:right;margin-top:-6px">Tick all</button></h3>
-   <div class="grid" style="gap:6px">${MODS.map(([k,l])=>{const on=m[k]?m[k]!='off':mset.includes(k)||(!cur&&false);return `<label class="card row" style="padding:12px;cursor:pointer"><span><b>${l}</b>${m[k]=='view'?'<span class="tag">view only</span>':''}</span><input type="checkbox" data-mod="${k}" ${on?'checked':''} style="width:24px;height:24px"></label>`}).join('')}</div>
+   <div class="grid" style="gap:6px">${MODS.map(([k,l])=>{const on=m[k]?m[k]!='off':(cur?mset.includes(k):true);return `<label class="card row" style="padding:12px;cursor:pointer"><span><b>${l}</b>${m[k]=='view'?'<span class="tag">view only</span>':''}</span><input type="checkbox" data-mod="${k}" ${on?'checked':''} style="width:24px;height:24px"></label>`}).join('')}</div>
    <h3>4. Billing</h3><div class="fl">Billing status</div><select class="sel" id="bl_s">${st.map(v=>`<option value="${esc(v)}" ${v==s.billing_status?'selected':''}>${esc(ghCap(v))}</option>`).join('')}</select>
    <div class="fl" style="margin-top:8px">Amount (UGX)</div><input class="fi" id="bl_a" type="number" min="0" inputmode="numeric" value="${s.billing_amount!=null?esc(s.billing_amount):''}">
    <div class="fl">Note</div><input class="fi" id="bl_n" maxlength="300" value="${esc(s.billing_note||'')}">
@@ -1200,7 +1201,9 @@ async function scSub(s){
    <button class="btn danger" id="sp_r">Hold to revoke</button>
    <div class="muted" style="margin-top:6px">Activating needs a press and hold. Save does not activate by itself.</div>`);
   const $$=q=>[...document.querySelectorAll(q)];
-  $('sp_p').onchange=e=>{const p=e.target.value;if(p)$$('[data-mod]').forEach(c=>c.checked=PLAN_MODS[p].includes(c.dataset.mod))};
+  const pickPlan=p=>{if(!p)return;$('sp_p').value=p;$$('[data-mod]').forEach(c=>c.checked=PLAN_MODS[p].includes(c.dataset.mod));$$('[data-plan]').forEach(b=>b.classList.toggle('on',b.dataset.plan==p))};
+  $('sp_p').onchange=e=>pickPlan(e.target.value);
+  $$('[data-plan]').forEach(b=>b.onclick=()=>pickPlan(b.dataset.plan));
   $('md_all').onclick=()=>$$('[data-mod]').forEach(c=>c.checked=true);
   $$('[data-add]').forEach(b=>b.onclick=()=>{$('sp_d').value=b.dataset.add});
   const done=async(fn,msg)=>{try{await fn();SPC.data=null;LSC.data=null;toast(msg);scSub(s)}catch(e){toast(e.message)}};
